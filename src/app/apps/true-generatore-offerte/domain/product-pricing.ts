@@ -32,7 +32,8 @@ export function createLineFromProduct(product: CatalogProduct, priceList: PriceL
   return {
     id, productCode: product.code, quantity: 1, unitPrice: choice[priceList],
     pricesByList: { ITAENG: choice.ITAENG, ENGFRA: choice.ENGFRA }, extras: [],
-    extrasByList: { ITAENG: [], ENGFRA: [] }, discountPercent: 0,
+    extrasByList: { ITAENG: [], ENGFRA: [] }, discount: "0",
+    manualSurcharge: 0, note: "",
     configuration: { priceChoice: choice.id },
   };
 }

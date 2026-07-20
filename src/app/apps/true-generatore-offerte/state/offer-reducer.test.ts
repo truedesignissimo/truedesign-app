@@ -10,7 +10,9 @@ const configuredLine: OfferLine = {
   pricesByList: { ITAENG: 1000, ENGFRA: 1250 },
   extras: [80],
   extrasByList: { ITAENG: [80], ENGFRA: [90] },
-  discountPercent: 0,
+  discount: "0",
+  manualSurcharge: 0,
+  note: "",
   configuration: { fabric: "Camira Era CSE30", finish: "Ashwood" },
 };
 

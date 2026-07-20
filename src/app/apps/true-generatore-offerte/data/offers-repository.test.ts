@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { createOffersRepository } from "./offers-repository";
 import type { Offer } from "../domain/types";
+import { createEmptyOffer } from "../state/offer-reducer";
 
 const offer: Offer = {
-  id: "offer-1", userId: "user-1", number: "OFF-1", priceList: "ITAENG", currency: "EUR",
-  customer: { name: "Cliente" }, project: { reference: "Hotel" }, lines: [],
-  globalDiscountPercent: 0, createdAt: "2026-07-20T00:00:00.000Z", updatedAt: "2026-07-20T00:00:00.000Z",
+  ...createEmptyOffer("user-1", "offer-1", "2026-07-20T00:00:00.000Z"),
+  number: "OFF-1",
+  customer: { name: "Cliente" },
+  project: { reference: "Hotel" },
 };
 
 class Query {
