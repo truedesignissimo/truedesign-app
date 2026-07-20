@@ -1,13 +1,11 @@
-import { createClient } from "@/lib/supabase-server";
 import { createAdminClient } from "@/lib/supabase-admin";
 
 export default async function AdminOverviewPage() {
-  const supabase = await createClient();
   const admin = createAdminClient();
 
   const [appsResult, logsResult, usersResult] = await Promise.all([
-    supabase.from("apps").select("id, name, is_active, visibility"),
-    supabase
+    admin.from("apps").select("id, name, is_active, visibility"),
+    admin
       .from("usage_log")
       .select("id, used_at, user_id, apps(name)")
       .order("used_at", { ascending: false })

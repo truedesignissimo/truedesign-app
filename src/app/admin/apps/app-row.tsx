@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase-browser";
+import {
+  deleteAppRecord,
+  setAppActive,
+  updateAppRecord,
+  type AppInput,
+} from "./actions";
 
 type App = {
   id: string;
@@ -17,7 +22,6 @@ type App = {
 
 export default function AppRow({ app, supportsPlacement }: { app: App; supportsPlacement: boolean }) {
   const router = useRouter();
-  const supabase = createClient();
   const [name, setName] = useState(app.name);
   const [description, setDescription] = useState(app.description ?? "");
   const [url, setUrl] = useState(app.url ?? "");
@@ -32,7 +36,7 @@ export default function AppRow({ app, supportsPlacement }: { app: App; supportsP
     setSaving(true);
     setError(null);
     setSaved(false);
-    const update: Record<string, string | number | boolean | null> = {
+    const update: AppInput = {
       name: name.trim(),
       description: description.trim() || null,
       url: url.trim() || null,
@@ -43,31 +47,36 @@ export default function AppRow({ app, supportsPlacement }: { app: App; supportsP
       update.display_order = displayOrder;
     }
 
-    const { error: updateError } = await supabase.from("apps").update(update).eq("id", app.id);
-    setSaving(false);
-    if (updateError) {
-      setError(updateError.message);
+    try {
+      await updateAppRecord(app.id, update);
+    } catch (updateError) {
+      setSaving(false);
+      setError(updateError instanceof Error ? updateError.message : "Salvataggio non riuscito.");
       return;
     }
+    setSaving(false);
     setSaved(true);
     router.refresh();
   }
 
   async function toggleActive() {
     setError(null);
-    const { error: updateError } = await supabase
-      .from("apps")
-      .update({ is_active: !app.is_active })
-      .eq("id", app.id);
-    if (updateError) setError(updateError.message);
-    else router.refresh();
+    try {
+      await setAppActive(app.id, !app.is_active);
+      router.refresh();
+    } catch (updateError) {
+      setError(updateError instanceof Error ? updateError.message : "Aggiornamento non riuscito.");
+    }
   }
 
   async function deleteApp() {
     if (!confirm(`Eliminare l'app "${app.name}"? Verranno rimosse anche le assegnazioni e i log collegati.`)) return;
-    const { error: deleteError } = await supabase.from("apps").delete().eq("id", app.id);
-    if (deleteError) setError(deleteError.message);
-    else router.refresh();
+    try {
+      await deleteAppRecord(app.id);
+      router.refresh();
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : "Eliminazione non riuscita.");
+    }
   }
 
   return (

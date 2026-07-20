@@ -2,11 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase-browser";
+import { createAppRecord, type AppInput } from "./actions";
 
 export default function NewAppForm({ supportsPlacement }: { supportsPlacement: boolean }) {
   const router = useRouter();
-  const supabase = createClient();
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -22,7 +21,7 @@ export default function NewAppForm({ supportsPlacement }: { supportsPlacement: b
     setError(null);
     setLoading(true);
 
-    const newApp: Record<string, string | number | boolean | null> = {
+    const newApp: AppInput = {
       name,
       description: description || null,
       url: url || null,
@@ -32,15 +31,15 @@ export default function NewAppForm({ supportsPlacement }: { supportsPlacement: b
       newApp.is_featured = isFeatured;
       newApp.display_order = displayOrder;
     }
-    const { error } = await supabase.from("apps").insert(newApp);
-
-    setLoading(false);
-
-    if (error) {
-      setError(error.message);
+    try {
+      await createAppRecord(newApp);
+    } catch (createError) {
+      setLoading(false);
+      setError(createError instanceof Error ? createError.message : "Creazione non riuscita.");
       return;
     }
 
+    setLoading(false);
     setName("");
     setDescription("");
     setUrl("");

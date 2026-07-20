@@ -1,11 +1,11 @@
-import { createClient } from "@/lib/supabase-server";
+import { createAdminClient } from "@/lib/supabase-admin";
 import NewAppForm from "./new-app-form";
 import AppRow from "./app-row";
 
 export default async function AdminAppsPage() {
-  const supabase = await createClient();
+  const admin = createAdminClient();
 
-  const placementResult = await supabase
+  const placementResult = await admin
     .from("apps")
     .select("id, name, description, url, is_active, visibility, is_featured, display_order")
     .order("display_order", { ascending: true })
@@ -14,7 +14,7 @@ export default async function AdminAppsPage() {
   const supportsPlacement = !placementResult.error;
   const fallbackResult = supportsPlacement
     ? null
-    : await supabase
+    : await admin
         .from("apps")
         .select("id, name, description, url, is_active, visibility")
         .order("created_at", { ascending: false });

@@ -8,13 +8,13 @@ export default async function Home() {
   } = await supabase.auth.getUser();
 
   return (
-    <main className="page-shell">
+    <main className="page-shell home-page">
       <div className="container">
         <header className="site-header">
           <Brand />
           {user ? (
             <a href="/dashboard" className="btn">
-              La tua dashboard →
+              Le tue app →
             </a>
           ) : (
             <a href="/pubblico" className="btn btn-secondary">
@@ -23,7 +23,7 @@ export default async function Home() {
           )}
         </header>
 
-        <section className="hero">
+        <section className="hero home-hero">
           <div className="hero-copy">
             <p className="eyebrow">Extraordinary. Everyday.</p>
             <h1 className="display-title">
@@ -35,13 +35,6 @@ export default async function Home() {
             </p>
             <p className="hero-note">Progettato per essere semplice. Costruito per evolvere.</p>
           </div>
-
-          <aside className="hero-panel" aria-label="True Workspace">
-            <span className="hero-panel-label">True digital workspace</span>
-            <div className="hero-panel-copy">
-              Strumenti digitali per trasformare processi complessi in gesti semplici.
-            </div>
-          </aside>
         </section>
 
         <section className="access-section" aria-labelledby="access-title">

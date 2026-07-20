@@ -1,10 +1,12 @@
-import { createClient } from "@/lib/supabase-server";
+import { createAdminClient } from "@/lib/supabase-admin";
 import Brand from "../_components/brand";
 
-export default async function PubblicoPage() {
-  const supabase = await createClient();
+export const dynamic = "force-dynamic";
 
-  const placementResult = await supabase
+export default async function PubblicoPage() {
+  const admin = createAdminClient();
+
+  const placementResult = await admin
     .from("apps")
     .select("id, name, description, url, is_featured, display_order")
     .eq("visibility", "pubblica")
@@ -14,7 +16,7 @@ export default async function PubblicoPage() {
     .order("name", { ascending: true });
 
   const fallbackResult = placementResult.error
-    ? await supabase
+    ? await admin
         .from("apps")
         .select("id, name, description, url")
         .eq("visibility", "pubblica")
