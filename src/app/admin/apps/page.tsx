@@ -3,7 +3,7 @@ import NewAppForm from "./new-app-form";
 import AppRow from "./app-row";
 
 export default async function AdminAppsPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: apps } = await supabase
     .from("apps")

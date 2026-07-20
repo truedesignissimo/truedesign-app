@@ -4,7 +4,7 @@ import InviteForm from "./invite-form";
 import UserAppMatrix from "./user-app-matrix";
 
 export default async function AssignmentsPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: apps } = await supabase
     .from("apps")

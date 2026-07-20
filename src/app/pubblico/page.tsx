@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase-server";
 
 export default async function PubblicoPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: apps } = await supabase
     .from("apps")

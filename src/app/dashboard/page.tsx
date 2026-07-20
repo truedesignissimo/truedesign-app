@@ -4,7 +4,7 @@ import SignOutButton from "./sign-out-button";
 import AppLink from "./app-link";
 
 export default async function DashboardPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },

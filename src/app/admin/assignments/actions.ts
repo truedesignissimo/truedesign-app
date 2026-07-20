@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase-admin";
 import { revalidatePath } from "next/cache";
 
 async function assertIsAdmin() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -43,7 +43,7 @@ export async function listUsersWithProfiles() {
   const { data: usersData, error } = await admin.auth.admin.listUsers();
   if (error) throw new Error(error.message);
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: profiles } = await supabase.from("profiles").select("id, full_name, is_admin, user_type");
 
   return usersData.users.map((u) => {
@@ -60,7 +60,7 @@ export async function listUsersWithProfiles() {
 
 export async function toggleUserAdmin(userId: string, isAdmin: boolean) {
   await assertIsAdmin();
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("profiles").update({ is_admin: isAdmin }).eq("id", userId);
   if (error) throw new Error(error.message);
   revalidatePath("/admin/assignments");
@@ -68,7 +68,7 @@ export async function toggleUserAdmin(userId: string, isAdmin: boolean) {
 
 export async function setUserType(userId: string, userType: "interno" | "cliente") {
   await assertIsAdmin();
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("profiles").update({ user_type: userType }).eq("id", userId);
   if (error) throw new Error(error.message);
   revalidatePath("/admin/assignments");
@@ -76,7 +76,7 @@ export async function setUserType(userId: string, userType: "interno" | "cliente
 
 export async function assignApp(userId: string, appId: string) {
   await assertIsAdmin();
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("user_apps").insert({ user_id: userId, app_id: appId });
   if (error) throw new Error(error.message);
   revalidatePath("/admin/assignments");
@@ -84,7 +84,7 @@ export async function assignApp(userId: string, appId: string) {
 
 export async function unassignApp(userId: string, appId: string) {
   await assertIsAdmin();
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase
     .from("user_apps")
     .delete()
