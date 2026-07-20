@@ -1,3 +1,22 @@
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Suisse Intl";
+  src: url("/Assets/fonts/SuisseIntl-Regular.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Suisse Intl";
+  src: url("/Assets/fonts/SuisseIntl-SemiBold.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 600 900;
+  font-display: swap;
+}
+
 :root {
   --bg: #f3f1ec;
   --surface: #ffffff;
@@ -20,6 +39,26 @@
 
 * {
   box-sizing: border-box;
+}
+
+.meeting-rooms-app,
+.meeting-rooms-app * {
+  box-sizing: border-box;
+  border-width: 0;
+  border-style: solid;
+  border-color: #e5e7eb;
+}
+
+.meeting-rooms-app {
+  font-family: "Suisse Intl", Arial, Helvetica, sans-serif;
+}
+
+.meeting-rooms-app button,
+.meeting-rooms-app input,
+.meeting-rooms-app select,
+.meeting-rooms-app textarea {
+  color: inherit;
+  font: inherit;
 }
 
 html {
