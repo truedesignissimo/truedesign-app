@@ -14,7 +14,6 @@ export default async function UsagePage() {
   const { data: usersData } = await admin.auth.admin.listUsers();
   const emailById = new Map(usersData?.users.map((u) => [u.id, u.email]) ?? []);
 
-  // conteggio utilizzi per app
   const countsByApp = new Map<string, number>();
   (logs ?? []).forEach((log: any) => {
     const name = log.apps?.name ?? "—";
@@ -22,49 +21,58 @@ export default async function UsagePage() {
   });
 
   return (
-    <div className="grid" style={{ gap: "1.5rem" }}>
-      <div className="card">
-        <h2 style={{ marginTop: 0, fontSize: "1.1rem" }}>Utilizzi per app</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>App</th>
-              <th>Numero accessi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Array.from(countsByApp.entries()).map(([name, count]) => (
-              <tr key={name}>
-                <td>{name}</td>
-                <td>{count}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {countsByApp.size === 0 && <p className="muted">Nessun utilizzo registrato ancora.</p>}
+    <div className="admin-section-stack">
+      <div className="page-intro">
+        <div>
+          <p className="eyebrow">Analytics</p>
+          <h1 className="page-title">Utilizzo.</h1>
+          <p className="lead">Una vista essenziale su quali strumenti vengono usati.</p>
+        </div>
+        <div className="stat-pill"><strong>{(logs ?? []).length}</strong> accessi recenti</div>
       </div>
 
-      <div className="card">
-        <h2 style={{ marginTop: 0, fontSize: "1.1rem" }}>Ultimi 200 accessi</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Data/ora</th>
-              <th>Utente</th>
-              <th>App</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(logs ?? []).map((log: any) => (
-              <tr key={log.id}>
-                <td>{new Date(log.used_at).toLocaleString("it-IT")}</td>
-                <td>{emailById.get(log.user_id) ?? log.user_id}</td>
-                <td>{log.apps?.name ?? "—"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <section className="card panel">
+        <div className="admin-section-heading">
+          <div>
+            <h2 className="section-title">Accessi per applicazione</h2>
+            <p className="muted">Conteggio calcolato sugli ultimi 200 eventi registrati.</p>
+          </div>
+        </div>
+        <div className="table-wrap">
+          <table>
+            <thead><tr><th>Applicazione</th><th>Numero accessi</th></tr></thead>
+            <tbody>
+              {Array.from(countsByApp.entries()).map(([name, count]) => (
+                <tr key={name}><td>{name}</td><td>{count}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {countsByApp.size === 0 && <p className="muted">Nessun utilizzo registrato.</p>}
+      </section>
+
+      <section className="card panel">
+        <div className="admin-section-heading">
+          <div>
+            <h2 className="section-title">Attività recente</h2>
+            <p className="muted">Gli ultimi accessi in ordine cronologico.</p>
+          </div>
+        </div>
+        <div className="table-wrap">
+          <table>
+            <thead><tr><th>Data e ora</th><th>Utente</th><th>Applicazione</th></tr></thead>
+            <tbody>
+              {(logs ?? []).map((log: any) => (
+                <tr key={log.id}>
+                  <td>{new Date(log.used_at).toLocaleString("it-IT")}</td>
+                  <td>{emailById.get(log.user_id) ?? log.user_id}</td>
+                  <td>{log.apps?.name ?? "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   );
 }

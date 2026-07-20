@@ -42,7 +42,7 @@ export default function NewAppForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="grid" style={{ gridTemplateColumns: "1fr 1fr 1fr 1fr auto", alignItems: "end" }}>
+    <form onSubmit={handleSubmit} className="grid form-grid-app">
       <div>
         <label className="muted">Nome</label>
         <input className="input" required value={name} onChange={(e) => setName(e.target.value)} />
@@ -53,7 +53,7 @@ export default function NewAppForm() {
       </div>
       <div>
         <label className="muted">URL</label>
-        <input className="input" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..." />
+        <input className="input" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="/apps/nome-app" />
       </div>
       <div>
         <label className="muted">Visibile a</label>
@@ -64,7 +64,7 @@ export default function NewAppForm() {
         </select>
       </div>
       <button className="btn" type="submit" disabled={loading}>
-        {loading ? "..." : "Crea"}
+        {loading ? "Creazione…" : "Crea app"}
       </button>
       {error && <p className="error" style={{ gridColumn: "1 / -1" }}>{error}</p>}
     </form>

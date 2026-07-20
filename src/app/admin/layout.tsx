@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
+import Brand from "../_components/brand";
 
 export default async function AdminLayout({
   children,
@@ -27,21 +28,23 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="container">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
-        <h1 style={{ margin: 0, fontSize: "1.4rem" }}>Amministrazione</h1>
-        <a href="/dashboard" className="btn btn-secondary">
-          Torna alla dashboard
-        </a>
+    <main className="page-shell">
+      <div className="container">
+        <header className="admin-header">
+          <div className="site-header">
+            <Brand context="amministrazione" />
+            <a href="/dashboard" className="btn btn-secondary">← Dashboard</a>
+          </div>
+
+          <nav className="admin-nav" aria-label="Navigazione amministrazione">
+            <a href="/admin/apps" className="btn btn-secondary">Applicazioni</a>
+            <a href="/admin/assignments" className="btn btn-secondary">Utenti</a>
+            <a href="/admin/usage" className="btn btn-secondary">Utilizzo</a>
+          </nav>
+        </header>
+
+        <div className="admin-main">{children}</div>
       </div>
-
-      <nav style={{ display: "flex", gap: "0.75rem", marginBottom: "1.5rem" }}>
-        <a href="/admin/apps" className="btn btn-secondary">App</a>
-        <a href="/admin/assignments" className="btn btn-secondary">Assegnazioni</a>
-        <a href="/admin/usage" className="btn btn-secondary">Utilizzo</a>
-      </nav>
-
-      {children}
-    </div>
+    </main>
   );
 }

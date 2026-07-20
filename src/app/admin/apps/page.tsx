@@ -11,32 +11,51 @@ export default async function AdminAppsPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <div className="grid" style={{ gap: "1.5rem" }}>
-      <div className="card">
-        <h2 style={{ marginTop: 0, fontSize: "1.1rem" }}>Nuova app</h2>
-        <NewAppForm />
+    <div className="admin-section-stack">
+      <div className="page-intro">
+        <div>
+          <p className="eyebrow">Catalogo</p>
+          <h1 className="page-title">Applicazioni.</h1>
+          <p className="lead">Crea, pubblica e organizza gli strumenti del workspace.</p>
+        </div>
+        <div className="stat-pill"><strong>{(apps ?? []).length}</strong> totali</div>
       </div>
 
-      <div className="card">
-        <h2 style={{ marginTop: 0, fontSize: "1.1rem" }}>App esistenti</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>URL</th>
-              <th>Visibile a</th>
-              <th>Attiva</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {(apps ?? []).map((app) => (
-              <AppRow key={app.id} app={app} />
-            ))}
-          </tbody>
-        </table>
-        {(apps ?? []).length === 0 && <p className="muted">Nessuna app creata.</p>}
-      </div>
+      <section className="card panel">
+        <div className="admin-section-heading">
+          <div>
+            <h2 className="section-title">Nuova applicazione</h2>
+            <p className="muted">Collega una nuova app e scegli subito chi può utilizzarla.</p>
+          </div>
+        </div>
+        <NewAppForm />
+      </section>
+
+      <section className="card panel">
+        <div className="admin-section-heading">
+          <div>
+            <h2 className="section-title">Catalogo</h2>
+            <p className="muted">Modifica visibilità e stato delle applicazioni già registrate.</p>
+          </div>
+        </div>
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Indirizzo</th>
+                <th>Visibilità</th>
+                <th>Stato</th>
+                <th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(apps ?? []).map((app) => <AppRow key={app.id} app={app} />)}
+            </tbody>
+          </table>
+        </div>
+        {(apps ?? []).length === 0 && <p className="muted">Nessuna applicazione creata.</p>}
+      </section>
     </div>
   );
 }

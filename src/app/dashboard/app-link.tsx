@@ -22,7 +22,7 @@ export default function AppLink({
 
   return (
     <button className="btn" onClick={handleClick} disabled={!url}>
-      Apri
+      {url ? "Apri applicazione →" : "Non disponibile"}
     </button>
   );
 }

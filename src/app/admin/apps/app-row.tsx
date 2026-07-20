@@ -53,11 +53,11 @@ export default function AppRow({ app }: { app: App }) {
       </td>
       <td>
         <button className="btn btn-secondary" onClick={toggleActive}>
-          {app.is_active ? "Sì" : "No"}
+          {app.is_active ? "Attiva" : "In pausa"}
         </button>
       </td>
       <td>
-        <button className="btn btn-secondary" onClick={deleteApp}>
+        <button className="btn btn-danger" onClick={deleteApp}>
           Elimina
         </button>
       </td>

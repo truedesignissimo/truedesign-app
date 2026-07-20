@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
+import Brand from "./_components/brand";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -7,35 +7,82 @@ export default async function Home() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (user) {
-    redirect("/dashboard");
-  }
-
   return (
-    <div className="container" style={{ maxWidth: 600, display: "flex", alignItems: "center", minHeight: "80vh" }}>
-      <div style={{ width: "100%" }}>
-        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-          <h1 style={{ fontSize: "1.8rem", margin: 0 }}>True App</h1>
-          <p className="muted">Piattaforma web app di True Design</p>
-        </div>
+    <main className="page-shell">
+      <div className="container">
+        <header className="site-header">
+          <Brand />
+          {user ? (
+            <a href="/dashboard" className="btn">
+              La tua dashboard →
+            </a>
+          ) : (
+            <a href="/pubblico" className="btn btn-secondary">
+              Esplora le app
+            </a>
+          )}
+        </header>
 
-        <div className="grid" style={{ gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-          <a href="/login?tipo=cliente" className="card" style={{ textAlign: "center", textDecoration: "none", display: "block" }}>
-            <strong style={{ fontSize: "1.1rem" }}>Sono un cliente</strong>
-            <p className="muted" style={{ marginBottom: 0 }}>Accedi alle app riservate ai clienti</p>
-          </a>
-          <a href="/login?tipo=interno" className="card" style={{ textAlign: "center", textDecoration: "none", display: "block" }}>
-            <strong style={{ fontSize: "1.1rem" }}>Sono di True Design</strong>
-            <p className="muted" style={{ marginBottom: 0 }}>Accedi come utente interno</p>
-          </a>
-        </div>
+        <section className="hero">
+          <div className="hero-copy">
+            <p className="eyebrow">True digital workspace</p>
+            <h1 className="display-title">
+              Le idee, gli strumenti, il <em>fare.</em>
+            </h1>
+            <p className="lead">
+              Un unico spazio per accedere alle applicazioni che semplificano il lavoro
+              quotidiano di clienti e team True Design.
+            </p>
+            <p className="hero-note">Progettato per essere semplice. Costruito per evolvere.</p>
+          </div>
 
-        <div style={{ textAlign: "center", marginTop: "1.5rem" }}>
-          <a href="/pubblico" className="muted" style={{ fontSize: "0.9rem" }}>
-            Oppure sfoglia le app pubbliche, senza accesso →
-          </a>
-        </div>
+          <aside className="hero-panel" aria-label="True Workspace">
+            <span className="hero-panel-label">Extraordinary. Everyday.</span>
+            <div className="hero-panel-copy">
+              Strumenti digitali per trasformare processi complessi in gesti semplici.
+            </div>
+          </aside>
+        </section>
+
+        <section className="access-section" aria-labelledby="access-title">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Accesso</p>
+              <h2 id="access-title" className="section-title">Scegli il tuo spazio</h2>
+            </div>
+            <p className="muted">Ogni profilo vede solo gli strumenti dedicati.</p>
+          </div>
+
+          <div className="access-grid">
+            <a href="/login?tipo=cliente" className="access-card access-card-featured">
+              <span className="access-index">01 / CLIENTI</span>
+              <div>
+                <h2>Area clienti</h2>
+                <p className="muted">Progetti, configuratori e servizi riservati.</p>
+                <span className="access-arrow" aria-hidden="true">→</span>
+              </div>
+            </a>
+
+            <a href="/login?tipo=interno" className="access-card">
+              <span className="access-index">02 / TEAM</span>
+              <div>
+                <h2>Area True</h2>
+                <p className="muted">Gli strumenti operativi per il team interno.</p>
+                <span className="access-arrow" aria-hidden="true">→</span>
+              </div>
+            </a>
+
+            <a href="/pubblico" className="access-card">
+              <span className="access-index">03 / OPEN</span>
+              <div>
+                <h2>App pubbliche</h2>
+                <p className="muted">Scopri gli strumenti disponibili senza accesso.</p>
+                <span className="access-arrow" aria-hidden="true">→</span>
+              </div>
+            </a>
+          </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }

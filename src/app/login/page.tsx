@@ -3,6 +3,7 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
+import Brand from "../_components/brand";
 
 function LoginForm() {
   const router = useRouter();
@@ -10,6 +11,7 @@ function LoginForm() {
   const supabase = createClient();
 
   const tipo = searchParams.get("tipo") === "interno" ? "interno" : "cliente";
+  const isInternal = tipo === "interno";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,12 +30,10 @@ function LoginForm() {
 
     if (error || !data.user) {
       setLoading(false);
-      setError("Credenziali non valide. Riprova.");
+      setError("Credenziali non valide. Controlla email e password e riprova.");
       return;
     }
 
-    // Verifica che il tipo di accesso scelto corrisponda al profilo,
-    // a meno che l'utente non sia admin (che passa sempre)
     const { data: profile } = await supabase
       .from("profiles")
       .select("user_type, is_admin")
@@ -44,9 +44,9 @@ function LoginForm() {
       await supabase.auth.signOut();
       setLoading(false);
       setError(
-        tipo === "interno"
-          ? "Questo accesso e' riservato agli utenti interni True Design."
-          : "Questo accesso e' riservato ai clienti."
+        isInternal
+          ? "Questo accesso è riservato agli utenti interni True Design."
+          : "Questo accesso è riservato ai clienti."
       );
       return;
     }
@@ -57,51 +57,67 @@ function LoginForm() {
   }
 
   return (
-    <div className="container" style={{ maxWidth: 400 }}>
-      <div className="card">
-        <h1 style={{ marginTop: 0, fontSize: "1.4rem" }}>True App</h1>
-        <p className="muted">
-          {tipo === "interno"
-            ? "Accesso utenti interni True Design."
-            : "Accesso clienti."}{" "}
-          Accedi con le credenziali fornite dall'amministratore.
-        </p>
+    <main className="login-shell">
+      <section className="login-story">
+        <Brand context="digital workspace" />
+        <div className="login-story-copy">
+          <p className="eyebrow">Accesso riservato</p>
+          <h1>{isInternal ? "Bentornato nel tuo spazio." : "Il progetto continua qui."}</h1>
+          <p>
+            {isInternal
+              ? "Accedi agli strumenti digitali pensati per rendere più fluido il lavoro del team True Design."
+              : "Accedi a strumenti, configuratori e contenuti che True Design ha preparato per te."}
+          </p>
+        </div>
+        <span className="muted">Extraordinary. Everyday.</span>
+      </section>
 
-        <form onSubmit={handleLogin} className="grid" style={{ marginTop: "1rem" }}>
-          <div>
-            <label className="muted">Email</label>
-            <input
-              className="input"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
+      <section className="login-form-wrap">
+        <div className="login-card">
+          <p className="eyebrow">{isInternal ? "Team True" : "Area clienti"}</p>
+          <h2>Accedi</h2>
+          <p className="muted">Usa le credenziali che hai ricevuto dall’amministratore.</p>
 
-          <div>
-            <label className="muted">Password</label>
-            <input
-              className="input"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+          <form onSubmit={handleLogin} className="grid">
+            <div>
+              <label className="muted" htmlFor="email">Email</label>
+              <input
+                id="email"
+                className="input"
+                type="email"
+                autoComplete="email"
+                placeholder="nome@azienda.it"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
 
-          {error && <p className="error">{error}</p>}
+            <div>
+              <label className="muted" htmlFor="password">Password</label>
+              <input
+                id="password"
+                className="input"
+                type="password"
+                autoComplete="current-password"
+                placeholder="La tua password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
 
-          <button className="btn" type="submit" disabled={loading}>
-            {loading ? "Accesso in corso..." : "Accedi"}
-          </button>
-        </form>
+            {error && <p className="error" role="alert">{error}</p>}
 
-        <p className="muted" style={{ marginTop: "1rem", fontSize: "0.85rem" }}>
-          <a href="/">← Torna alla home</a>
-        </p>
-      </div>
-    </div>
+            <button className="btn" type="submit" disabled={loading}>
+              {loading ? "Accesso in corso…" : "Entra nel workspace →"}
+            </button>
+          </form>
+
+          <a href="/" className="login-back">← Torna alla scelta dell’area</a>
+        </div>
+      </section>
+    </main>
   );
 }
 

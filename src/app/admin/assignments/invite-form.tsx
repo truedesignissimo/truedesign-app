@@ -8,6 +8,7 @@ export default function InviteForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
+  const [userType, setUserType] = useState<"cliente" | "interno">("cliente");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -19,9 +20,10 @@ export default function InviteForm() {
     setLoading(true);
 
     try {
-      await inviteUser(email, fullName);
+      await inviteUser(email, fullName, userType);
       setEmail("");
       setFullName("");
+      setUserType("cliente");
       setSuccess(true);
       router.refresh();
     } catch (err: any) {
@@ -32,7 +34,7 @@ export default function InviteForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="grid" style={{ gridTemplateColumns: "1fr 1fr auto", alignItems: "end" }}>
+    <form onSubmit={handleSubmit} className="grid form-grid-invite form-grid-invite-wide">
       <div>
         <label className="muted">Nome</label>
         <input className="input" required value={fullName} onChange={(e) => setFullName(e.target.value)} />
@@ -41,11 +43,22 @@ export default function InviteForm() {
         <label className="muted">Email</label>
         <input className="input" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
       </div>
+      <div>
+        <label className="muted">Tipo di accesso</label>
+        <select
+          className="input"
+          value={userType}
+          onChange={(e) => setUserType(e.target.value as "cliente" | "interno")}
+        >
+          <option value="cliente">Cliente</option>
+          <option value="interno">Team interno</option>
+        </select>
+      </div>
       <button className="btn" type="submit" disabled={loading}>
-        {loading ? "..." : "Invita"}
+        {loading ? "Invio…" : "Invia invito"}
       </button>
       {error && <p className="error" style={{ gridColumn: "1 / -1" }}>{error}</p>}
-      {success && <p className="muted" style={{ gridColumn: "1 / -1" }}>Invito inviato via email.</p>}
+      {success && <p className="success" style={{ gridColumn: "1 / -1" }}>Invito inviato via email.</p>}
     </form>
   );
 }

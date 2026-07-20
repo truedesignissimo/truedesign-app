@@ -2,8 +2,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "True App",
-  description: "Piattaforma web app di True Design",
+  title: {
+    default: "True Workspace",
+    template: "%s | True Workspace",
+  },
+  description: "Il workspace digitale di True Design: strumenti, servizi e applicazioni in un unico spazio.",
 };
 
 export default function RootLayout({

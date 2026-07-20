@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
+import Brand from "../_components/brand";
 import SignOutButton from "./sign-out-button";
 import AppLink from "./app-link";
 
@@ -20,7 +21,6 @@ export default async function DashboardPage() {
     .eq("id", user.id)
     .single();
 
-  // App visibili per via del tipo di utente (o tutte se admin)
   let visibilityQuery = supabase
     .from("apps")
     .select("id, name, description, url")
@@ -33,7 +33,6 @@ export default async function DashboardPage() {
 
   const { data: visibleApps } = await visibilityQuery;
 
-  // App assegnate singolarmente (oltre a quelle di categoria)
   const { data: userApps } = await supabase
     .from("user_apps")
     .select("apps(id, name, description, url)")
@@ -43,7 +42,6 @@ export default async function DashboardPage() {
     .map((row: any) => row.apps)
     .filter(Boolean);
 
-  // Unione senza duplicati
   const appsById = new Map<string, any>();
   [...(visibleApps ?? []), ...assignedApps].forEach((app) => {
     if (app) appsById.set(app.id, app);
@@ -51,36 +49,57 @@ export default async function DashboardPage() {
   const apps = Array.from(appsById.values());
 
   return (
-    <div className="container">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: "1.4rem" }}>
-            Ciao{profile?.full_name ? `, ${profile.full_name}` : ""}
-          </h1>
-          <p className="muted">Le tue app</p>
-        </div>
-        <div style={{ display: "flex", gap: "0.5rem" }}>
-          {profile?.is_admin && (
-            <a href="/admin" className="btn btn-secondary">
-              Area admin
-            </a>
-          )}
-          <SignOutButton />
-        </div>
-      </div>
-
-      <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", marginTop: "1.5rem" }}>
-        {apps.length === 0 && (
-          <p className="muted">Nessuna app disponibile al momento. Contatta l'amministratore.</p>
-        )}
-        {apps.map((app: any) => (
-          <div key={app.id} className="card app-card">
-            <strong>{app.name}</strong>
-            {app.description && <span className="muted">{app.description}</span>}
-            <AppLink appId={app.id} url={app.url} userId={user.id} />
+    <main className="page-shell">
+      <div className="container">
+        <header className="site-header dashboard-header">
+          <Brand />
+          <div className="header-actions">
+            {profile?.is_admin && (
+              <a href="/admin" className="btn btn-secondary">Amministrazione</a>
+            )}
+            <SignOutButton />
           </div>
-        ))}
+        </header>
+
+        <section className="dashboard-main">
+          <div className="page-intro">
+            <div>
+              <p className="eyebrow">
+                {profile?.is_admin ? "Profilo amministratore" : profile?.user_type === "interno" ? "Team True" : "Area clienti"}
+              </p>
+              <h1 className="page-title">
+                Ciao{profile?.full_name ? `, ${profile.full_name.split(" ")[0]}` : ""}.
+              </h1>
+              <p className="lead">Tutto quello che ti serve, pronto da aprire.</p>
+            </div>
+            <div className="stat-pill">
+              <strong>{apps.length}</strong> {apps.length === 1 ? "app disponibile" : "app disponibili"}
+            </div>
+          </div>
+
+          <div className="app-grid">
+            {apps.length === 0 && (
+              <div className="empty-state">
+                <h2>Il tuo spazio è pronto</h2>
+                <p className="muted">Non ci sono ancora app assegnate. Contatta l’amministratore per iniziare.</p>
+              </div>
+            )}
+            {apps.map((app: any) => (
+              <article key={app.id} className="card app-card">
+                <div className="app-card-visual">
+                  <span className="app-initial" aria-hidden="true">{app.name.trim().charAt(0).toLowerCase()}</span>
+                  <span className="app-status">Disponibile</span>
+                </div>
+                <div className="app-card-body">
+                  <h2>{app.name}</h2>
+                  <p className="muted">{app.description || "Uno strumento del workspace True Design."}</p>
+                  <AppLink appId={app.id} url={app.url} userId={user.id} />
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }
