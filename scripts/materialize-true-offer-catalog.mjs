@@ -6,7 +6,7 @@ import { gunzipSync } from "node:zlib";
 const ROOT = resolve(import.meta.dirname, "..");
 const PARTS_DIR = join(ROOT, "src/app/apps/true-generatore-offerte/catalog-bundle");
 const OUTPUT_DIR = join(ROOT, "public/apps/true-generatore-offerte");
-const EXPECTED_SHA256 = "2a39e3908ec50bc3632c5a4b69d9fe3be430bd3a7dbc5812cd670c6b6b7a2eae";
+const EXPECTED_SHA256 = "45ee0524cd69331573ef486e662268bcc0f0b6e76fef9d02123aa0c3ce7c8f2d";
 const ALLOWED_ROOTS = new Set(["data", "images"]);
 
 function readString(buffer, offset, length) {
@@ -67,5 +67,5 @@ for (const directory of ALLOWED_ROOTS) {
 }
 mkdirSync(OUTPUT_DIR, { recursive: true });
 const files = extractTar(gunzipSync(archive));
-if (files !== 2619) throw new Error(`Catalogo incompleto: attesi 2619 file, trovati ${files}`);
+if (files !== 2691) throw new Error(`Catalogo incompleto: attesi 2691 file, trovati ${files}`);
 console.log(`Catalogo TRUE materializzato: ${files} file (${checksum.slice(0, 12)})`);
