@@ -718,7 +718,7 @@ git add src/app/apps/true-generatore-offerte docs/superpowers/plans/2026-07-20-t
 git commit -m "fix: complete V3 visual and functional parity"
 ```
 
-- [ ] **Step 6: Publish**
+- [x] **Step 6: Publish**
 
 ```bash
 ./scripts/pubblica.sh "ripristina parità completa Generatore Offerte V3"
@@ -726,7 +726,7 @@ git commit -m "fix: complete V3 visual and functional parity"
 
 Expected: push to `main`; Vercel status `success`.
 
-- [ ] **Step 7: Verify production and regenerate the archive**
+- [x] **Step 7: Verify production and regenerate the archive**
 
 Verify `https://www.truedesign.app/apps/true-generatore-offerte` redirects an
 anonymous request to `/login` and renders the faithful app after authentication.
