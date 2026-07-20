@@ -14,12 +14,13 @@ class Query {
   filters: Array<[string, unknown]> = [];
   operation = "";
   payload: unknown;
+  constructor(private readonly returnedPayload: unknown = offer) {}
   select() { this.operation ||= "select"; return this; }
   upsert(payload: unknown) { this.operation = "upsert"; this.payload = payload; return this; }
   delete() { this.operation = "delete"; return this; }
   eq(column: string, value: unknown) { this.filters.push([column, value]); return this; }
-  order() { return Promise.resolve({ data: [{ payload: offer }], error: null }); }
-  single() { return Promise.resolve({ data: { payload: offer }, error: null }); }
+  order() { return Promise.resolve({ data: [{ payload: this.returnedPayload }], error: null }); }
+  single() { return Promise.resolve({ data: { payload: this.returnedPayload }, error: null }); }
   then(resolve: (value: unknown) => void) { return Promise.resolve({ data: null, error: null }).then(resolve); }
 }
 
@@ -29,7 +30,8 @@ describe("offers repository", () => {
     const repository = createOffersRepository({ from: () => query } as never);
     const offers = await repository.listOffers("user-1");
     expect(query.filters).toContainEqual(["user_id", "user-1"]);
-    expect(offers).toEqual([offer]);
+    expect(offers).toHaveLength(1);
+    expect(offers[0]).toMatchObject(offer);
   });
 
   it("writes the user id both as a column and inside the payload", async () => {
@@ -38,5 +40,29 @@ describe("offers repository", () => {
     await repository.saveOffer(offer);
     expect(query.operation).toBe("upsert");
     expect(query.payload).toMatchObject({ id: "offer-1", user_id: "user-1", payload: { userId: "user-1" } });
+  });
+
+  it("normalizes reduced saved payloads before returning them", async () => {
+    const query = new Query({
+      id: "legacy-1",
+      userId: "user-1",
+      number: "OLD-1",
+      priceList: "ITAENG",
+      customer: { name: "Cliente storico" },
+      project: {},
+      lines: [],
+      globalDiscountPercent: 0,
+    });
+    const repository = createOffersRepository({ from: () => query } as never);
+
+    const [normalized] = await repository.listOffers("user-1");
+
+    expect(normalized).toMatchObject({
+      schemaVersion: 3,
+      userId: "user-1",
+      vatRate: 22,
+      globalDiscount: "0",
+      customer: { name: "Cliente storico", vatNumber: "" },
+    });
   });
 });

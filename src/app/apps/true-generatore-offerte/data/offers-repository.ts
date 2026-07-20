@@ -1,7 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { normalizeOffer } from "../domain/offer-normalization";
 import type { Offer } from "../domain/types";
 
-interface OfferRow { payload: Offer }
+interface OfferRow { payload: unknown }
 
 const assertResult = <T>(result: { data: T; error: { message: string } | null }, operation: string): T => {
   if (result.error) throw new Error(`${operation}: ${result.error.message}`);
@@ -17,7 +18,7 @@ export function createOffersRepository(supabase: SupabaseClient) {
         .eq("user_id", userId)
         .order("updated_at", { ascending: false });
       return (assertResult(result as { data: OfferRow[]; error: { message: string } | null }, "Elenco offerte") ?? [])
-        .map((row) => row.payload);
+        .map((row) => normalizeOffer(row.payload, userId));
     },
 
     async loadOffer(id: string, userId: string): Promise<Offer> {
@@ -27,7 +28,10 @@ export function createOffersRepository(supabase: SupabaseClient) {
         .eq("id", id)
         .eq("user_id", userId)
         .single();
-      return assertResult(result as unknown as { data: OfferRow; error: { message: string } | null }, "Apertura offerta").payload;
+      return normalizeOffer(
+        assertResult(result as unknown as { data: OfferRow; error: { message: string } | null }, "Apertura offerta").payload,
+        userId,
+      );
     },
 
     async saveOffer(offer: Offer): Promise<Offer> {
@@ -46,7 +50,10 @@ export function createOffersRepository(supabase: SupabaseClient) {
         })
         .select("payload")
         .single();
-      return assertResult(result as unknown as { data: OfferRow; error: { message: string } | null }, "Salvataggio offerta").payload;
+      return normalizeOffer(
+        assertResult(result as unknown as { data: OfferRow; error: { message: string } | null }, "Salvataggio offerta").payload,
+        offer.userId,
+      );
     },
 
     async deleteOffer(id: string, userId: string): Promise<void> {

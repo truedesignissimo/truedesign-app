@@ -94,14 +94,15 @@
 .resetButton{display:inline-flex;margin-top:20px;padding:12px 22px;border:1px solid var(--tt-red);background:#fff;color:var(--tt-red);font-size:13px;font-weight:500;text-transform:uppercase;letter-spacing:1px;cursor:pointer}
 
 .archive{position:static;height:auto;padding:0;border:0;background:#fff;overflow:visible}
-.archive>div{display:flex;justify-content:flex-end;align-items:center}
-.archive h2{display:none}
+.archiveHeading{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.archiveHeading h2{margin:0;font-size:14px}
 .archive button{border:1px solid var(--tt-line);background:#fff;text-align:left;cursor:pointer;padding:7px 9px}
-.archive>div button{background:var(--tt-black);color:#fff;border-color:var(--tt-black);text-transform:uppercase;letter-spacing:.5px;font-size:11px}
-.archive nav{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:12px}
-.archive nav button strong,.archive nav button span{display:block}
-.archive nav button span{font-size:12px;color:var(--tt-grey);margin-top:2px}
-.current{border-color:var(--tt-black)!important}
+.archiveHeading button{background:var(--tt-black);color:#fff;border-color:var(--tt-black);text-transform:uppercase;letter-spacing:.5px;font-size:11px}
+.archiveTable{border:1px solid var(--tt-line);overflow-x:auto}
+.archiveHeader,.archiveRow,.archiveCurrent{display:grid;grid-template-columns:140px minmax(160px,1fr) minmax(160px,1fr) 140px 130px;gap:10px;align-items:center;min-width:780px;padding:9px 10px;border-bottom:1px solid var(--tt-line)}
+.archiveHeader{background:var(--tt-cream);color:var(--tt-grey);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.archiveRow,.archiveCurrent{font-size:12px}.archiveCurrent{background:#fffaf0;border-left:3px solid var(--tt-gold)}
+.archiveActions{display:flex;gap:5px}.archiveActions button{font-size:10px;text-transform:uppercase;letter-spacing:.4px}.archiveActions .deleteAction{color:var(--tt-red);border-color:#e7c5c5}
 .footer{margin-top:32px;text-align:center;font-size:11px;color:var(--tt-grey);border-top:1px solid var(--tt-line);padding:16px 0 4px}
 .loading{min-height:100dvh;display:grid;place-content:center;text-align:center;background:var(--tt-cream,#f5f2ec);font-family:'Suisse Intl',sans-serif}
 .loading div{width:220px;height:5px;background:linear-gradient(90deg,#1a1a1a 0 40%,#d8d5cf 40%);animation:load 1.2s infinite alternate}
@@ -133,5 +134,5 @@
   .offerTable{min-width:1160px}
   .configRow{grid-template-columns:1fr}
   .totals{width:100%}
-  .archive nav{grid-template-columns:1fr}
+  .archiveHeader,.archiveRow,.archiveCurrent{grid-template-columns:120px minmax(150px,1fr) minmax(150px,1fr) 120px 120px}
 }

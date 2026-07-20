@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import { loadCatalog, type Catalog, type CatalogProduct } from "./data/catalog";
 import { createImageStorage } from "./data/image-storage";
@@ -29,8 +29,10 @@ export default function OfferGenerator({ userId }: { userId: string }) {
   const [previews, setPreviews] = useState<Record<string, string>>({});
   const [dirty, setDirty] = useState(false);
   const [status, setStatus] = useState("Caricamento catalogo...");
+  const changeVersion = useRef(0);
 
   const change = useCallback((action: OfferAction) => {
+    changeVersion.current += 1;
     dispatch(action);
     setDirty(true);
   }, []);
@@ -49,11 +51,14 @@ export default function OfferGenerator({ userId }: { userId: string }) {
   useEffect(() => {
     if (!dirty) return;
     const timer = window.setTimeout(() => {
+      const savingVersion = changeVersion.current;
       setStatus("Salvataggio...");
       repository.saveOffer(offer).then((saved) => {
         setArchive((items) => [saved, ...items.filter((item) => item.id !== saved.id)]);
-        setDirty(false);
-        setStatus("Salvata");
+        if (changeVersion.current === savingVersion) {
+          setDirty(false);
+          setStatus("Salvata");
+        }
       }).catch((error: Error) => setStatus(error.message));
     }, 900);
     return () => window.clearTimeout(timer);
@@ -98,6 +103,20 @@ export default function OfferGenerator({ userId }: { userId: string }) {
     try {
       setPreviews(await loadOfferPreviews(item, imageStorage));
       setStatus("Pronto");
+    } catch (error) {
+      setStatus((error as Error).message);
+    }
+  };
+  const deleteOffer = async (item: Offer) => {
+    setStatus("Eliminazione...");
+    try {
+      await repository.deleteOffer(item.id, userId);
+      await Promise.all(item.lines.flatMap((line) => line.customImagePath
+        ? [imageStorage.deleteLineImage(line.customImagePath).catch(() => undefined)]
+        : []));
+      setArchive((items) => items.filter((offerItem) => offerItem.id !== item.id));
+      if (item.id === offer.id) resetOffer();
+      else setStatus("Pronto");
     } catch (error) {
       setStatus((error as Error).message);
     }
@@ -155,7 +174,7 @@ export default function OfferGenerator({ userId }: { userId: string }) {
 
         <section className={styles.card} data-v3-section="archive">
           <h2 className={styles.sectionTitle}>Archivio Offerte</h2>
-          <OfferArchive offers={archive} currentId={offer.id} onOpen={openOffer} onNew={resetOffer} />
+          <OfferArchive offers={archive} currentId={offer.id} onOpen={openOffer} onNew={resetOffer} onDelete={deleteOffer} />
         </section>
 
         <footer className={styles.footer}>

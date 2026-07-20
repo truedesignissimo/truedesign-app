@@ -20,6 +20,8 @@ const lineSource = [
   optionalSource("./components/product-configurator.tsx"),
   optionalSource("./components/product-search.tsx"),
 ].join("\n");
+const archiveSource = optionalSource("./components/offer-archive.tsx");
+const totalsSource = optionalSource("./components/offer-totals.tsx");
 
 describe("official V3 structural parity", () => {
   it.each(["client", "search", "lines", "archive"])("renders the %s section", (name) => {
@@ -45,6 +47,11 @@ describe("official V3 structural parity", () => {
     expect(lineSource).toContain("<table");
     expect(lineSource).toContain("scrollIntoView");
     expect(cssSource).toContain("object-fit:contain");
+  });
+
+  it("restores archive actions and complete totals", () => {
+    ["Apri", "Elimina", "Cliente", "Progetto", "Aggiornata"].forEach((label) => expect(archiveSource).toContain(label));
+    ["Subtotale", "Sconto globale", "Imponibile", "IVA", "Totale"].forEach((label) => expect(totalsSource).toContain(label));
   });
 
   it.each([
