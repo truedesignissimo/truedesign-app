@@ -16,12 +16,22 @@ const line = (overrides: Partial<OfferLine> = {}): OfferLine => ({
 });
 
 describe("calculateLineTotal", () => {
-  it("applies extras before line discount and quantity", () => {
-    expect(calculateLineTotal(line())).toBe(2070);
+  it("applies the selected extra once before the line discount", () => {
+    expect(calculateLineTotal(line())).toBe(1935);
   });
 
   it("rounds monetary values to two decimals", () => {
     expect(calculateLineTotal(line({ quantity: 3, unitPrice: 10.005, extras: [], discount: "0" }))).toBe(30.02);
+  });
+
+  it("applies extra charges and manual surcharge once per line like official V3", () => {
+    expect(calculateLineTotal(line({
+      quantity: 3,
+      unitPrice: 100,
+      extras: [80],
+      manualSurcharge: 20,
+      discount: "0",
+    }))).toBe(400);
   });
 });
 
@@ -38,6 +48,6 @@ describe("calculateOfferTotals", () => {
       createdAt: "2026-07-20T00:00:00.000Z", updatedAt: "2026-07-20T00:00:00.000Z",
     };
 
-    expect(calculateOfferTotals(offer)).toEqual({ subtotal: 3220, discount: 161, net: 3059, vat: 672.98, total: 3731.98 });
+    expect(calculateOfferTotals(offer)).toEqual({ subtotal: 3085, discount: 154.25, net: 2930.75, vat: 644.77, total: 3575.52 });
   });
 });

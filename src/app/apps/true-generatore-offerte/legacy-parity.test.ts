@@ -15,6 +15,11 @@ const formSource = [
   optionalSource("./components/customer-details.tsx"),
   optionalSource("./components/commercial-options.tsx"),
 ].join("\n");
+const lineSource = [
+  optionalSource("./components/offer-lines.tsx"),
+  optionalSource("./components/product-configurator.tsx"),
+  optionalSource("./components/product-search.tsx"),
+].join("\n");
 
 describe("official V3 structural parity", () => {
   it.each(["client", "search", "lines", "archive"])("renders the %s section", (name) => {
@@ -28,7 +33,18 @@ describe("official V3 structural parity", () => {
   });
 
   it("does not expose AI image generation controls", () => {
-    expect(generatorSource).not.toMatch(/Genera immagine|Gemini|OpenAI/);
+    expect(`${generatorSource}\n${lineSource}`).not.toMatch(/Genera immagine|Apri tool immagine|Gemini|OpenAI/);
+  });
+
+  it("restores the official commercial table and custom upload", () => {
+    [
+      "Codice", "Immagine", "Nome", "Configurazione", "Qta", "Categoria",
+      "Prezzo listino", "Sconto %", "Sovrapprezzo", "Totale Riga",
+      "Carica immagine",
+    ].forEach((label) => expect(lineSource).toContain(label));
+    expect(lineSource).toContain("<table");
+    expect(lineSource).toContain("scrollIntoView");
+    expect(cssSource).toContain("object-fit:contain");
   });
 
   it.each([
