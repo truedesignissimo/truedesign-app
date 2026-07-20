@@ -124,6 +124,41 @@ export function getPriceChoices(product: CatalogProduct): PriceChoice[] {
   return fixedIta !== null && fixedFra !== null ? [{ id: "base", label: "Prezzo base", ITAENG: fixedIta, ENGFRA: fixedFra }] : [];
 }
 
+const finishKey = (value: unknown): string => String(value ?? "")
+  .split("::").pop()!.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_");
+
+export function configurationForPriceChoice(
+  product: CatalogProduct,
+  choice: PriceChoice,
+  base: OfferLine["configuration"],
+): OfferLine["configuration"] {
+  const next: OfferLine["configuration"] = {
+    ...base,
+    priceChoice: choice.id,
+    finishId: choice.finishId ?? null,
+    category: choice.category ?? null,
+  };
+  const selectedFinish = finishKey(choice.finishId);
+  const groups = (product.componentGroups as Array<{
+    id: string;
+    linkedPrice?: boolean;
+    options?: Array<{ id: string; priceVariants?: string[] }>;
+  }> | undefined) ?? [];
+  for (const group of groups) {
+    const options = group.options ?? [];
+    const allowed = options.filter((option) => !option.priceVariants?.length
+      || option.priceVariants.some((variant) => finishKey(variant) === selectedFinish));
+    if (group.linkedPrice && selectedFinish) {
+      const linked = allowed.find((option) => finishKey(option.id) === selectedFinish);
+      if (linked) next[`component:${group.id}`] = linked.id;
+    }
+    if (allowed.length && !allowed.some((option) => option.id === next[`component:${group.id}`])) {
+      next[`component:${group.id}`] = allowed[0].id;
+    }
+  }
+  return next;
+}
+
 export function freeQuantityThreshold(extra: Pick<ExtraChoice, "note">): number | null {
   const match = String(extra.note ?? "").match(/gratuit[oa]\s+(?:oltre|da)\s+(?:i\s+)?(\d+)\s*p/i);
   return match ? Number(match[1]) : null;
@@ -152,11 +187,8 @@ export function createLineFromProduct(product: CatalogProduct, priceList: PriceL
     pricesByList: { ITAENG: choice.ITAENG, ENGFRA: choice.ENGFRA }, extras: [],
     extrasByList: { ITAENG: [], ENGFRA: [] }, discount: "0",
     manualSurcharge: 0, note: "",
-    configuration: {
+    configuration: configurationForPriceChoice(product, choice, {
       ...componentDefaults,
-      priceChoice: choice.id,
-      finishId: choice.finishId ?? null,
-      category: choice.category ?? null,
       pricingMode: choice.id.startsWith("option::") ? "option" : (product.has_fabric ? "fabric" : "standard"),
       fabricManufacturer: "",
       fabricId: "",
@@ -164,7 +196,7 @@ export function createLineFromProduct(product: CatalogProduct, priceList: PriceL
       waiveExtraCharge: false,
       class1IM: false,
       fireRetardant: false,
-    },
+    }),
   };
 }
 

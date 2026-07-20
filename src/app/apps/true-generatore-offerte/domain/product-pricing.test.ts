@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   createLineFromProduct,
+  configurationForPriceChoice,
   effectiveFabricCategory,
   extraAmount,
   fabricCategoryForProduct,
@@ -76,5 +77,31 @@ describe("product pricing", () => {
 
     expect(fabricCategoryForProduct(product, fabric)).toBe("F");
     expect(effectiveFabricCategory(product, fabric, true)).toBe("L");
+  });
+
+  it("synchronizes linked finishes and removes incompatible component selections", () => {
+    const product = {
+      code: "AU 1044",
+      family: "AURA",
+      componentGroups: [
+        { id: "wood", linkedPrice: true, options: [{ id: "ash", label: "Ash" }, { id: "oak", label: "Oak" }] },
+        { id: "base", linkedPrice: false, options: [
+          { id: "ash-only", label: "Ash base", priceVariants: ["ash"] },
+          { id: "oak-only", label: "Oak base", priceVariants: ["oak"] },
+        ] },
+      ],
+    } as CatalogProduct;
+    const choice = { id: "oak::S", label: "Oak - S", finishId: "oak", category: "S", ITAENG: 100, ENGFRA: 110 };
+
+    expect(configurationForPriceChoice(product, choice, {
+      "component:wood": "ash",
+      "component:base": "ash-only",
+    })).toMatchObject({
+      "component:wood": "oak",
+      "component:base": "oak-only",
+      finishId: "oak",
+      category: "S",
+      priceChoice: "oak::S",
+    });
   });
 });

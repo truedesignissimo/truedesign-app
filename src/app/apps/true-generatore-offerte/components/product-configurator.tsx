@@ -1,6 +1,7 @@
 import type { CatalogProduct, FabricRecord } from "../data/catalog";
 import {
   allowedFabricsForProduct,
+  configurationForPriceChoice,
   effectiveFabricCategory,
   getPriceChoices,
 } from "../domain/product-pricing";
@@ -51,13 +52,10 @@ export default function ProductConfigurator({ product, line, priceList, fabrics,
     onChange({
       unitPrice: choice[priceList],
       pricesByList: { ITAENG: choice.ITAENG, ENGFRA: choice.ENGFRA },
-      configuration: {
+      configuration: configurationForPriceChoice(product, choice, {
         ...line.configuration,
-        priceChoice: id,
-        finishId: choice.finishId ?? null,
-        category: choice.category ?? null,
         ...configurationPatch,
-      },
+      }),
     });
   };
 

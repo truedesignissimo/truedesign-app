@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { CatalogProduct, FabricRecord } from "../data/catalog";
 import { calculateLineTotal } from "../domain/pricing";
-import { getPriceChoices, selectedExtraAmounts } from "../domain/product-pricing";
+import { configurationForPriceChoice, getPriceChoices, selectedExtraAmounts } from "../domain/product-pricing";
 import type { OfferLine, PriceList } from "../domain/types";
 import ProductConfigurator from "./product-configurator";
 import styles from "../offer-generator.module.css";
@@ -96,7 +96,7 @@ export default function OfferLines({ lines, products, fabrics, priceList, previe
             onUpdate(line.id, {
               unitPrice: choice[priceList],
               pricesByList: { ITAENG: choice.ITAENG, ENGFRA: choice.ENGFRA },
-              configuration: { ...line.configuration, priceChoice: choice.id, category: choice.category ?? null },
+              configuration: configurationForPriceChoice(product, choice, line.configuration),
             });
           }}>{categories.map((choice) => <option key={choice.id} value={choice.category}>{choice.category}</option>)}</select>}</td>
           <td className={styles.moneyCell}>{euro.format(line.unitPrice)}</td>
