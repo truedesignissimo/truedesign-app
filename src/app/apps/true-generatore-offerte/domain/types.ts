@@ -7,6 +7,7 @@ export interface OfferLine {
   productCode: string;
   quantity: number;
   unitPrice: number;
+  pricesByList?: Partial<Record<PriceList, number>>;
   extras: number[];
   discountPercent: number;
   configuration: ProductConfiguration;
@@ -47,4 +48,3 @@ export interface OfferTotals {
   discount: number;
   total: number;
 }
-
