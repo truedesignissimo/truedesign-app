@@ -9,6 +9,7 @@ export interface OfferLine {
   unitPrice: number;
   pricesByList?: Partial<Record<PriceList, number>>;
   extras: number[];
+  extrasByList?: Partial<Record<PriceList, number[]>>;
   discountPercent: number;
   configuration: ProductConfiguration;
   customImagePath?: string;

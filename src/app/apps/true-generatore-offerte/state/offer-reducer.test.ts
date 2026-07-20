@@ -9,6 +9,7 @@ const configuredLine: OfferLine = {
   unitPrice: 1000,
   pricesByList: { ITAENG: 1000, ENGFRA: 1250 },
   extras: [80],
+  extrasByList: { ITAENG: [80], ENGFRA: [90] },
   discountPercent: 0,
   configuration: { fabric: "Camira Era CSE30", finish: "Ashwood" },
 };
@@ -34,6 +35,7 @@ describe("offerReducer", () => {
     const switched = offerReducer(initial, { type: "price-list/set", priceList: "ENGFRA" });
 
     expect(switched.lines[0].unitPrice).toBe(1250);
+    expect(switched.lines[0].extras).toEqual([90]);
     expect(switched.lines[0].configuration).toEqual(configuredLine.configuration);
   });
 });

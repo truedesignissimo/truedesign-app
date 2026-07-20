@@ -47,6 +47,7 @@ export function offerReducer(state: Offer, action: OfferAction): Offer {
         lines: state.lines.map((line) => ({
           ...line,
           unitPrice: line.pricesByList?.[action.priceList] ?? line.unitPrice,
+          extras: line.extrasByList?.[action.priceList] ?? line.extras,
         })),
       };
     case "offer/replace":
