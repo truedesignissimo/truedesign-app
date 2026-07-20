@@ -50,7 +50,7 @@ I cataloghi V3 attuali occupano circa 23 MB perché contengono disegni e fotogra
 - immagini estratte come asset separati o riferimenti URL ufficiali;
 - campioni tessuto separati dai record commerciali.
 
-I file vengono serviti tramite route handler sotto la stessa rotta applicativa, così non è necessario modificare cartelle pubbliche globali. La conversione deve essere deterministica e verificata confrontando codici, prezzi, opzioni ed extra con l'output V3 di partenza.
+I file generati vengono pubblicati sotto `public/apps/true-generatore-offerte/`. Questa è un'eccezione strettamente necessaria alla regola della singola cartella: i cataloghi da 8–11 MB superano la dimensione adatta a una risposta serverless e non devono gonfiare il bundle JavaScript. La conversione deve essere deterministica e verificata confrontando codici, prezzi, opzioni ed extra con l'output V3 di partenza.
 
 ### Persistenza Supabase
 
