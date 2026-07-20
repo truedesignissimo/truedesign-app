@@ -10,8 +10,9 @@ import { createLineFromProduct } from "./domain/product-pricing";
 import type { Offer, OfferLine, PriceList } from "./domain/types";
 import { createEmptyOffer, offerReducer, type OfferAction } from "./state/offer-reducer";
 import LegacyHeader from "./components/legacy-header";
+import CustomerDetails from "./components/customer-details";
+import CommercialOptions from "./components/commercial-options";
 import OfferArchive from "./components/offer-archive";
-import OfferHeader from "./components/offer-header";
 import OfferLines from "./components/offer-lines";
 import OfferTotals from "./components/offer-totals";
 import ProductSearch from "./components/product-search";
@@ -124,7 +125,10 @@ export default function OfferGenerator({ userId }: { userId: string }) {
 
         <section className={styles.card} data-v3-section="client">
           <h2 className={styles.sectionTitle}>Dati Cliente</h2>
-          <OfferHeader offer={offer} onChange={replace} onPriceList={(priceList) => change({ type: "price-list/set", priceList })} />
+          <div className={styles.customerGrid}>
+            <CustomerDetails offer={offer} onChange={replace} />
+            <CommercialOptions offer={offer} onChange={replace} />
+          </div>
         </section>
 
         <section className={styles.card} data-v3-section="search">

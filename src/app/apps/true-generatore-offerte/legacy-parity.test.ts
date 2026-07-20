@@ -3,6 +3,18 @@ import { describe, expect, it } from "vitest";
 
 const generatorSource = readFileSync(new URL("./offer-generator.tsx", import.meta.url), "utf8");
 const cssSource = readFileSync(new URL("./offer-generator.module.css", import.meta.url), "utf8");
+const optionalSource = (path: string): string => {
+  try {
+    return readFileSync(new URL(path, import.meta.url), "utf8");
+  } catch {
+    return "";
+  }
+};
+const formSource = [
+  generatorSource,
+  optionalSource("./components/customer-details.tsx"),
+  optionalSource("./components/commercial-options.tsx"),
+].join("\n");
 
 describe("official V3 structural parity", () => {
   it.each(["client", "search", "lines", "archive"])("renders the %s section", (name) => {
@@ -17,5 +29,29 @@ describe("official V3 structural parity", () => {
 
   it("does not expose AI image generation controls", () => {
     expect(generatorSource).not.toMatch(/Genera immagine|Gemini|OpenAI/);
+  });
+
+  it.each([
+    "Nome",
+    "Azienda",
+    "Partita IVA / Codice fiscale",
+    "Email",
+    "Telefono",
+    "Indirizzo",
+    "Numero Offerta",
+    "Data Preventivo",
+    "Validità",
+    "IVA",
+    "Riferimento Progetto",
+    "Referente Commerciale",
+    "Tipologia di pagamento",
+    "Sconto generale offerta (%)",
+    "Mostra sconti nel PDF",
+    "Mostra prezzi netti e totali riga",
+    "Classe 1IM sulle righe dove richiesta",
+    "Annota richiesta verniciatura ignifuga",
+    "Note descrizione offerta",
+  ])("contains the official field label %s", (label) => {
+    expect(formSource).toContain(label);
   });
 });
