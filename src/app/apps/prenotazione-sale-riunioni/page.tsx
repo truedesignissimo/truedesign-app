@@ -45,6 +45,41 @@ const FLOORS = [
   { key: 'first', label: 'Primo Piano', image: '/Assets/primo piano.png' },
 ]
 
+interface Booking {
+  id: number
+  room_id: number
+  name: string
+  date: string
+  time_start: string
+  duration: number
+  description: string
+}
+
+type BookingDraft = Omit<Booking, 'id'>
+
+const STORAGE_KEY = 'bookings_prenotazione'
+
+function timeToMinutes(time: string) {
+  const [hours, minutes] = time.split(':').map(Number)
+  return hours * 60 + minutes
+}
+
+function getBookingEndTime(booking: Pick<Booking, 'time_start' | 'duration'>) {
+  const end = timeToMinutes(booking.time_start) + booking.duration
+  return `${String(Math.floor(end / 60)).padStart(2, '0')}:${String(end % 60).padStart(2, '0')}`
+}
+
+function bookingsOverlap(first: BookingDraft, second: Booking) {
+  if (first.room_id !== second.room_id || first.date !== second.date) return false
+
+  const firstStart = timeToMinutes(first.time_start)
+  const firstEnd = firstStart + first.duration
+  const secondStart = timeToMinutes(second.time_start)
+  const secondEnd = secondStart + second.duration
+
+  return firstStart < secondEnd && secondStart < firstEnd
+}
+
 // --- Header ---
 function Header({ logo }: { logo: string }) {
   return (
@@ -123,7 +158,7 @@ function RoomCard({ room, count, hovered, onEnter, onLeave, onSelect }: RoomCard
 // --- Floor Plan ---
 interface FloorPlanProps {
   onRoomSelect: (room: typeof ROOMS[0]) => void
-  bookings: any[]
+  bookings: Booking[]
 }
 
 function FloorPlan({ onRoomSelect, bookings }: FloorPlanProps) {
@@ -215,17 +250,17 @@ function FloorPlan({ onRoomSelect, bookings }: FloorPlanProps) {
 interface BookingModalProps {
   room: typeof ROOMS[0] | null
   onClose: () => void
-  onSubmit: (data: any) => void
-  bookings: any[]
+  onSubmit: (data: BookingDraft) => void
+  bookings: Booking[]
+  initialBooking?: Booking | null
 }
 
-function BookingModal({ room, onClose, onSubmit, bookings }: BookingModalProps) {
-  const [name, setName] = useState('')
-  const [date, setDate] = useState('')
-  const [timeStart, setTimeStart] = useState('')
-  const [duration, setDuration] = useState('30')
-  const [description, setDescription] = useState('')
-  const [showPreview, setShowPreview] = useState(false)
+function BookingModal({ room, onClose, onSubmit, bookings, initialBooking }: BookingModalProps) {
+  const [name, setName] = useState(initialBooking?.name ?? '')
+  const [date, setDate] = useState(initialBooking?.date ?? '')
+  const [timeStart, setTimeStart] = useState(initialBooking?.time_start ?? '')
+  const [duration, setDuration] = useState(String(initialBooking?.duration ?? 30))
+  const [description, setDescription] = useState(initialBooking?.description ?? '')
 
   if (!room) return null
 
@@ -242,14 +277,30 @@ function BookingModal({ room, onClose, onSubmit, bookings }: BookingModalProps) 
       return
     }
 
-    onSubmit({
+    const bookingDraft: BookingDraft = {
       room_id: room.id,
-      name,
+      name: name.trim(),
       date,
       time_start: timeStart,
       duration: parseInt(duration),
-      description,
-    })
+      description: description.trim(),
+    }
+
+    if (timeToMinutes(timeStart) + bookingDraft.duration > 18 * 60) {
+      alert('La riunione deve terminare entro le 18:00')
+      return
+    }
+
+    const hasConflict = bookings.some(
+      booking => booking.id !== initialBooking?.id && bookingsOverlap(bookingDraft, booking),
+    )
+
+    if (hasConflict) {
+      alert('La sala è già prenotata in questa fascia oraria')
+      return
+    }
+
+    onSubmit(bookingDraft)
   }
 
   const timeOptions = []
@@ -262,8 +313,12 @@ function BookingModal({ room, onClose, onSubmit, bookings }: BookingModalProps) 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg max-w-md w-full shadow-lg p-6 space-y-4">
-        <h2 className="text-2xl font-bold text-dark">{room.name}</h2>
-        <p className="text-sm text-gray-600">Compila i dettagli della tua prenotazione</p>
+        <h2 className="text-2xl font-bold text-dark">
+          {initialBooking ? `Modifica · ${room.name}` : room.name}
+        </h2>
+        <p className="text-sm text-gray-600">
+          {initialBooking ? 'Aggiorna i dettagli della riunione' : 'Compila i dettagli della tua prenotazione'}
+        </p>
 
         <div>
           <label className="block text-sm font-medium text-dark mb-1">Il tuo nome</label>
@@ -280,6 +335,7 @@ function BookingModal({ room, onClose, onSubmit, bookings }: BookingModalProps) 
           <label className="block text-sm font-medium text-dark mb-1">Data</label>
           <input
             type="date"
+            min={new Date().toISOString().split('T')[0]}
             value={date}
             onChange={(e) => setDate(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
@@ -338,7 +394,7 @@ function BookingModal({ room, onClose, onSubmit, bookings }: BookingModalProps) 
             onClick={handleSubmit}
             className="flex-1 px-4 py-2 bg-dark text-white rounded-lg font-medium hover:opacity-90 transition"
           >
-            Conferma
+            {initialBooking ? 'Salva modifiche' : 'Conferma'}
           </button>
         </div>
       </div>
@@ -348,15 +404,16 @@ function BookingModal({ room, onClose, onSubmit, bookings }: BookingModalProps) 
 
 // --- Bookings List ---
 interface BookingsListProps {
-  bookings: any[]
+  bookings: Booking[]
+  onEditBooking: (booking: Booking) => void
   onDeleteBooking: (id: number) => void
 }
 
-function BookingsList({ bookings, onDeleteBooking }: BookingsListProps) {
+function BookingsList({ bookings, onEditBooking, onDeleteBooking }: BookingsListProps) {
   const today = new Date().toISOString().split('T')[0]
   const upcoming = bookings
     .filter(b => b.date >= today)
-    .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .sort((a, b) => `${a.date}T${a.time_start}`.localeCompare(`${b.date}T${b.time_start}`))
 
   const ROOM_NAMES: Record<number, string> = { 1: 'Sala 1', 2: 'Sala 2', 3: 'Sala 3', 4: 'Sala 4' }
   const ROOM_COLORS: Record<number, string> = { 1: '#D85A5A', 2: '#4A90E2', 3: '#4B7E5B', 4: '#E8935C' }
@@ -366,38 +423,40 @@ function BookingsList({ bookings, onDeleteBooking }: BookingsListProps) {
       <div>
         <h2 className="text-lg font-semibold text-dark">Prenotazioni in programma</h2>
         <p className="text-sm text-gray-500">
-          {upcoming.length > 0 ? `${upcoming.length} prenotazion${upcoming.length === 1 ? 'e' : 'i'} — clicca la X per disdire` : 'Nessuna prenotazione'}
+          {upcoming.length > 0 ? `${upcoming.length} prenotazion${upcoming.length === 1 ? 'e' : 'i'} — puoi modificarle o eliminarle` : 'Nessuna prenotazione'}
         </p>
       </div>
 
       <div className="space-y-3">
-        {upcoming.map((booking: any) => (
+        {upcoming.map(booking => (
           <div key={booking.id} className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
             <div className="w-3 h-3 rounded-full flex-shrink-0 mt-1.5" style={{ backgroundColor: ROOM_COLORS[booking.room_id] }} />
             <div className="flex-1 min-w-0">
               <p className="font-medium text-dark">{ROOM_NAMES[booking.room_id]} · {booking.name}</p>
               <p className="text-xs text-gray-500">
                 {new Date(booking.date).toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' })} · {booking.time_start}–
-                {(() => {
-                  const [h, m] = booking.time_start.split(':').map(Number)
-                  const endH = h + Math.floor((m + booking.duration) / 60)
-                  const endM = (m + booking.duration) % 60
-                  return `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`
-                })()}
+                {getBookingEndTime(booking)}
               </p>
               {booking.description && <p className="text-xs text-gray-600 mt-1">{booking.description}</p>}
             </div>
-            <button
-              onClick={() => {
-                if (confirm(`Disdire la prenotazione di ${booking.name} (${ROOM_NAMES[booking.room_id]}, ${booking.date} ${booking.time_start})?`)) {
-                  onDeleteBooking(booking.id)
-                }
-              }}
-              className="flex-shrink-0 px-2 py-1 text-gray-500 hover:text-red-600 transition"
-              aria-label="Disdici prenotazione"
-            >
-              ✕
-            </button>
+            <div className="flex flex-shrink-0 items-center gap-2">
+              <button
+                onClick={() => onEditBooking(booking)}
+                className="rounded border border-gray-300 px-3 py-1 text-xs font-medium text-dark hover:bg-gray-100 transition"
+              >
+                Modifica
+              </button>
+              <button
+                onClick={() => {
+                  if (confirm(`Eliminare la prenotazione di ${booking.name} (${ROOM_NAMES[booking.room_id]}, ${booking.date} ${booking.time_start})?`)) {
+                    onDeleteBooking(booking.id)
+                  }
+                }}
+                className="rounded border border-red-200 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 transition"
+              >
+                Elimina
+              </button>
+            </div>
           </div>
         ))}
       </div>
@@ -407,13 +466,13 @@ function BookingsList({ bookings, onDeleteBooking }: BookingsListProps) {
 
 // --- Admin Panel ---
 interface AdminPanelProps {
-  bookings: any[]
+  bookings: Booking[]
   onDeleteBooking: (id: number) => void
 }
 
 function AdminPanel({ bookings, onDeleteBooking }: AdminPanelProps) {
   const ROOM_NAMES: Record<number, string> = { 1: 'Sala 1', 2: 'Sala 2', 3: 'Sala 3', 4: 'Sala 4' }
-  const sorted = [...bookings].sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  const sorted = [...bookings].sort((a, b) => `${a.date}T${a.time_start}`.localeCompare(`${b.date}T${b.time_start}`))
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -431,7 +490,7 @@ function AdminPanel({ bookings, onDeleteBooking }: AdminPanelProps) {
             </tr>
           </thead>
           <tbody>
-            {sorted.map((b: any) => (
+            {sorted.map(b => (
               <tr key={b.id} className="border hover:bg-gray-50">
                 <td className="border px-4 py-2">{b.date}</td>
                 <td className="border px-4 py-2">{b.time_start}</td>
@@ -462,39 +521,65 @@ function AdminPanel({ bookings, onDeleteBooking }: AdminPanelProps) {
 export default function PrenotazioneSaleRiunioniPage() {
   const [selectedRoom, setSelectedRoom] = useState<typeof ROOMS[0] | null>(null)
   const [showBookingModal, setShowBookingModal] = useState(false)
-  const [bookings, setBookings] = useState<any[]>([])
+  const [bookings, setBookings] = useState<Booking[]>([])
+  const [editingBooking, setEditingBooking] = useState<Booking | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
     // Carica dal localStorage (in produzione, collegare a Supabase)
-    const stored = localStorage.getItem('bookings_prenotazione')
+    const stored = localStorage.getItem(STORAGE_KEY)
     if (stored) {
       try {
-        setBookings(JSON.parse(stored))
+        const parsed = JSON.parse(stored)
+        setBookings(Array.isArray(parsed) ? parsed : [])
       } catch {
         setBookings([])
       }
     }
   }, [])
 
-  const saveBookings = (data: any[]) => {
+  const saveBookings = (data: Booking[]) => {
     setBookings(data)
-    localStorage.setItem('bookings_prenotazione', JSON.stringify(data))
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
   }
 
   const handleRoomSelect = (room: typeof ROOMS[0]) => {
     setSelectedRoom(room)
+    setEditingBooking(null)
     setShowBookingModal(true)
   }
 
-  const handleBooking = (bookingData: any) => {
+  const handleEditBooking = (booking: Booking) => {
+    const room = ROOMS.find(candidate => candidate.id === booking.room_id)
+    if (!room) return
+
+    setSelectedRoom(room)
+    setEditingBooking(booking)
+    setShowBookingModal(true)
+  }
+
+  const closeBookingModal = () => {
+    setShowBookingModal(false)
+    setEditingBooking(null)
+  }
+
+  const handleBooking = (bookingData: BookingDraft) => {
+    if (editingBooking) {
+      saveBookings(bookings.map(booking => (
+        booking.id === editingBooking.id ? { ...bookingData, id: booking.id } : booking
+      )))
+      alert('✅ Prenotazione aggiornata!')
+      closeBookingModal()
+      return
+    }
+
     const newBooking = {
       id: Date.now(),
       ...bookingData,
     }
     saveBookings([...bookings, newBooking])
     alert('✅ Prenotazione salvata!')
-    setShowBookingModal(false)
+    closeBookingModal()
   }
 
   const handleDeleteBooking = (id: number) => {
@@ -512,15 +597,20 @@ export default function PrenotazioneSaleRiunioniPage() {
               <h1 className="text-3xl font-bold text-dark mb-8">Seleziona una sala</h1>
               <FloorPlan onRoomSelect={handleRoomSelect} bookings={bookings} />
             </div>
-            <BookingsList bookings={bookings} onDeleteBooking={handleDeleteBooking} />
+            <BookingsList
+              bookings={bookings}
+              onEditBooking={handleEditBooking}
+              onDeleteBooking={handleDeleteBooking}
+            />
           </main>
 
           {showBookingModal && (
             <BookingModal
               room={selectedRoom}
-              onClose={() => setShowBookingModal(false)}
+              onClose={closeBookingModal}
               onSubmit={handleBooking}
               bookings={bookings}
+              initialBooking={editingBooking}
             />
           )}
         </>
