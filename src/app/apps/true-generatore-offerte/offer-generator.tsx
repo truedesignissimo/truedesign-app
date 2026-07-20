@@ -13,6 +13,7 @@ import OfferHeader from "./components/offer-header";
 import OfferLines from "./components/offer-lines";
 import OfferTotals from "./components/offer-totals";
 import ProductSearch from "./components/product-search";
+import PdfPreview from "./components/pdf-preview";
 import styles from "./offer-generator.module.css";
 
 export default function OfferGenerator({ userId }: { userId: string }) {
@@ -68,8 +69,8 @@ export default function OfferGenerator({ userId }: { userId: string }) {
         <ProductSearch products={catalog.products} onSelect={addProduct} />
         <OfferLines lines={offer.lines} products={catalog.products} fabrics={catalog.fabrics.fabrics} priceList={offer.priceList} previews={previews} onUpdate={updateLine} onRemove={(lineId) => change({ type: "line/remove", lineId })} onImage={uploadImage} />
         <OfferTotals offer={offer} onChange={replace} />
+        <PdfPreview offer={offer} products={catalog.products} imageUrls={previews} />
       </div>
     </div>
   </main>;
 }
-
