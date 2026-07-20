@@ -17,7 +17,7 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
+  const { data: profile } = await admin
     .from("profiles")
     .select("is_admin, full_name, user_type")
     .eq("id", user.id)
