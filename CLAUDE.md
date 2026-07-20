@@ -7,7 +7,7 @@ TypeScript, Supabase (auth + database), deploy su Vercel.
 ## Comando "pubblica su sito" / "pubblica su truedesign.app"
 
 Quando l'utente chiede di pubblicare, aggiornare, o mettere online le
-modifiche, esegui semplicemente:
+modifiche, esegui:
 
 ```bash
 ./scripts/pubblica.sh "breve descrizione della modifica"
@@ -17,6 +17,32 @@ Questo fa commit di tutto ciò che è stato modificato e lo pusha su `main`.
 **Non chiedere conferma prima di eseguirlo** se l'utente ha esplicitamente
 detto "pubblica" — è il comportamento atteso. Vercel fa il deploy
 automaticamente al push, di solito pronto in 1-2 minuti.
+
+Se nel repository sono presenti modifiche di altre sessioni o progetti non
+pertinenti, non includerle: esegui commit e push selettivi dei soli file
+dell'app richiesta.
+
+### Definizione obbligatoria di "pubblicata"
+
+Quando l'utente dice **"pubblica su truedesign.app"**, il lavoro non è
+concluso al solo push. Prima di dichiararlo completato devi verificare tutti
+questi punti:
+
+1. l'app è presente in `src/app/apps/[slug]/` e compila correttamente;
+2. il deploy Vercel è terminato e l'URL interno
+   `https://www.truedesign.app/apps/[slug]` risponde correttamente;
+3. in Supabase esiste una riga nella tabella `apps` con URL interno
+   `/apps/[slug]`, `is_active = true` e la visibilità richiesta (se non
+   specificata, usa `interno`);
+4. l'app compare in `/admin/apps` e in `/admin/assignments`, quindi è
+   effettivamente assegnabile agli utenti;
+5. l'accesso pubblico o riservato è stato provato in base alla visibilità;
+6. la risposta finale contiene il link diretto dell'app e conferma che è
+   online e assegnabile.
+
+Non usare URL di hosting esterni come record del catalogo. Se uno dei punti
+sopra fallisce, continua il lavoro oppure segnala chiaramente il blocco: non
+dire che la pubblicazione è conclusa.
 
 Se il push fallisce per credenziali mancanti, guarda la sezione
 "Prima configurazione su un computer nuovo" più sotto e segnala il problema
@@ -38,8 +64,10 @@ in modo chiaro, senza tentare workaround.
    locale o file JSON nel repository stesso (es. `src/app/apps/[slug]/data/`);
    la migrazione a Supabase per dati condivisi tra dispositivi è un passo
    successivo, da fare solo se richiesto esplicitamente.
-6. Dopo aver creato/modificato i file, esegui il comando di pubblicazione
-   sopra.
+6. Crea o aggiorna anche la riga della tabella `apps` con URL
+   `/apps/[slug]`, così l'app risulta gestibile e assegnabile dal pannello.
+7. Dopo aver creato/modificato i file, esegui il processo di pubblicazione e
+   verifica completo descritto sopra.
 
 ## Prima configurazione su un computer nuovo
 
