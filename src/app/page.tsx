@@ -1,131 +1,75 @@
 import { createClient } from "@/lib/supabase-server";
 import { createAdminClient } from "@/lib/supabase-admin";
 import Brand from "./_components/brand";
+import HomeLogin from "./_components/home-login";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const supabase = await createClient();
   const admin = createAdminClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   const { data: publicApps } = await admin
     .from("apps")
-    .select("id, name, description, url, is_featured, display_order")
+    .select("id, name, url, display_order")
     .eq("visibility", "pubblica")
     .eq("is_active", true)
-    .order("is_featured", { ascending: false })
     .order("display_order", { ascending: true })
     .order("name", { ascending: true });
 
   return (
-    <main className="page-shell home-page">
-      <div className="container">
-        <header className="site-header">
-          <Brand />
-          {user ? (
-            <a href="/dashboard" className="btn">
-              Le tue app →
-            </a>
-          ) : (
-            <a href="/pubblico" className="btn btn-secondary">
-              Esplora le app
-            </a>
-          )}
+    <main className="home-page">
+      <section className="home-hero" aria-labelledby="home-title">
+        <header className="home-header">
+          <Brand context="digital workspace" />
+          <a href={user ? "/dashboard" : "#accesso"} className="home-header-action">
+            {user ? "Le tue app" : "Accedi"} <span>↘</span>
+          </a>
         </header>
 
-        <section className="hero home-hero">
-          <div className="hero-copy">
-            <p className="eyebrow">Extraordinary. Everyday.</p>
-            <h1 className="display-title">
-              Le idee, gli strumenti, il <em>fare.</em>
-            </h1>
-            <p className="lead">
-              Un unico spazio per accedere alle applicazioni che semplificano il lavoro
-              quotidiano di clienti e team True Design.
-            </p>
-            <p className="hero-note">Progettato per essere semplice. Costruito per evolvere.</p>
-          </div>
-        </section>
+        <div className="home-hero-copy">
+          <p className="home-kicker">Extraordinary. Everyday.</p>
+          <h1 id="home-title">Ideas,<br />made <em>real.</em></h1>
+          <p>Strumenti digitali pensati da True Design per rendere straordinario il lavoro di ogni giorno.</p>
+        </div>
 
-        <section className="home-public-section" aria-labelledby="public-apps-title">
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">Open tools</p>
-              <h2 id="public-apps-title" className="section-title">App pubbliche</h2>
-            </div>
-            <p className="muted">Pronte da usare, senza registrazione.</p>
-          </div>
-          <div className="app-grid">
-            {(publicApps ?? []).map((app) => (
-              <article key={app.id} className={`card app-card ${app.is_featured ? "app-card-featured" : ""}`}>
-                <div className="app-card-visual">
-                  <span className="app-initial" aria-hidden="true">{app.name.trim().charAt(0).toLowerCase()}</span>
-                  <span className="app-status">{app.is_featured ? "In evidenza" : "Open"}</span>
-                </div>
-                <div className="app-card-body">
-                  <h2>{app.name}</h2>
-                  <p className="muted">{app.description || "Uno strumento pubblico di True Design."}</p>
-                  {app.url && <a className="btn" href={app.url}>Apri applicazione →</a>}
-                </div>
-              </article>
-            ))}
-            {(publicApps ?? []).length === 0 && (
-              <div className="empty-state">
-                <h2>Presto nuovi strumenti</h2>
-                <p className="muted">Le app impostate come pubbliche compariranno qui automaticamente.</p>
-              </div>
-            )}
-          </div>
-        </section>
+        <a className="home-scroll-cue" href="#accesso" aria-label="Vai all’accesso">
+          <span>Entra</span><b>↓</b>
+        </a>
+      </section>
 
-        <section className="access-section" aria-labelledby="access-title">
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">Accesso</p>
-              <h2 id="access-title" className="section-title">Scegli il tuo spazio</h2>
-            </div>
-            <p className="muted">Ogni profilo vede solo gli strumenti dedicati.</p>
-          </div>
+      <section id="accesso" className="home-login-section" aria-labelledby="home-login-title">
+        <div className="home-login-copy">
+          <p className="home-kicker">Your space</p>
+          <h2 id="home-login-title">Tutto ciò che ti serve.<br /><em>Nient’altro.</em></h2>
+          <p>Accedi e ritrova soltanto le applicazioni scelte per te, in un unico spazio semplice e immediato.</p>
+        </div>
+        <div className="home-login-panel">
+          <HomeLogin isAuthenticated={Boolean(user)} />
+        </div>
+      </section>
 
-          <div className="access-grid">
-            <a href="/login?tipo=cliente" className="access-card access-card-featured">
-              <span className="access-index">01 / CLIENTI</span>
-              <div>
-                <h2>Area clienti</h2>
-                <p className="muted">Progetti, configuratori e servizi riservati.</p>
-                <span className="access-arrow" aria-hidden="true">→</span>
-              </div>
+      <section className="home-apps-section" aria-labelledby="public-apps-title">
+        <div className="home-apps-heading">
+          <p className="home-kicker">Open tools</p>
+          <h2 id="public-apps-title">Pronte.<br />Ora.</h2>
+        </div>
+        <div className="home-app-title-grid">
+          {(publicApps ?? []).map((app, index) => app.url && (
+            <a key={app.id} href={app.url} className={`home-app-title home-app-title-${index % 4}`}>
+              <h3>{app.name}</h3>
             </a>
+          ))}
+          {(publicApps ?? []).length === 0 && (
+            <div className="home-app-title home-app-title-empty"><h3>Nuovi strumenti, presto.</h3></div>
+          )}
+        </div>
+      </section>
 
-            <a href="/login?tipo=interno" className="access-card">
-              <span className="access-index">02 / TEAM</span>
-              <div>
-                <h2>Area True</h2>
-                <p className="muted">Gli strumenti operativi per il team interno.</p>
-                <span className="access-arrow" aria-hidden="true">→</span>
-              </div>
-            </a>
-
-            <a href="/pubblico" className="access-card">
-              <span className="access-index">03 / OPEN</span>
-              <div>
-                <h2>App pubbliche</h2>
-                <p className="muted">Scopri gli strumenti disponibili senza accesso.</p>
-                <span className="access-arrow" aria-hidden="true">→</span>
-              </div>
-            </a>
-          </div>
-        </section>
-
-        {!user && (
-          <div className="home-register-note">
-            <span>Non hai ancora un account?</span>
-            <a href="/registrati">Registrati al workspace →</a>
-          </div>
-        )}
-      </div>
+      <footer className="home-footer">
+        <Brand />
+        <p>Extraordinary. Everyday.</p>
+      </footer>
     </main>
   );
 }
