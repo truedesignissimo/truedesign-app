@@ -1,6 +1,6 @@
 # TRUE Generatore Offerte V3 Parity Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Replace the reduced React quote generator with a faithful React port of the official V3 interface and workflows while retaining True App authentication, Supabase persistence, and custom image upload.
 
@@ -80,7 +80,7 @@
 - Produces: `normalizeOffer(value: unknown, userId: string): Offer`.
 - Produces: `OfferTotals` with `subtotal`, `discount`, `net`, `vat`, `total`.
 
-- [ ] **Step 1: Write failing discount and normalization tests**
+- [x] **Step 1: Write failing discount and normalization tests**
 
 ```ts
 import { describe, expect, it } from "vitest";
@@ -117,7 +117,7 @@ describe("normalizeOffer", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests and verify RED**
+- [x] **Step 2: Run tests and verify RED**
 
 Run:
 
@@ -127,7 +127,7 @@ npx vitest run src/app/apps/true-generatore-offerte/domain/discount.test.ts src/
 
 Expected: FAIL because both modules and the V3 fields do not exist.
 
-- [ ] **Step 3: Implement the pure discount functions**
+- [x] **Step 3: Implement the pure discount functions**
 
 ```ts
 export function parseDiscountExpression(value: string): number[] {
@@ -148,7 +148,7 @@ export function discountLabel(value: string): string {
 }
 ```
 
-- [ ] **Step 4: Expand the schema and normalization defaults**
+- [x] **Step 4: Expand the schema and normalization defaults**
 
 Use these exact fields in `Offer`:
 
@@ -207,7 +207,7 @@ export interface Offer {
 missing VAT, and normalize every line to `discount: String(line.discount ??
 line.discountPercent ?? 0)`.
 
-- [ ] **Step 5: Update totals and reducer defaults**
+- [x] **Step 5: Update totals and reducer defaults**
 
 `calculateLineTotal` must apply `discountMultiplier(line.discount)` after unit
 price plus extras. `calculateOfferTotals` must compute:
@@ -223,7 +223,7 @@ return { subtotal, discount, net, vat, total: roundMoney(net + vat) };
 `createEmptyOffer` must populate all schema fields and generate dates from the
 supplied timestamp without demo/customer seed data.
 
-- [ ] **Step 6: Run focused and full tests**
+- [x] **Step 6: Run focused and full tests**
 
 Run:
 
@@ -234,7 +234,7 @@ npm test
 
 Expected: all tests PASS.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/app/apps/true-generatore-offerte/domain src/app/apps/true-generatore-offerte/state
@@ -260,7 +260,7 @@ git commit -m "feat: restore complete V3 offer model"
 - Produces: `LegacyHeader` props `{ offer, status, onLanguage, onPriceList }`.
 - Produces stable structural hooks: `data-v3-section="client|search|lines|archive"`.
 
-- [ ] **Step 1: Write the failing structural parity test**
+- [x] **Step 1: Write the failing structural parity test**
 
 ```ts
 import { readFileSync } from "node:fs";
@@ -281,7 +281,7 @@ describe("official V3 structural parity", () => {
 });
 ```
 
-- [ ] **Step 2: Run test and verify RED**
+- [x] **Step 2: Run test and verify RED**
 
 Run:
 
@@ -291,7 +291,7 @@ npx vitest run src/app/apps/true-generatore-offerte/legacy-parity.test.ts
 
 Expected: FAIL because the reduced shell lacks V3 sections and tokens.
 
-- [ ] **Step 3: Copy the four official fonts**
+- [x] **Step 3: Copy the four official fonts**
 
 Copy from the canonical official directory:
 
@@ -302,7 +302,7 @@ cp '/Users/dariobreg/Documents/Codex/generatore offerte/TRUE Generatore Offerte/
 cp '/Users/dariobreg/Documents/Codex/generatore offerte/TRUE Generatore Offerte/dist/fonts/SuisseIntl-Bold.otf' src/app/apps/true-generatore-offerte/assets/
 ```
 
-- [ ] **Step 4: Implement the original header contract**
+- [x] **Step 4: Implement the original header contract**
 
 `LegacyHeader` must render, in this order:
 
@@ -329,7 +329,7 @@ cp '/Users/dariobreg/Documents/Codex/generatore offerte/TRUE Generatore Offerte/
 The two price buttons must show black/grey dots, expose `ITA/ENG` and
 `ENG/FRA` through accessible labels, and call `onPriceList`.
 
-- [ ] **Step 5: Replace the reduced page shell**
+- [x] **Step 5: Replace the reduced page shell**
 
 `OfferGenerator` must compose exactly:
 
@@ -347,7 +347,7 @@ The two price buttons must show black/grey dots, expose `ITA/ENG` and
 </main>
 ```
 
-- [ ] **Step 6: Port the official CSS tokens and responsive rules**
+- [x] **Step 6: Port the official CSS tokens and responsive rules**
 
 Use the official values exactly:
 
@@ -364,7 +364,7 @@ Use the official values exactly:
 Port the remaining header, grid, form, table, totals, actions, archive and
 mobile rules from the official `<style>` block without changing token values.
 
-- [ ] **Step 7: Verify and commit**
+- [x] **Step 7: Verify and commit**
 
 Run:
 
@@ -394,7 +394,7 @@ git commit -m "feat: restore official V3 visual shell"
 - `CustomerDetails({ offer, onChange })` updates immutable `Offer` fields.
 - `CommercialOptions({ offer, onChange })` updates discounts, PDF flags, special options and notes.
 
-- [ ] **Step 1: Extend the failing structural test**
+- [x] **Step 1: Extend the failing structural test**
 
 Assert these labels occur in the component sources:
 
@@ -410,12 +410,12 @@ const requiredLabels = [
 requiredLabels.forEach((label) => expect(allComponentSource).toContain(label));
 ```
 
-- [ ] **Step 2: Run test and verify RED**
+- [x] **Step 2: Run test and verify RED**
 
 Run: `npx vitest run src/app/apps/true-generatore-offerte/legacy-parity.test.ts`  
 Expected: FAIL on the first missing label.
 
-- [ ] **Step 3: Implement `CustomerDetails`**
+- [x] **Step 3: Implement `CustomerDetails`**
 
 Render labelled controlled inputs for the exact ordered fields in Step 1.
 Use `type="date"` for offer date and valid-until, `type="email"` for email,
@@ -433,13 +433,13 @@ and this exact VAT set:
 Changing validity days must update `validUntil`; changing `validUntil` must
 preserve the explicitly selected date.
 
-- [ ] **Step 4: Implement `CommercialOptions`**
+- [x] **Step 4: Implement `CommercialOptions`**
 
 Render the discount string input, two PDF checkboxes, two special-option
 checkboxes, and full-width notes textarea. Checkboxes must use native inputs
 with explicit `<label htmlFor>` associations.
 
-- [ ] **Step 5: Verify and commit**
+- [x] **Step 5: Verify and commit**
 
 Run:
 
@@ -473,7 +473,7 @@ git commit -m "feat: restore complete V3 commercial form"
 - `OfferLine.note` is free text.
 - `OfferLine.configuration` continues to hold price choice, fabric, finish groups, extra selections, waive-extra state, 1IM and fire-retardant state.
 
-- [ ] **Step 1: Add failing product-pricing tests**
+- [x] **Step 1: Add failing product-pricing tests**
 
 ```ts
 it("waives an under-ten extra at the official threshold", () => {
@@ -486,12 +486,12 @@ it("waives an under-ten extra at the official threshold", () => {
 Also assert switching between ITAENG and ENGFRA updates both base choice and
 selected extra values without changing selection IDs.
 
-- [ ] **Step 2: Run test and verify RED**
+- [x] **Step 2: Run test and verify RED**
 
 Run: `npx vitest run src/app/apps/true-generatore-offerte/domain/product-pricing.test.ts`  
 Expected: FAIL because `extraAmount` and line parity fields are missing.
 
-- [ ] **Step 3: Implement the original table columns**
+- [x] **Step 3: Implement the original table columns**
 
 `OfferLines` must render a `<table>` inside an overflow wrapper with this exact
 header order:
@@ -508,7 +508,7 @@ header order:
 The image cell must use `object-fit: contain`, show the product photo or
 drawing, and expose only `Carica immagine`; no AI-generation button may render.
 
-- [ ] **Step 4: Restore complete configuration controls**
+- [x] **Step 4: Restore complete configuration controls**
 
 For each catalog-supported field render:
 
@@ -524,13 +524,13 @@ For each catalog-supported field render:
 Never synthesize an option absent from the catalog. Keep both lists in
 `pricesByList`/`extrasByList` and recompute on list switch.
 
-- [ ] **Step 5: Restore search presentation and focus flow**
+- [x] **Step 5: Restore search presentation and focus flow**
 
 Search results must show a 40×40 proportional image, code, family and localized
 name. Selecting a product clears search, adds the row, expands its configurator
 and scrolls/focuses the new row.
 
-- [ ] **Step 6: Verify and commit**
+- [x] **Step 6: Verify and commit**
 
 Run:
 
@@ -562,35 +562,35 @@ git commit -m "feat: restore V3 product table and configurator"
 - `OfferArchive` adds `onDelete(id)` and renders as the official bottom card.
 - Save status values: `Caricamento catalogo...`, `Pronto`, `Salvataggio...`, `Salvata`, or an explicit error.
 
-- [ ] **Step 1: Write failing repository compatibility test**
+- [x] **Step 1: Write failing repository compatibility test**
 
 Make the Supabase mock return a reduced payload and assert `listOffers("u1")`
 returns `schemaVersion: 3`, `vatRate: 22`, and `globalDiscount: "0"`.
 
-- [ ] **Step 2: Run test and verify RED**
+- [x] **Step 2: Run test and verify RED**
 
 Run: `npx vitest run src/app/apps/true-generatore-offerte/data/offers-repository.test.ts`  
 Expected: FAIL because repository returns raw payloads.
 
-- [ ] **Step 3: Normalize reads and preserve full writes**
+- [x] **Step 3: Normalize reads and preserve full writes**
 
 Apply `normalizeOffer` in `listOffers` and `loadOffer`. Keep the complete V3
 payload in the existing `payload` JSONB column; no new Supabase table or column
 is required.
 
-- [ ] **Step 4: Implement official archive behavior**
+- [x] **Step 4: Implement official archive behavior**
 
 Render columns for offer number, customer, project, updated date and actions.
 Provide `Apri` and `Elimina`; deletion must call repository delete, remove the
 item locally, and create a new empty offer if the current offer was deleted.
 
-- [ ] **Step 5: Make autosave loss-safe**
+- [x] **Step 5: Make autosave loss-safe**
 
 Keep the 900 ms debounce. On failure keep `dirty=true`, preserve local state,
 show the error, and allow the next change to retry. Loading an archive offer
 must resolve signed custom-image previews before reporting `Pronto`.
 
-- [ ] **Step 6: Verify and commit**
+- [x] **Step 6: Verify and commit**
 
 Run:
 
@@ -621,19 +621,19 @@ git commit -m "feat: restore V3 archive and resilient autosave"
 - `fitImage` remains proportional.
 - Preview generation invalidates the previous URL after every offer change.
 
-- [ ] **Step 1: Add failing PDF tests**
+- [x] **Step 1: Add failing PDF tests**
 
 Test `fitImage(1200, 600, 40, 40)` returns `40×20`. Add pure helper tests for
 localized metadata and configuration lines, asserting VAT, payment, notes,
 discount visibility, custom image preference and no phrases such as
 `Rivestimento sconsigliato dal listino ufficiale` unless explicitly selected.
 
-- [ ] **Step 2: Run PDF tests and verify RED**
+- [x] **Step 2: Run PDF tests and verify RED**
 
 Run: `npx vitest run src/app/apps/true-generatore-offerte/pdf/build-offer-pdf.test.ts`  
 Expected: FAIL on missing metadata/configuration helpers.
 
-- [ ] **Step 3: Port the compact V3 PDF layout**
+- [x] **Step 3: Port the compact V3 PDF layout**
 
 Use A4, 16 mm margins, a smaller TRUE logo than the rejected preview, wrapped
 right-side metadata capped inside 69 mm, and product rows with proportional
@@ -641,13 +641,13 @@ images. Include customer block, project/reference, payment and notes, list
 price, optional discount/net columns, subtotal, global discount, VAT and total.
 Use page-break checks before every row and totals block.
 
-- [ ] **Step 4: Restore the preview/download gate**
+- [x] **Step 4: Restore the preview/download gate**
 
 Render actions in this order: `Anteprima offerta`, `Scarica PDF`, `Reset`.
 `Scarica PDF` must be disabled until the current offer revision has generated a
 successful preview. Any offer edit invalidates the prior preview.
 
-- [ ] **Step 5: Verify and commit**
+- [x] **Step 5: Verify and commit**
 
 Run:
 
@@ -678,7 +678,7 @@ git commit -m "feat: restore complete V3 PDF workflow"
 - Original reference runs from the canonical `dist` directory.
 - New implementation runs from the Next.js repository.
 
-- [ ] **Step 1: Run the complete automated gate**
+- [x] **Step 1: Run the complete automated gate**
 
 ```bash
 npm audit
@@ -689,7 +689,7 @@ npm run build
 
 Expected: 0 vulnerabilities, 0 failed tests, typecheck exit 0, build exit 0.
 
-- [ ] **Step 2: Run both applications locally**
+- [x] **Step 2: Run both applications locally**
 
 ```bash
 php -S 127.0.0.1:8790
@@ -699,19 +699,19 @@ npm run dev -- --hostname 127.0.0.1 --port 3000
 Run the first command from the canonical `dist` directory and the second from
 the Next.js repository.
 
-- [ ] **Step 3: Compare desktop and mobile**
+- [x] **Step 3: Compare desktop and mobile**
 
 At 1440×1000 and 390×844 verify the same section order, header proportions,
 Suisse typography, palette, form density, table behavior, totals, actions,
 archive and footer. Add one product with fabric, finish, official extra and
 custom image; verify no image distortion.
 
-- [ ] **Step 4: Verify persistence and PDF**
+- [x] **Step 4: Verify persistence and PDF**
 
 Create a complete offer, wait for `Salvata`, reload it from archive, verify all
 fields and custom image, open preview, inspect every PDF page, then download.
 
-- [ ] **Step 5: Commit parity corrections**
+- [x] **Step 5: Commit parity corrections**
 
 ```bash
 git add src/app/apps/true-generatore-offerte docs/superpowers/plans/2026-07-20-true-offer-v3-parity.md
