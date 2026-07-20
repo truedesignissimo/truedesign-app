@@ -447,11 +447,7 @@ function BookingsList({ bookings, onEditBooking, onDeleteBooking }: BookingsList
                 Modifica
               </button>
               <button
-                onClick={() => {
-                  if (confirm(`Eliminare la prenotazione di ${booking.name} (${ROOM_NAMES[booking.room_id]}, ${booking.date} ${booking.time_start})?`)) {
-                    onDeleteBooking(booking.id)
-                  }
-                }}
+                onClick={() => onDeleteBooking(booking.id)}
                 className="rounded border border-red-200 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 transition"
               >
                 Elimina
@@ -524,6 +520,7 @@ export default function PrenotazioneSaleRiunioniPage() {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [editingBooking, setEditingBooking] = useState<Booking | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [statusMessage, setStatusMessage] = useState('')
 
   useEffect(() => {
     // Carica dal localStorage (in produzione, collegare a Supabase)
@@ -568,7 +565,7 @@ export default function PrenotazioneSaleRiunioniPage() {
       saveBookings(bookings.map(booking => (
         booking.id === editingBooking.id ? { ...bookingData, id: booking.id } : booking
       )))
-      alert('✅ Prenotazione aggiornata!')
+      setStatusMessage('Prenotazione aggiornata correttamente.')
       closeBookingModal()
       return
     }
@@ -578,12 +575,13 @@ export default function PrenotazioneSaleRiunioniPage() {
       ...bookingData,
     }
     saveBookings([...bookings, newBooking])
-    alert('✅ Prenotazione salvata!')
+    setStatusMessage('Prenotazione salvata correttamente.')
     closeBookingModal()
   }
 
   const handleDeleteBooking = (id: number) => {
     saveBookings(bookings.filter(b => b.id !== id))
+    setStatusMessage('Prenotazione eliminata.')
   }
 
   return (
@@ -597,6 +595,14 @@ export default function PrenotazioneSaleRiunioniPage() {
               <h1 className="text-3xl font-bold text-dark mb-8">Seleziona una sala</h1>
               <FloorPlan onRoomSelect={handleRoomSelect} bookings={bookings} />
             </div>
+            {statusMessage && (
+              <div
+                role="status"
+                className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-800"
+              >
+                {statusMessage}
+              </div>
+            )}
             <BookingsList
               bookings={bookings}
               onEditBooking={handleEditBooking}
