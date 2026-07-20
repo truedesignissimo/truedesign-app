@@ -168,8 +168,7 @@ export default function OfferGenerator({ userId }: { userId: string }) {
             onImage={uploadImage}
           />
           <OfferTotals offer={offer} onChange={replace} />
-          <PdfPreview offer={offer} products={catalog.products} imageUrls={previews} />
-          <button className={styles.resetButton} type="button" onClick={resetOffer}>Reset</button>
+          <PdfPreview offer={offer} products={catalog.products} imageUrls={previews} onReset={resetOffer} />
         </section>
 
         <section className={styles.card} data-v3-section="archive">
