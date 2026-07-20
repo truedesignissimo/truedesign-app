@@ -60,15 +60,16 @@ export async function inviteUser(
       alreadyExisted = false;
     }
 
-    const { error: profileError } = await admin.from("profiles").upsert({
+    const profilePayload = {
       id: invitedUser.id,
       full_name: normalizedName,
       user_type: userType,
-      is_admin: false,
       approval_status: "approved",
       approved_at: new Date().toISOString(),
       approved_by: currentUser.id,
-    });
+      ...(!alreadyExisted ? { is_admin: false } : {}),
+    };
+    const { error: profileError } = await admin.from("profiles").upsert(profilePayload);
     if (profileError) {
       return { ok: false as const, error: `Profilo non aggiornato: ${profileError.message}` };
     }
