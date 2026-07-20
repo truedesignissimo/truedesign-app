@@ -21,7 +21,7 @@ export default async function AssignmentsPage() {
     await Promise.all([
       admin.from("user_apps").select("user_id, app_id"),
       admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
-      admin.from("profiles").select("id, full_name, is_admin, user_type"),
+      admin.from("profiles").select("id, full_name, is_admin, user_type, approval_status"),
     ]);
 
   if (usersError) throw new Error(usersError.message);
@@ -35,6 +35,7 @@ export default async function AssignmentsPage() {
       full_name: profile?.full_name ?? null,
       is_admin: profile?.is_admin ?? false,
       user_type: profile?.user_type ?? "cliente",
+      approval_status: profile?.approval_status ?? "pending",
       created_at: user.created_at,
       last_sign_in_at: user.last_sign_in_at ?? null,
       email_confirmed_at: user.email_confirmed_at ?? null,
@@ -43,6 +44,7 @@ export default async function AssignmentsPage() {
   const customerCount = users.filter((user) => user.user_type === "cliente").length;
   const internalCount = users.filter((user) => user.user_type === "interno").length;
   const adminCount = users.filter((user) => user.is_admin).length;
+  const pendingCount = users.filter((user) => user.approval_status === "pending").length;
 
   return (
     <div className="admin-section-stack">
@@ -56,6 +58,10 @@ export default async function AssignmentsPage() {
       </div>
 
       <div className="user-stats-grid" aria-label="Riepilogo utenti">
+        <div className="user-stat-card user-stat-pending">
+          <span>Da approvare</span>
+          <strong>{pendingCount}</strong>
+        </div>
         <div className="user-stat-card">
           <span>Clienti</span>
           <strong>{customerCount}</strong>

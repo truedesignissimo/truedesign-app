@@ -12,6 +12,7 @@ export default function InviteForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -20,11 +21,16 @@ export default function InviteForm() {
     setLoading(true);
 
     try {
-      await inviteUser(email, fullName, userType);
+      const result = await inviteUser(email, fullName, userType);
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
       setEmail("");
       setFullName("");
       setUserType("cliente");
       setSuccess(true);
+      setSuccessMessage(result.message);
       router.refresh();
     } catch (err: any) {
       setError(err.message ?? "Errore durante l'invito");
@@ -58,7 +64,7 @@ export default function InviteForm() {
         {loading ? "Invio…" : "Invia invito"}
       </button>
       {error && <p className="error" style={{ gridColumn: "1 / -1" }}>{error}</p>}
-      {success && <p className="success" style={{ gridColumn: "1 / -1" }}>Invito inviato via email.</p>}
+      {success && <p className="success" style={{ gridColumn: "1 / -1" }}>{successMessage}</p>}
     </form>
   );
 }

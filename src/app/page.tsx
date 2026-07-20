@@ -1,11 +1,23 @@
 import { createClient } from "@/lib/supabase-server";
+import { createAdminClient } from "@/lib/supabase-admin";
 import Brand from "./_components/brand";
+
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const supabase = await createClient();
+  const admin = createAdminClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const { data: publicApps } = await admin
+    .from("apps")
+    .select("id, name, description, url, is_featured, display_order")
+    .eq("visibility", "pubblica")
+    .eq("is_active", true)
+    .order("is_featured", { ascending: false })
+    .order("display_order", { ascending: true })
+    .order("name", { ascending: true });
 
   return (
     <main className="page-shell home-page">
@@ -34,6 +46,37 @@ export default async function Home() {
               quotidiano di clienti e team True Design.
             </p>
             <p className="hero-note">Progettato per essere semplice. Costruito per evolvere.</p>
+          </div>
+        </section>
+
+        <section className="home-public-section" aria-labelledby="public-apps-title">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Open tools</p>
+              <h2 id="public-apps-title" className="section-title">App pubbliche</h2>
+            </div>
+            <p className="muted">Pronte da usare, senza registrazione.</p>
+          </div>
+          <div className="app-grid">
+            {(publicApps ?? []).map((app) => (
+              <article key={app.id} className={`card app-card ${app.is_featured ? "app-card-featured" : ""}`}>
+                <div className="app-card-visual">
+                  <span className="app-initial" aria-hidden="true">{app.name.trim().charAt(0).toLowerCase()}</span>
+                  <span className="app-status">{app.is_featured ? "In evidenza" : "Open"}</span>
+                </div>
+                <div className="app-card-body">
+                  <h2>{app.name}</h2>
+                  <p className="muted">{app.description || "Uno strumento pubblico di True Design."}</p>
+                  {app.url && <a className="btn" href={app.url}>Apri applicazione →</a>}
+                </div>
+              </article>
+            ))}
+            {(publicApps ?? []).length === 0 && (
+              <div className="empty-state">
+                <h2>Presto nuovi strumenti</h2>
+                <p className="muted">Le app impostate come pubbliche compariranno qui automaticamente.</p>
+              </div>
+            )}
           </div>
         </section>
 

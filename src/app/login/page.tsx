@@ -36,7 +36,7 @@ function LoginForm() {
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("user_type, is_admin")
+      .select("user_type, is_admin, approval_status")
       .eq("id", data.user.id)
       .single();
 
@@ -48,6 +48,13 @@ function LoginForm() {
           ? "Questo accesso è riservato agli utenti interni True Design."
           : "Questo accesso è riservato ai clienti."
       );
+      return;
+    }
+
+    if (profile?.approval_status === "pending" || profile?.approval_status === "rejected") {
+      setLoading(false);
+      router.push("/in-attesa");
+      router.refresh();
       return;
     }
 
@@ -76,7 +83,7 @@ function LoginForm() {
         <div className="login-card">
           <p className="eyebrow">{isInternal ? "Team True" : "Area clienti"}</p>
           <h2>Accedi</h2>
-          <p className="muted">Usa le credenziali che hai ricevuto dall’amministratore.</p>
+          <p className="muted">Usa le tue credenziali oppure crea un nuovo account.</p>
 
           <form onSubmit={handleLogin} className="grid">
             <div>

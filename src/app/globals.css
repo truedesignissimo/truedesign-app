@@ -277,8 +277,14 @@ h3 {
   background: rgba(255, 255, 255, 0.52);
 }
 
-.home-hero + .access-section {
+.home-public-section {
   margin-top: 72px;
+  padding: 28px 0 72px;
+  border-top: 1px solid var(--border-strong);
+}
+
+.home-public-section + .access-section {
+  margin-top: 0;
 }
 
 .hero-note {
@@ -1217,8 +1223,31 @@ label.muted {
 
 .user-stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
+}
+
+.user-stat-pending {
+  border-color: #d8c2a9;
+  background: #f3eadd;
+}
+
+.pending-layout {
+  display: grid;
+  min-height: 100vh;
+  grid-template-rows: auto 1fr;
+}
+
+.pending-card {
+  width: min(780px, 100%);
+  align-self: center;
+  justify-self: center;
+  padding: clamp(32px, 6vw, 72px);
+}
+
+.pending-card .page-title {
+  max-width: 650px;
+  margin-bottom: 24px;
 }
 
 .user-stat-card {
@@ -1621,6 +1650,10 @@ input[type="checkbox"] {
     grid-template-columns: 1fr 1fr;
   }
 
+  .user-stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
   .user-result-count {
     grid-column: 1 / -1;
     justify-self: start;
@@ -1682,7 +1715,7 @@ input[type="checkbox"] {
     background-position: 61% center;
   }
 
-  .home-hero + .access-section {
+  .home-public-section {
     margin-top: 52px;
   }
 

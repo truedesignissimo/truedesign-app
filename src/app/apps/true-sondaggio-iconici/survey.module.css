@@ -1,0 +1,319 @@
+.page,
+.successPage {
+  --survey-bg: #f4f4f2;
+  --survey-ink: #1a1a1a;
+  --survey-muted: #686865;
+  --survey-accent: #c8102e;
+  --survey-accent-soft: #fde8eb;
+  --survey-line: #deded9;
+  min-height: 100dvh;
+  background: var(--survey-bg);
+  color: var(--survey-ink);
+  font-family: "Suisse Intl", "Helvetica Neue", Arial, sans-serif;
+}
+
+.page {
+  padding: 42px max(18px, calc((100vw - 1280px) / 2)) 150px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 48px;
+  margin-bottom: 34px;
+}
+
+.heading {
+  max-width: 840px;
+}
+
+.kicker {
+  margin: 0 0 13px;
+  color: var(--survey-accent);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.heading h1,
+.successCard h1 {
+  margin: 0;
+  font-size: clamp(30px, 4vw, 54px);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+}
+
+.intro {
+  max-width: 720px;
+  margin: 20px 0 0;
+  color: var(--survey-muted);
+  font-size: clamp(15px, 1.6vw, 18px);
+  line-height: 1.55;
+}
+
+.logo {
+  width: 112px;
+  height: auto;
+  object-fit: contain;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  flex-direction: column;
+  border: 2px solid var(--survey-line);
+  border-radius: 11px;
+  outline: none;
+  background: #fff;
+  color: var(--survey-ink);
+  cursor: pointer;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease, opacity 180ms ease;
+}
+
+.card:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: #aaa9a4;
+  box-shadow: 0 10px 24px rgba(26, 26, 26, 0.09);
+}
+
+.card:focus-visible {
+  box-shadow: 0 0 0 4px rgba(200, 16, 46, 0.28);
+}
+
+.card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  transition: transform 280ms ease;
+}
+
+.card:hover:not(:disabled) img {
+  transform: scale(1.025);
+}
+
+.productName {
+  width: 100%;
+  padding: 10px 7px 11px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.15;
+  text-align: center;
+  transition: background 180ms ease, color 180ms ease;
+}
+
+.badge {
+  position: absolute;
+  z-index: 2;
+  top: 9px;
+  right: 9px;
+  display: grid;
+  width: 27px;
+  height: 27px;
+  place-items: center;
+  border: 2px solid var(--survey-line);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: transparent;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.selected {
+  border-color: var(--survey-accent);
+  box-shadow: 0 8px 20px rgba(200, 16, 46, 0.16);
+}
+
+.selected .productName,
+.selected .badge {
+  border-color: var(--survey-accent);
+  background: var(--survey-accent);
+  color: #fff;
+}
+
+.unavailable {
+  opacity: 0.42;
+  cursor: not-allowed;
+  filter: grayscale(0.3);
+}
+
+.actionBar {
+  position: fixed;
+  z-index: 20;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border-top: 1px solid var(--survey-line);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 -10px 34px rgba(26, 26, 26, 0.07);
+  backdrop-filter: blur(12px);
+}
+
+.actionInner {
+  display: grid;
+  width: min(1280px, calc(100% - 36px));
+  min-height: 104px;
+  margin: 0 auto;
+  padding: 13px 0;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 7px 28px;
+}
+
+.progress {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.counter {
+  color: var(--survey-accent);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.controls {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 11px;
+}
+
+.nameField {
+  display: grid;
+  gap: 4px;
+}
+
+.nameField span {
+  color: var(--survey-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nameField input {
+  width: min(300px, 30vw);
+  min-width: 210px;
+  height: 44px;
+  padding: 0 13px;
+  border: 1px solid var(--survey-line);
+  border-radius: 8px;
+  outline: none;
+  background: #fff;
+  color: var(--survey-ink);
+  font-size: 15px;
+}
+
+.nameField input:focus {
+  border-color: var(--survey-accent);
+  box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.12);
+}
+
+.submit {
+  height: 44px;
+  padding: 0 23px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--survey-accent);
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.submit:disabled {
+  background: #c8c8c5;
+  cursor: not-allowed;
+}
+
+.hint {
+  margin: 0;
+  grid-column: 2;
+  color: var(--survey-muted);
+  font-size: 12px;
+  text-align: right;
+}
+
+.error {
+  color: var(--survey-accent);
+  font-weight: 600;
+}
+
+.successPage {
+  display: grid;
+  padding: 24px;
+  place-items: center;
+}
+
+.successCard {
+  width: min(580px, 100%);
+  padding: clamp(40px, 8vw, 80px);
+  border: 1px solid var(--survey-line);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(26, 26, 26, 0.08);
+  text-align: center;
+}
+
+.successMark {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 28px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--survey-accent);
+  color: #fff;
+  font-size: 26px;
+}
+
+.successCard p:last-child {
+  margin: 22px 0 0;
+  color: var(--survey-muted);
+  line-height: 1.55;
+}
+
+@media (max-width: 1100px) {
+  .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@media (max-width: 720px) {
+  .page { padding-top: 26px; padding-bottom: 220px; }
+  .header { gap: 20px; }
+  .logo { width: 76px; }
+  .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+  .actionInner { grid-template-columns: 1fr; padding: 12px 0 14px; gap: 9px; }
+  .controls { justify-content: stretch; }
+  .nameField { flex: 1; }
+  .nameField input { width: 100%; min-width: 0; }
+  .hint { grid-column: 1; text-align: left; }
+}
+
+@media (max-width: 480px) {
+  .header { flex-direction: column-reverse; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .controls { align-items: stretch; flex-direction: column; }
+  .submit { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .card img { transition: none; }
+}

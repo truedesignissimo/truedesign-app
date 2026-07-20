@@ -3,7 +3,13 @@ import { createClient } from "@/lib/supabase-server";
 import Brand from "../_components/brand";
 import SignOutButton from "../dashboard/sign-out-button";
 
-export default async function AccessDeniedPage() {
+export default async function AccessDeniedPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ motivo?: string }>;
+}) {
+  const { motivo } = await searchParams;
+  const isAppDenied = motivo === "app";
   const supabase = await createClient();
   const {
     data: { user },
@@ -33,10 +39,13 @@ export default async function AccessDeniedPage() {
           <div className="access-denied-mark" aria-hidden="true">!</div>
           <div className="access-denied-content">
             <p className="eyebrow">Permessi account</p>
-            <h1 className="page-title">Questo profilo non è amministratore.</h1>
+            <h1 className="page-title">
+              {isAppDenied ? "Questa app non è assegnata al tuo profilo." : "Questo profilo non è amministratore."}
+            </h1>
             <p className="lead">
-              L’area di controllo è attiva, ma l’account collegato non ha il permesso
-              necessario. Per sicurezza non vieni più rimandato silenziosamente alla dashboard.
+              {isAppDenied
+                ? "Puoi utilizzare solo gli strumenti scelti per il tuo account. Torna alle tue app oppure chiedi all’amministratore di abilitare questo accesso."
+                : "L’area di controllo è attiva, ma l’account collegato non ha il permesso necessario. Per sicurezza non vieni più rimandato silenziosamente alla dashboard."}
             </p>
 
             <div className="account-detail-card">
@@ -49,7 +58,7 @@ export default async function AccessDeniedPage() {
                 <strong>{roleLabel}</strong>
               </div>
               <div>
-                <span>Accesso admin</span>
+                <span>{isAppDenied ? "Accesso applicazione" : "Accesso admin"}</span>
                 <strong>Non abilitato</strong>
               </div>
             </div>

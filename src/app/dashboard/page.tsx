@@ -19,9 +19,13 @@ export default async function DashboardPage() {
 
   const { data: profile } = await admin
     .from("profiles")
-    .select("is_admin, full_name, user_type")
+    .select("is_admin, full_name, user_type, approval_status")
     .eq("id", user.id)
     .single();
+
+  if (profile?.approval_status === "pending" || profile?.approval_status === "rejected") {
+    redirect("/in-attesa");
+  }
 
   let visibleApps: any[] = [];
 

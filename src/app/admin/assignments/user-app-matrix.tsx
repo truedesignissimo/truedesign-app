@@ -5,6 +5,7 @@ import {
   assignApp,
   deleteUser,
   sendPasswordReset,
+  setUserApproval,
   setUserType,
   toggleUserAdmin,
   unassignApp,
@@ -17,6 +18,7 @@ type User = {
   full_name: string | null;
   is_admin: boolean;
   user_type: string;
+  approval_status: "pending" | "approved" | "rejected";
   created_at: string;
   last_sign_in_at: string | null;
   email_confirmed_at: string | null;
@@ -103,7 +105,7 @@ export default function UserAppMatrix({
   const [localUsers, setLocalUsers] = useState(users);
   const [localUserApps, setLocalUserApps] = useState(userApps);
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<"tutti" | "cliente" | "interno" | "admin">("tutti");
+  const [filter, setFilter] = useState<"tutti" | "pending" | "cliente" | "interno" | "admin">("tutti");
   const [notice, setNotice] = useState<Notice>(null);
 
   const filteredUsers = useMemo(() => {
@@ -115,7 +117,11 @@ export default function UserAppMatrix({
         user.email?.toLowerCase().includes(normalizedQuery);
       const matchesFilter =
         filter === "tutti" ||
-        (filter === "admin" ? user.is_admin : user.user_type === filter);
+        (filter === "admin"
+          ? user.is_admin
+          : filter === "pending"
+            ? user.approval_status === "pending"
+            : user.user_type === filter);
       return matchesQuery && matchesFilter;
     });
   }, [filter, localUsers, query]);
@@ -154,6 +160,27 @@ export default function UserAppMatrix({
         setNotice({ type: "success", message: "Permessi amministratore aggiornati." });
       } catch (error) {
         updateLocalUser(user.id, { is_admin: user.is_admin });
+        setNotice({ type: "error", message: error instanceof Error ? error.message : "Aggiornamento non riuscito." });
+      }
+    });
+  }
+
+  function handleApproval(user: User, approved: boolean) {
+    const previousStatus = user.approval_status;
+    const nextStatus = approved ? "approved" : "rejected";
+    updateLocalUser(user.id, { approval_status: nextStatus });
+    setNotice(null);
+    startTransition(async () => {
+      try {
+        await setUserApproval(user.id, approved);
+        setNotice({
+          type: "success",
+          message: approved
+            ? `${user.full_name ?? user.email} può ora accedere alle app assegnate.`
+            : `Accesso di ${user.full_name ?? user.email} sospeso.`,
+        });
+      } catch (error) {
+        updateLocalUser(user.id, { approval_status: previousStatus });
         setNotice({ type: "error", message: error instanceof Error ? error.message : "Aggiornamento non riuscito." });
       }
     });
@@ -236,6 +263,7 @@ export default function UserAppMatrix({
             onChange={(event) => setFilter(event.target.value as typeof filter)}
           >
             <option value="tutti">Tutti gli utenti</option>
+            <option value="pending">Da approvare</option>
             <option value="cliente">Solo clienti</option>
             <option value="interno">Solo team interno</option>
             <option value="admin">Solo amministratori</option>
@@ -273,6 +301,13 @@ export default function UserAppMatrix({
                         <div className="user-badges">
                           <span className={`status-badge ${user.email_confirmed_at ? "status-active" : "status-pending"}`}>
                             {user.email_confirmed_at ? "Attivo" : "Invito in attesa"}
+                          </span>
+                          <span className={`status-badge ${user.approval_status === "approved" ? "status-active" : "status-pending"}`}>
+                            {user.approval_status === "approved"
+                              ? "Approvato"
+                              : user.approval_status === "pending"
+                                ? "Da approvare"
+                                : "Sospeso"}
                           </span>
                           {isCurrentUser && <span className="status-badge">Tu</span>}
                         </div>
@@ -338,6 +373,25 @@ export default function UserAppMatrix({
                           onError={(message) => setNotice({ type: "error", message })}
                         />
                         <div className="user-actions-buttons">
+                          {user.approval_status !== "approved" ? (
+                            <button
+                              className="btn"
+                              type="button"
+                              disabled={isPending}
+                              onClick={() => handleApproval(user, true)}
+                            >
+                              Approva accesso
+                            </button>
+                          ) : !isCurrentUser ? (
+                            <button
+                              className="btn btn-secondary"
+                              type="button"
+                              disabled={isPending}
+                              onClick={() => handleApproval(user, false)}
+                            >
+                              Sospendi accesso
+                            </button>
+                          ) : null}
                           <button
                             className="btn btn-secondary"
                             type="button"

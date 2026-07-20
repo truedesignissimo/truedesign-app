@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sondaggio Prodotti Iconici – True Design</title>
+<style>
+  /* Suisse Int'l — font commerciale: i file vanno messi in assets/fonts/.
+     Finché non ci sono, parte il fallback (grotesque svizzera simile). */
+  @font-face{font-family:'Suisse Intl';src:url('assets/fonts/SuisseIntl-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+  @font-face{font-family:'Suisse Intl';src:url('assets/fonts/SuisseIntl-Medium.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
+  @font-face{font-family:'Suisse Intl';src:url('assets/fonts/SuisseIntl-SemiBold.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap}
+  @font-face{font-family:'Suisse Intl';src:url('assets/fonts/SuisseIntl-Bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
+
+  :root{
+    --bg:#f4f4f2; --ink:#1a1a1a; --muted:#6b6b6b;
+    --accent:#c8102e; --accent-soft:#fde8eb; --line:#e2e2de;
+    --font:'Suisse Intl','Helvetica Neue','Helvetica',Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font);background:var(--bg);color:var(--ink);}
+
+  header{padding:32px 0 8px}
+  .header-inner{max-width:1280px;margin:0 auto;padding:0 16px;display:flex;justify-content:space-between;align-items:flex-start;gap:24px}
+  .head-text{text-align:left;max-width:760px}
+  header h1{font-size:clamp(22px,3.4vw,34px);margin:0 0 12px;font-weight:600;letter-spacing:-.2px;line-height:1.15}
+  header p{margin:0;color:var(--muted);font-size:15px;line-height:1.55}
+  .logo{flex:0 0 auto;height:34px;width:auto;color:#3d3d3d;font-weight:700;font-size:38px;letter-spacing:-1px;line-height:1;text-decoration:none}
+  .logo svg{height:34px;width:auto;display:block}
+  @media(max-width:640px){
+    .header-inner{flex-direction:column-reverse;align-items:flex-start}
+    .logo,.logo svg{height:28px}
+  }
+  .wrap{max-width:1280px;margin:0 auto;padding:16px 16px 140px}
+
+  .grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+  @media(max-width:1100px){.grid{grid-template-columns:repeat(4,1fr)}}
+  @media(max-width:720px){.grid{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:480px){.grid{grid-template-columns:repeat(2,1fr)}}
+
+  .card{position:relative;cursor:pointer;border:2px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;transition:transform .15s,border-color .2s,box-shadow .2s;outline:none}
+  .card:focus-visible{box-shadow:0 0 0 3px rgba(200,16,46,.4)}
+  .card img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;transition:transform .3s}
+  .card:hover img{transform:scale(1.05)}
+  .card .name{padding:8px 6px;text-align:center;font-size:13px;font-weight:600}
+  .card .badge{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:#fff;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:14px;color:transparent;transition:.2s}
+
+  .card.selected{border-color:var(--accent);box-shadow:0 6px 18px rgba(200,16,46,.18)}
+  .card.selected .name{background:var(--accent);color:#fff}
+  .card.selected .badge{background:var(--accent);border-color:var(--accent);color:#fff}
+  .card.disabled{opacity:.45;pointer-events:none;filter:grayscale(.3)}
+
+  .bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);box-shadow:0 -4px 20px rgba(0,0,0,.06);padding:14px 16px;z-index:50}
+  .bar-inner{max-width:1280px;margin:0 auto;display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+  .counter{font-weight:700;font-size:16px}
+  .counter b{color:var(--accent)}
+  .controls{display:flex;gap:12px;align-items:center;flex:1;justify-content:flex-end;flex-wrap:wrap}
+  input[type=text]{padding:11px 14px;border:1px solid var(--line);border-radius:8px;font-size:15px;min-width:200px}
+  button{padding:12px 28px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-size:15px;font-weight:700;cursor:pointer;transition:.2s}
+  button:disabled{background:#c9c9c9;cursor:not-allowed}
+  .hint{color:var(--muted);font-size:13px;width:100%;text-align:right}
+  .ok{text-align:center;padding:80px 20px}
+  .ok h2{color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="head-text">
+      <h1>Quali sono i prodotti iconici di True?</h1>
+      <p>Aiutaci a identificare i prodotti che meglio rappresentano l'identità di True: seleziona le 5 collezioni che ritieni più iconiche e riconoscibili. Il tuo contributo ci aiuterà a comprendere come il mercato percepisce le nostre collezioni e a definire le future attività di comunicazione e valorizzazione del marchio.</p>
+    </div>
+    <img class="logo" src="assets/true-logo.png" alt="True">
+  </div>
+</header>
+
+<div id="app" class="wrap">
+  <div id="grid" class="grid"></div>
+</div>
+
+<div class="bar" id="bar">
+  <div class="bar-inner">
+    <div class="counter">Selezionati: <b id="count">0</b> / 5</div>
+    <div class="controls">
+      <input type="text" id="nome" placeholder="Il tuo nome" autocomplete="name">
+      <button id="send" disabled>Invia</button>
+      <div class="hint" id="hint">Seleziona esattamente 5 prodotti e inserisci il tuo nome.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PRODUCTS = [{"name": "Abisko", "url": "https://www.truedesign.it/it/prodotti/abisko/", "img": "https://www.truedesign.it/app/uploads/2023/09/abisko-preview-truedesign-768x1024.jpg"}, {"name": "Adinne", "url": "https://www.truedesign.it/it/prodotti/adinne/", "img": "https://www.truedesign.it/app/uploads/2026/04/adinne-preview-truedesign_ok-1-1150x1536-1-1-768x1026.jpg"}, {"name": "Ahkka", "url": "https://www.truedesign.it/it/prodotti/ahkka/", "img": "https://www.truedesign.it/app/uploads/2026/04/ahkka-preview-truedesign_ok-1-1150x1536-2-768x1026.jpg"}, {"name": "Anyway", "url": "https://www.truedesign.it/it/prodotti/anyway/", "img": "https://www.truedesign.it/app/uploads/2023/09/anyway-preview-truedesign-768x1026.jpg"}, {"name": "Arca", "url": "https://www.truedesign.it/it/prodotti/arca/", "img": "https://www.truedesign.it/app/uploads/2023/09/1592556942-768x1024.jpg"}, {"name": "Aura", "url": "https://www.truedesign.it/it/prodotti/aura/", "img": "https://www.truedesign.it/app/uploads/2026/04/aura-preview-truedesign_ok-1-768x1026.jpg"}, {"name": "Blade", "url": "https://www.truedesign.it/it/prodotti/blade/", "img": "https://www.truedesign.it/app/uploads/2023/09/1592557673-1-768x1025.jpg"}, {"name": "Blade Cabinet", "url": "https://www.truedesign.it/it/prodotti/blade-cabinet/", "img": "https://www.truedesign.it/app/uploads/2023/09/1614074798w1200x1600hresize-768x1026.jpg"}, {"name": "Blade Coffee", "url": "https://www.truedesign.it/it/prodotti/blade-coffee/", "img": "https://www.truedesign.it/app/uploads/2023/09/1606124518-768x1024.jpg"}, {"name": "Clara", "url": "https://www.truedesign.it/it/prodotti/clara/", "img": "https://www.truedesign.it/app/uploads/2023/09/1592557394-1-768x1025.jpg"}, {"name": "Cloud", "url": "https://www.truedesign.it/it/prodotti/cloud/", "img": "https://www.truedesign.it/app/uploads/2023/09/1592556859-768x1025.jpg"}, {"name": "Code", "url": "https://www.truedesign.it/it/prodotti/code/", "img": "https://www.truedesign.it/app/uploads/2023/09/1592557157-768x1025.jpg"}, {"name": "Code Out", "url": "https://www.truedesign.it/it/prodotti/code-out/", "img": "https://www.truedesign.it/app/uploads/2023/09/1621341313-768x1025.jpg"}, {"name": "Cremino", "url": "https://www.truedesign.it/it/prodotti/cremino/", "img": "https://www.truedesign.it/app/uploads/2026/04/cremino-preview-truedesign_ok-1-1150x1536-3-768x1026.jpg"}, {"name": "Cute", "url": "https://www.truedesign.it/it/prodotti/cute/", "img": "https://www.truedesign.it/app/uploads/2024/11/cute-1-768x1024.jpg"}, {"name": "Dna", "url": "https://www.truedesign.it/it/prodotti/dna/", "img": "https://www.truedesign.it/app/uploads/2023/09/1592557647-768x1024.jpg"}, {"name": "Dna Out", "url": "https://www.truedesign.it/it/prodotti/dna-out/", "img": "https://www.truedesign.it/app/uploads/2023/09/1623249065-768x1025.jpg"}, {"name": "E-quo", "url": "https://www.truedesign.it/it/prodotti/e-quo/", "img": "https://www.truedesign.it/app/uploads/2023/09/1592557228-768x1025.jpg"}, {"name": "Ermete", "url": "https://www.truedesign.it/it/prodotti/ermete/", "img": "https://www.truedesign.it/app/uploads/2023/09/1592557113-768x1024.jpg"}, {"name": "Essence", "url": "https://www.truedesign.it/it/prodotti/essence/", "img": "https://www.truedesign.it/app/uploads/2024/05/Essence_lista-768x1024.jpeg"}, {"name": "Ethrio", "url": "https://www.truedesign.it/it/prodotti/ethrio/", "img": "https://www.truedesign.it/app/uploads/2023/09/1592557181-768x1025.jpg"}, {"name": "Farfalla", "url": "https://www.truedesign.it/it/prodotti/farfalla/", "img": "https://www.truedesign.it/app/uploads/2025/07/farfalla-768x1024.jpg"}, {"name": "Fender", "url": "https://www.truedesign.it/it/prodotti/fender/", "img": "https://www.truedesign.it/app/uploads/2023/09/1700055961w1200x1600hresize-768x1024.jpg"}, {"name": "Fender Coffee", "url": "https://www.truedesign.it/it/prodotti/fender-coffee/", "img": "https://www.truedesign.it/app/uploads/2025/04/fender-coffee-listato-768x1025.jpg"}, {"name": "Fender Sofa", "url": "https://www.truedesign.it/it/prodotti/fender-sofa/", "img": "https://www.truedesign.it/app/uploads/2023/09/1700056004w1200x1600hresize-768x1024.jpg"}, {"name": "Fiocco", "url": "https://www.truedesign.it/it/prodotti/fiocco/", "img": "https://www.truedesign.it/app/uploads/2026/04/fiocco-preview-truedesign_ok-1150x1536-4-768x1026.jpg"}, {"name": "Flap Kitchen", "url": "https://www.truedesign.it/it/prodotti/flap-kitchen/", "img": "https://www.truedesign.it/app/uploads/2023/09/1713951600-768x1024.jpg"}, {"name": "Flow", "url": "https://www.truedesign.it/it/prodotti/flow/", "img": "https://www.truedesign.it/app/uploads/2023/09/FLOW_render-sito-768x1152.jpg"}, {"name": "Flow Out", "url": "https://www.truedesign.it/it/prodotti/flow-out/", "img": "https://www.truedesign.it/app/uploads/2023/09/1664440279.jpg"}, {"name": "Fold", "url": "https://www.truedesign.it/it/prodotti/fold/", "img": "https://www.truedesign.it/app/uploads/2023/09/1687765461.jpg"}, {"name": "Grillo", "url": "https://www.truedesign.it/it/prodotti/grillo/", "img": "https://www.truedesign.it/app/uploads/2023/09/1592557726w600x800hresize.jpg"}, {"name": "Hive", "url": "https://www.truedesign.it/it/prodotti/hive/", "img": "https://www.truedesign.it/app/uploads/2023/09/1606124527w600x800hresize.jpg"}, {"name": "Inside", "url": "https://www.truedesign.it/it/prodotti/inside/", "img": "https://www.truedesign.it/app/uploads/2023/09/1633437711w600x800hresize.jpg"}, {"name": "Kay", "url": "https://www.truedesign.it/it/prodotti/kay/", "img": "https://www.truedesign.it/app/uploads/2023/09/1700056077w600x800hresize.jpg"}, {"name": "Laguna", "url": "https://www.truedesign.it/it/prodotti/laguna/", "img": "https://www.truedesign.it/app/uploads/2024/02/laguna-prodotti-768x1024.jpeg"}, {"name": "Linea", "url": "https://www.truedesign.it/it/prodotti/linea-mobile-contenitore-moderno/", "img": "https://www.truedesign.it/app/uploads/2025/04/linea-768x1024.jpg"}, {"name": "Lisa", "url": "https://www.truedesign.it/it/prodotti/lisa/", "img": "https://www.truedesign.it/app/uploads/2023/09/1700056139w600x800hresize.jpg"}, {"name": "Lisa Soft", "url": "https://www.truedesign.it/it/prodotti/lisa-soft/", "img": "https://www.truedesign.it/app/uploads/2025/04/lisa-soft-768x1023.jpg"}, {"name": "Marina", "url": "https://www.truedesign.it/it/prodotti/marina/", "img": "https://www.truedesign.it/app/uploads/2023/09/1700056175w600x800hresize.jpg"}, {"name": "Marina Out", "url": "https://www.truedesign.it/it/prodotti/marina-out/", "img": "https://www.truedesign.it/app/uploads/2023/09/marina-out-prodotti-768x1024.jpeg"}, {"name": "Millepiedi", "url": "https://www.truedesign.it/it/prodotti/millepiedi/", "img": "https://www.truedesign.it/app/uploads/2023/09/1592558210w600x800hresize.jpg"}, {"name": "Neo", "url": "https://www.truedesign.it/it/prodotti/neo/", "img": "https://www.truedesign.it/app/uploads/2023/09/1625754176w600x800hresize.jpg"}, {"name": "Nomade", "url": "https://www.truedesign.it/it/prodotti/nomade/", "img": "https://www.truedesign.it/app/uploads/2023/09/1700056250w600x800hresize.jpg"}, {"name": "Not", "url": "https://www.truedesign.it/it/prodotti/not/", "img": "https://www.truedesign.it/app/uploads/2023/09/1592557329w600x800hresize.jpg"}, {"name": "Not Out", "url": "https://www.truedesign.it/it/prodotti/not-out/", "img": "https://www.truedesign.it/app/uploads/2023/09/1700056287w600x800hresize.jpg"}, {"name": "Not Sofa", "url": "https://www.truedesign.it/it/prodotti/not-sofa/", "img": "https://www.truedesign.it/app/uploads/2023/09/1687764387.jpg"}, {"name": "Not Wood", "url": "https://www.truedesign.it/it/prodotti/not-wood/", "img": "https://www.truedesign.it/app/uploads/2023/09/1591950884w600x800hresize.jpg"}, {"name": "Notable", "url": "https://www.truedesign.it/it/prodotti/notable/", "img": "https://www.truedesign.it/app/uploads/2023/09/1621341531w600x800hresize.jpg"}, {"name": "Oracle", "url": "https://www.truedesign.it/it/prodotti/oracle/", "img": "https://www.truedesign.it/app/uploads/2023/09/1630922281w600x800hresize.jpg"}, {"name": "Oscar", "url": "https://www.truedesign.it/it/prodotti/oscar/", "img": "https://www.truedesign.it/app/uploads/2023/09/oscar-prodotti-true-768x1024.jpeg"}, {"name": "Patch", "url": "https://www.truedesign.it/it/prodotti/patch/", "img": "https://www.truedesign.it/app/uploads/2023/09/patch-prodotti-true-768x1024.jpeg"}, {"name": "Sarek", "url": "https://www.truedesign.it/it/prodotti/sarek/", "img": "https://www.truedesign.it/app/uploads/2024/11/Image32-2-1-768x1024.jpg"}, {"name": "Sho", "url": "https://www.truedesign.it/it/prodotti/sho/", "img": "https://www.truedesign.it/app/uploads/2023/09/sho-prodotti-true-768x1024.jpeg"}, {"name": "Sho Lounge", "url": "https://www.truedesign.it/it/prodotti/sho-lounge/", "img": "https://www.truedesign.it/app/uploads/2024/11/Sho-Lounge-principale-768x1024.jpg"}, {"name": "Sibillino", "url": "https://www.truedesign.it/it/prodotti/sibillino/", "img": "https://www.truedesign.it/app/uploads/2026/03/SIBILLINO_preview-verticale-1-768x1024.jpg"}, {"name": "Sibylla", "url": "https://www.truedesign.it/it/prodotti/sibylla/", "img": "https://www.truedesign.it/app/uploads/2023/09/sibylla-prodotti-true-768x1024.jpeg"}, {"name": "Silvestro", "url": "https://www.truedesign.it/it/prodotti/silvestro/", "img": "https://www.truedesign.it/app/uploads/2023/09/1633362873w600x800hresize.jpg"}, {"name": "Slight", "url": "https://www.truedesign.it/it/prodotti/slight/", "img": "https://www.truedesign.it/app/uploads/2023/09/1592557204w600x800hresize.jpg"}, {"name": "Stone", "url": "https://www.truedesign.it/it/prodotti/stone/", "img": "https://www.truedesign.it/app/uploads/2023/09/1592557490w600x800hresize.jpg"}, {"name": "Tao", "url": "https://www.truedesign.it/it/prodotti/tao-poltroncina-da-pranzo/", "img": "https://www.truedesign.it/app/uploads/2023/09/1602657683w600x800hresize.jpg"}, {"name": "Tod", "url": "https://www.truedesign.it/it/prodotti/tod/", "img": "https://www.truedesign.it/app/uploads/2023/09/1592557797w600x800hresize.jpg"}, {"name": "Wave", "url": "https://www.truedesign.it/it/prodotti/wave/", "img": "https://www.truedesign.it/app/uploads/2023/09/1592557781w600x800hresize.jpg"}, {"name": "Wing", "url": "https://www.truedesign.it/it/prodotti/wing/", "img": "https://www.truedesign.it/app/uploads/2023/09/1592557311w600x800hresize.jpg"}, {"name": "Wing Atelier", "url": "https://www.truedesign.it/it/prodotti/wing-atelier/", "img": "https://www.truedesign.it/app/uploads/2024/11/Wing-Atelier.jpg"}, {"name": "Wing Kitchen", "url": "https://www.truedesign.it/it/prodotti/wing-kitchen/", "img": "https://www.truedesign.it/app/uploads/2023/09/1592558170w600x800hresize.jpg"}, {"name": "Zuel", "url": "https://www.truedesign.it/it/prodotti/zuel/", "img": "https://www.truedesign.it/app/uploads/2025/03/zuel_lista-768x1025.jpg"}];
+const MAX = 5;
+const EMAIL = "dariobreg@gmail.com";
+const selected = new Set();
+
+const grid = document.getElementById('grid');
+const countEl = document.getElementById('count');
+const sendBtn = document.getElementById('send');
+const nameEl = document.getElementById('nome');
+const hint = document.getElementById('hint');
+
+PRODUCTS.forEach((p,i)=>{
+  const c = document.createElement('div');
+  c.className='card'; c.tabIndex=0; c.dataset.i=i;
+  c.innerHTML = `<div class="badge">✓</div>
+    <img src="${p.img}" alt="${p.name}" loading="lazy">
+    <div class="name">${p.name}</div>`;
+  c.addEventListener('click',()=>toggle(i,c));
+  c.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle(i,c);}});
+  grid.appendChild(c);
+});
+
+function toggle(i,c){
+  if(selected.has(i)){selected.delete(i);c.classList.remove('selected');}
+  else{ if(selected.size>=MAX) return; selected.add(i);c.classList.add('selected'); }
+  refresh();
+}
+
+function refresh(){
+  countEl.textContent = selected.size;
+  const full = selected.size>=MAX;
+  document.querySelectorAll('.card').forEach(c=>{
+    const i=+c.dataset.i;
+    c.classList.toggle('disabled', full && !selected.has(i));
+  });
+  const ready = selected.size===MAX && nameEl.value.trim().length>0;
+  sendBtn.disabled = !ready;
+  hint.textContent = ready ? 'Tutto pronto! Premi Invia.' :
+    (selected.size!==MAX ? `Mancano ${MAX-selected.size} selezioni.` : 'Inserisci il tuo nome.');
+}
+nameEl.addEventListener('input',refresh);
+
+sendBtn.addEventListener('click', async ()=>{
+  sendBtn.disabled=true; sendBtn.textContent='Invio...';
+  const scelte = [...selected].map(i=>PRODUCTS[i]);
+  const data = new URLSearchParams({
+    nome: nameEl.value.trim(),
+    scelte: scelte.map((p,n)=>`${n+1}. ${p.name}`).join('\n'),
+    link: scelte.map(p=>p.url).join('\n'),
+    data: new Date().toLocaleString('it-IT'),
+    website: '' // honeypot anti-bot: deve restare vuoto
+  });
+  try{
+    const r = await fetch('submit.php',{
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body:data.toString()
+    });
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    done();
+  }catch(err){
+    sendBtn.disabled=false; sendBtn.textContent='Invia';
+    hint.textContent='Errore di invio: '+err.message+'. Riprova.';
+  }
+});
+
+function done(){
+  document.getElementById('app').innerHTML =
+    `<div class="ok"><h2>Grazie, ${nameEl.value.trim()}!</h2>
+     <p>Le tue 5 scelte sono state inviate correttamente.</p></div>`;
+  document.getElementById('bar').style.display='none';
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>

@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import Brand from "../_components/brand";
+import { notifyRegistrationRequest } from "./actions";
 
 export default function RegistrationPage() {
-  const supabase = createClient();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -13,15 +13,19 @@ export default function RegistrationPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [complete, setComplete] = useState(false);
+  const [isInternal, setIsInternal] = useState(false);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
     setLoading(true);
+    const supabase = createClient();
 
     const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
+    const normalizedEmail = email.trim().toLowerCase();
+    const internalAccount = normalizedEmail.endsWith("@truedesign.it");
     const { error: signUpError } = await supabase.auth.signUp({
-      email: email.trim(),
+      email: normalizedEmail,
       password,
       options: {
         data: {
@@ -37,6 +41,14 @@ export default function RegistrationPage() {
       setError(signUpError.message);
       return;
     }
+    if (!internalAccount) {
+      try {
+        await notifyRegistrationRequest(normalizedEmail, fullName);
+      } catch {
+        // La richiesta resta visibile nel pannello admin anche se il provider email non risponde.
+      }
+    }
+    setIsInternal(internalAccount);
     setComplete(true);
   }
 
@@ -57,18 +69,20 @@ export default function RegistrationPage() {
           {complete ? (
             <div className="registration-complete">
               <span aria-hidden="true">✓</span>
-              <p className="eyebrow">Registrazione completata</p>
+              <p className="eyebrow">Registrazione ricevuta</p>
               <h2>Controlla la tua email.</h2>
               <p className="muted">
-                Ti abbiamo inviato il link per confermare l’account. Dopo la conferma potrai accedere al workspace.
+                {isInternal
+                  ? "Conferma l’account: il tuo indirizzo @truedesign.it viene riconosciuto automaticamente come profilo interno."
+                  : "Conferma l’account. La richiesta è stata inoltrata all’amministratore, che dovrà approvare il profilo e assegnarti le app."}
               </p>
-              <a href="/login?tipo=cliente" className="btn">Vai all’accesso →</a>
+              <a href={`/login?tipo=${isInternal ? "interno" : "cliente"}`} className="btn">Vai all’accesso →</a>
             </div>
           ) : (
             <>
               <p className="eyebrow">Crea account</p>
               <h2>Registrati</h2>
-              <p className="muted">I campi contrassegnati sono necessari per creare il tuo profilo.</p>
+              <p className="muted">Le email @truedesign.it sono approvate automaticamente. Gli altri profili richiedono l’approvazione dell’amministratore.</p>
 
               <form onSubmit={handleSubmit} className="grid registration-form">
                 <div className="registration-name-grid">

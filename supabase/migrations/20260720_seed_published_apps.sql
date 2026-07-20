@@ -10,14 +10,14 @@ insert into public.apps (
 select
   'True Tetris Pallet',
   'Importa un ordine, verifica gli imballi e costruisci il pallet in 3D.',
-  'https://dariobreggie.it/apps/true-tetris-pallet/',
+  '/apps/true-tetris-pallet',
   'interno',
   true,
   true,
   10
 where not exists (
   select 1 from public.apps
-  where url = 'https://dariobreggie.it/apps/true-tetris-pallet/'
+  where url = '/apps/true-tetris-pallet'
 );
 
 insert into public.apps (
@@ -32,14 +32,14 @@ insert into public.apps (
 select
   'Sondaggio Prodotti Iconici',
   'Seleziona le collezioni che rappresentano meglio l’identità di True Design.',
-  'https://dariobreggie.it/apps/true-sondaggio-iconici/',
-  'interno',
+  '/apps/true-sondaggio-iconici',
+  'pubblica',
   true,
   false,
   20
 where not exists (
   select 1 from public.apps
-  where url = 'https://dariobreggie.it/apps/true-sondaggio-iconici/'
+  where url = '/apps/true-sondaggio-iconici'
 );
 
 insert into public.apps (
@@ -63,3 +63,13 @@ where not exists (
   select 1 from public.apps
   where url = '/apps/prenotazione-sale-riunioni'
 );
+
+update public.apps
+set url = '/apps/true-tetris-pallet'
+where name = 'True Tetris Pallet';
+
+update public.apps
+set
+  url = '/apps/true-sondaggio-iconici',
+  visibility = 'pubblica'
+where name = 'Sondaggio Prodotti Iconici';

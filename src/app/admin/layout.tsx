@@ -29,11 +29,15 @@ export default async function AdminLayout({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("is_admin, full_name, user_type")
+    .select("is_admin, full_name, user_type, approval_status")
     .eq("id", user.id)
     .single();
 
   let isAdmin = profile?.is_admin ?? false;
+
+  if (profile?.approval_status === "pending" || profile?.approval_status === "rejected") {
+    redirect("/in-attesa");
+  }
 
   if (!isAdmin && user.email && getOwnerEmails().includes(user.email.toLowerCase())) {
     const admin = createAdminClient();
@@ -46,6 +50,8 @@ export default async function AdminLayout({
           user.email.split("@")[0],
         user_type: "interno",
         is_admin: true,
+        approval_status: "approved",
+        approved_at: new Date().toISOString(),
       },
       { onConflict: "id" }
     );
