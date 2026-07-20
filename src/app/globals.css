@@ -73,7 +73,6 @@
 .meeting-rooms-app input,
 .meeting-rooms-app select,
 .meeting-rooms-app textarea {
-  color: inherit;
   font: inherit;
 }
 
