@@ -14,4 +14,3 @@ export default function ProductSearch({ products, onSelect }: { products: Catalo
     </div>
   </section>;
 }
-

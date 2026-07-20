@@ -18,4 +18,3 @@ export default function OfferLines({ lines, products, fabrics, priceList, previe
     <div className={styles.lineNumbers}><label>Q.tà<input type="number" min="1" value={line.quantity} onChange={(e) => onUpdate(line.id, { quantity: Math.max(1, Number(e.target.value)) })} /></label><label>Sconto %<input type="number" min="0" max="100" value={line.discountPercent} onChange={(e) => onUpdate(line.id, { discountPercent: Number(e.target.value) })} /></label><span>{euro.format(calculateLineTotal(line))}</span></div>
   </article>; })}</div>;
 }
-

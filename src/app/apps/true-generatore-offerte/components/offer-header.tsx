@@ -19,4 +19,3 @@ export default function OfferHeader({ offer, onChange, onPriceList }: {
     </div>
   </section>;
 }
-
