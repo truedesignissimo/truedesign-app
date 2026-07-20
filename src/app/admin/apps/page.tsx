@@ -7,7 +7,7 @@ export default async function AdminAppsPage() {
 
   const { data: apps } = await supabase
     .from("apps")
-    .select("id, name, description, url, is_active")
+    .select("id, name, description, url, is_active, visibility")
     .order("created_at", { ascending: false });
 
   return (
@@ -24,6 +24,7 @@ export default async function AdminAppsPage() {
             <tr>
               <th>Nome</th>
               <th>URL</th>
+              <th>Visibile a</th>
               <th>Attiva</th>
               <th></th>
             </tr>

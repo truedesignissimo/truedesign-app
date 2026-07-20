@@ -24,7 +24,12 @@ export default async function AssignmentsPage() {
       </div>
 
       <div className="card">
-        <h2 style={{ marginTop: 0, fontSize: "1.1rem" }}>Utenti e app assegnate</h2>
+        <h2 style={{ marginTop: 0, fontSize: "1.1rem" }}>Utenti, tipo di accesso ed eccezioni</h2>
+        <p className="muted" style={{ marginTop: "-0.5rem" }}>
+          Il tipo (Cliente/Interno) determina automaticamente quali app vede ciascun utente.
+          Le caselle a destra servono solo per assegnare un'app specifica a un singolo utente
+          fuori dalla sua categoria.
+        </p>
         <UserAppMatrix
           users={users}
           apps={apps ?? []}

@@ -44,7 +44,7 @@ export async function listUsersWithProfiles() {
   if (error) throw new Error(error.message);
 
   const supabase = createClient();
-  const { data: profiles } = await supabase.from("profiles").select("id, full_name, is_admin");
+  const { data: profiles } = await supabase.from("profiles").select("id, full_name, is_admin, user_type");
 
   return usersData.users.map((u) => {
     const profile = profiles?.find((p) => p.id === u.id);
@@ -53,6 +53,7 @@ export async function listUsersWithProfiles() {
       email: u.email,
       full_name: profile?.full_name ?? null,
       is_admin: profile?.is_admin ?? false,
+      user_type: profile?.user_type ?? "cliente",
     };
   });
 }
@@ -61,6 +62,14 @@ export async function toggleUserAdmin(userId: string, isAdmin: boolean) {
   await assertIsAdmin();
   const supabase = createClient();
   const { error } = await supabase.from("profiles").update({ is_admin: isAdmin }).eq("id", userId);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/assignments");
+}
+
+export async function setUserType(userId: string, userType: "interno" | "cliente") {
+  await assertIsAdmin();
+  const supabase = createClient();
+  const { error } = await supabase.from("profiles").update({ user_type: userType }).eq("id", userId);
   if (error) throw new Error(error.message);
   revalidatePath("/admin/assignments");
 }

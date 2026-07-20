@@ -9,6 +9,13 @@ type App = {
   description: string | null;
   url: string | null;
   is_active: boolean;
+  visibility: string;
+};
+
+const VISIBILITY_LABELS: Record<string, string> = {
+  interno: "Solo interni",
+  cliente: "Clienti",
+  pubblica: "Pubblica",
 };
 
 export default function AppRow({ app }: { app: App }) {
@@ -17,6 +24,11 @@ export default function AppRow({ app }: { app: App }) {
 
   async function toggleActive() {
     await supabase.from("apps").update({ is_active: !app.is_active }).eq("id", app.id);
+    router.refresh();
+  }
+
+  async function changeVisibility(e: React.ChangeEvent<HTMLSelectElement>) {
+    await supabase.from("apps").update({ visibility: e.target.value }).eq("id", app.id);
     router.refresh();
   }
 
@@ -32,6 +44,13 @@ export default function AppRow({ app }: { app: App }) {
     <tr>
       <td>{app.name}</td>
       <td className="muted">{app.url ?? "—"}</td>
+      <td>
+        <select className="input" value={app.visibility} onChange={changeVisibility}>
+          <option value="interno">Solo interni</option>
+          <option value="cliente">Clienti</option>
+          <option value="pubblica">Pubblica</option>
+        </select>
+      </td>
       <td>
         <button className="btn btn-secondary" onClick={toggleActive}>
           {app.is_active ? "Sì" : "No"}

@@ -16,18 +16,39 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("is_admin, full_name")
+    .select("is_admin, full_name, user_type")
     .eq("id", user.id)
     .single();
 
+  // App visibili per via del tipo di utente (o tutte se admin)
+  let visibilityQuery = supabase
+    .from("apps")
+    .select("id, name, description, url")
+    .eq("is_active", true);
+
+  if (!profile?.is_admin) {
+    const visibleTypes = ["pubblica", profile?.user_type ?? "cliente"];
+    visibilityQuery = visibilityQuery.in("visibility", visibleTypes);
+  }
+
+  const { data: visibleApps } = await visibilityQuery;
+
+  // App assegnate singolarmente (oltre a quelle di categoria)
   const { data: userApps } = await supabase
     .from("user_apps")
     .select("apps(id, name, description, url)")
     .eq("user_id", user.id);
 
-  const apps = (userApps ?? [])
+  const assignedApps = (userApps ?? [])
     .map((row: any) => row.apps)
     .filter(Boolean);
+
+  // Unione senza duplicati
+  const appsById = new Map<string, any>();
+  [...(visibleApps ?? []), ...assignedApps].forEach((app) => {
+    if (app) appsById.set(app.id, app);
+  });
+  const apps = Array.from(appsById.values());
 
   return (
     <div className="container">
@@ -50,7 +71,7 @@ export default async function DashboardPage() {
 
       <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", marginTop: "1.5rem" }}>
         {apps.length === 0 && (
-          <p className="muted">Nessuna app assegnata al momento. Contatta l'amministratore.</p>
+          <p className="muted">Nessuna app disponibile al momento. Contatta l'amministratore.</p>
         )}
         {apps.map((app: any) => (
           <div key={app.id} className="card app-card">

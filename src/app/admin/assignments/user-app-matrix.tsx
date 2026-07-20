@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { assignApp, unassignApp, toggleUserAdmin } from "./actions";
+import { assignApp, unassignApp, toggleUserAdmin, setUserType } from "./actions";
 
 type User = {
   id: string;
   email: string | undefined;
   full_name: string | null;
   is_admin: boolean;
+  user_type: string;
 };
 
 type App = { id: string; name: string };
@@ -46,16 +47,13 @@ export default function UserAppMatrix({
     });
   }
 
-  if (apps.length === 0) {
-    return <p className="muted">Crea prima almeno un'app nella sezione "App".</p>;
-  }
-
   return (
     <div style={{ overflowX: "auto" }}>
       <table>
         <thead>
           <tr>
             <th>Utente</th>
+            <th>Tipo</th>
             <th>Admin</th>
             {apps.map((app) => (
               <th key={app.id}>{app.name}</th>
@@ -68,6 +66,21 @@ export default function UserAppMatrix({
               <td>
                 {user.full_name ?? "—"}
                 <div className="muted">{user.email}</div>
+              </td>
+              <td>
+                <select
+                  className="input"
+                  value={user.user_type}
+                  disabled={isPending}
+                  onChange={(e) =>
+                    startTransition(() =>
+                      setUserType(user.id, e.target.value as "interno" | "cliente")
+                    )
+                  }
+                >
+                  <option value="cliente">Cliente</option>
+                  <option value="interno">Interno</option>
+                </select>
               </td>
               <td>
                 <input
@@ -93,6 +106,12 @@ export default function UserAppMatrix({
           ))}
         </tbody>
       </table>
+      {apps.length === 0 && (
+        <p className="muted" style={{ marginTop: "0.75rem" }}>
+          Nessuna app da assegnare singolarmente. Le app "Clienti"/"Interno" sono già visibili
+          automaticamente in base al tipo utente — usa questa tabella solo per eccezioni.
+        </p>
+      )}
     </div>
   );
 }

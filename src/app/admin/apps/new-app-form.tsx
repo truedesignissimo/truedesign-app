@@ -11,6 +11,7 @@ export default function NewAppForm() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
+  const [visibility, setVisibility] = useState("interno");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -23,6 +24,7 @@ export default function NewAppForm() {
       name,
       description: description || null,
       url: url || null,
+      visibility,
     });
 
     setLoading(false);
@@ -35,11 +37,12 @@ export default function NewAppForm() {
     setName("");
     setDescription("");
     setUrl("");
+    setVisibility("interno");
     router.refresh();
   }
 
   return (
-    <form onSubmit={handleSubmit} className="grid" style={{ gridTemplateColumns: "1fr 1fr 1fr auto", alignItems: "end" }}>
+    <form onSubmit={handleSubmit} className="grid" style={{ gridTemplateColumns: "1fr 1fr 1fr 1fr auto", alignItems: "end" }}>
       <div>
         <label className="muted">Nome</label>
         <input className="input" required value={name} onChange={(e) => setName(e.target.value)} />
@@ -51,6 +54,14 @@ export default function NewAppForm() {
       <div>
         <label className="muted">URL</label>
         <input className="input" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..." />
+      </div>
+      <div>
+        <label className="muted">Visibile a</label>
+        <select className="input" value={visibility} onChange={(e) => setVisibility(e.target.value)}>
+          <option value="interno">Solo interni True Design</option>
+          <option value="cliente">Clienti</option>
+          <option value="pubblica">Pubblica (senza login)</option>
+        </select>
       </div>
       <button className="btn" type="submit" disabled={loading}>
         {loading ? "..." : "Crea"}
