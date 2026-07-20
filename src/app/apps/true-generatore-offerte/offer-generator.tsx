@@ -9,6 +9,7 @@ import { createOffersRepository } from "./data/offers-repository";
 import { createLineFromProduct } from "./domain/product-pricing";
 import type { Offer, OfferLine, PriceList } from "./domain/types";
 import { createEmptyOffer, offerReducer, type OfferAction } from "./state/offer-reducer";
+import LegacyHeader from "./components/legacy-header";
 import OfferArchive from "./components/offer-archive";
 import OfferHeader from "./components/offer-header";
 import OfferLines from "./components/offer-lines";
@@ -28,12 +29,19 @@ export default function OfferGenerator({ userId }: { userId: string }) {
   const [dirty, setDirty] = useState(false);
   const [status, setStatus] = useState("Caricamento catalogo...");
 
-  const change = useCallback((action: OfferAction) => { dispatch(action); setDirty(true); }, []);
+  const change = useCallback((action: OfferAction) => {
+    dispatch(action);
+    setDirty(true);
+  }, []);
   const replace = useCallback((next: Offer) => change({ type: "offer/replace", offer: next }), [change]);
 
   useEffect(() => {
     Promise.all([loadCatalog(), repository.listOffers(userId)])
-      .then(([nextCatalog, offers]) => { setCatalog(nextCatalog); setArchive(offers); setStatus("Pronto"); })
+      .then(([nextCatalog, offers]) => {
+        setCatalog(nextCatalog);
+        setArchive(offers);
+        setStatus("Pronto");
+      })
       .catch((error: Error) => setStatus(error.message));
   }, [repository, userId]);
 
@@ -43,44 +51,113 @@ export default function OfferGenerator({ userId }: { userId: string }) {
       setStatus("Salvataggio...");
       repository.saveOffer(offer).then((saved) => {
         setArchive((items) => [saved, ...items.filter((item) => item.id !== saved.id)]);
-        setDirty(false); setStatus("Salvata");
+        setDirty(false);
+        setStatus("Salvata");
       }).catch((error: Error) => setStatus(error.message));
     }, 900);
     return () => window.clearTimeout(timer);
   }, [dirty, offer, repository]);
 
   const addProduct = (product: CatalogProduct) => {
-    try { change({ type: "line/add", line: createLineFromProduct(product, offer.priceList) }); }
-    catch (error) { setStatus((error as Error).message); }
+    try {
+      change({ type: "line/add", line: createLineFromProduct(product, offer.priceList) });
+    } catch (error) {
+      setStatus((error as Error).message);
+    }
   };
-  const updateLine = (lineId: string, patch: Partial<OfferLine>) => change({ type: "line/update", lineId, patch });
+  const updateLine = (lineId: string, patch: Partial<OfferLine>) =>
+    change({ type: "line/update", lineId, patch });
+  const resetOffer = () => {
+    dispatch({ type: "offer/replace", offer: createEmptyOffer(userId) });
+    setDirty(false);
+    setPreviews({});
+    setStatus("Pronto");
+  };
   const uploadImage = async (line: OfferLine, file: File) => {
-    const localUrl = URL.createObjectURL(file); setPreviews((items) => ({ ...items, [line.id]: localUrl }));
-    try { const path = await imageStorage.uploadLineImage({ userId, offerId: offer.id, lineId: line.id, file }); updateLine(line.id, { customImagePath: path }); setStatus("Immagine caricata"); }
-    catch (error) { setPreviews((items) => { const next = { ...items }; delete next[line.id]; return next; }); setStatus((error as Error).message); }
+    const localUrl = URL.createObjectURL(file);
+    setPreviews((items) => ({ ...items, [line.id]: localUrl }));
+    try {
+      const path = await imageStorage.uploadLineImage({ userId, offerId: offer.id, lineId: line.id, file });
+      updateLine(line.id, { customImagePath: path });
+      setStatus("Immagine caricata");
+    } catch (error) {
+      setPreviews((items) => {
+        const next = { ...items };
+        delete next[line.id];
+        return next;
+      });
+      setStatus((error as Error).message);
+    }
   };
   const openOffer = async (item: Offer) => {
     dispatch({ type: "offer/replace", offer: item });
     setDirty(false);
     setPreviews({});
     setStatus("Caricamento immagini...");
-    const nextPreviews = await loadOfferPreviews(item, imageStorage);
-    setPreviews(nextPreviews);
-    setStatus("Pronto");
+    try {
+      setPreviews(await loadOfferPreviews(item, imageStorage));
+      setStatus("Pronto");
+    } catch (error) {
+      setStatus((error as Error).message);
+    }
   };
 
-  if (!catalog) return <main className={styles.loading}><div /><p>{status}</p></main>;
-  return <main className={styles.app}>
-    <header className={styles.topbar}><a href="/dashboard">Dashboard</a><span className={status.includes("Errore") ? styles.error : ""}>{status}</span></header>
-    <div className={styles.workspace}>
-      <OfferArchive offers={archive} currentId={offer.id} onOpen={openOffer} onNew={() => { dispatch({ type: "offer/replace", offer: createEmptyOffer(userId) }); setDirty(false); setPreviews({}); }} />
-      <div className={styles.document}>
-        <OfferHeader offer={offer} onChange={replace} onPriceList={(priceList: PriceList) => change({ type: "price-list/set", priceList })} />
-        <ProductSearch products={catalog.products} onSelect={addProduct} />
-        <OfferLines lines={offer.lines} products={catalog.products} fabrics={catalog.fabrics.fabrics} priceList={offer.priceList} previews={previews} onUpdate={updateLine} onRemove={(lineId) => change({ type: "line/remove", lineId })} onImage={uploadImage} />
-        <OfferTotals offer={offer} onChange={replace} />
-        <PdfPreview offer={offer} products={catalog.products} imageUrls={previews} />
+  if (!catalog) {
+    return <main className={styles.loading}><div /><p>{status}</p></main>;
+  }
+
+  return (
+    <main className={styles.app}>
+      <div className={styles.wrap}>
+        <LegacyHeader
+          offer={offer}
+          status={status}
+          onLanguage={(language) => change({ type: "language/set", language })}
+          onPriceList={(priceList: PriceList) => change({ type: "price-list/set", priceList })}
+        />
+        <div className={styles.notice}>
+          V3 con configuratore prodotto. Per segnalazioni{" "}
+          <a href="https://truedesignsrl-my.sharepoint.com/:x:/g/personal/gaia_bittante_truedesign_it/IQCFTupD66a7QKB1raJhPRngAflTtvxz8pXpzhLrTa37Nl0?e=NpZRIQ">
+            compilare questo form
+          </a>.
+        </div>
+
+        <section className={styles.card} data-v3-section="client">
+          <h2 className={styles.sectionTitle}>Dati Cliente</h2>
+          <OfferHeader offer={offer} onChange={replace} onPriceList={(priceList) => change({ type: "price-list/set", priceList })} />
+        </section>
+
+        <section className={styles.card} data-v3-section="search">
+          <h2 className={styles.sectionTitle}>Ricerca Prodotti</h2>
+          <ProductSearch products={catalog.products} onSelect={addProduct} />
+        </section>
+
+        <section className={styles.card} data-v3-section="lines">
+          <h2 className={styles.sectionTitle}>Righe Offerta</h2>
+          <OfferLines
+            lines={offer.lines}
+            products={catalog.products}
+            fabrics={catalog.fabrics.fabrics}
+            priceList={offer.priceList}
+            previews={previews}
+            onUpdate={updateLine}
+            onRemove={(lineId) => change({ type: "line/remove", lineId })}
+            onImage={uploadImage}
+          />
+          <OfferTotals offer={offer} onChange={replace} />
+          <PdfPreview offer={offer} products={catalog.products} imageUrls={previews} />
+          <button className={styles.resetButton} type="button" onClick={resetOffer}>Reset</button>
+        </section>
+
+        <section className={styles.card} data-v3-section="archive">
+          <h2 className={styles.sectionTitle}>Archivio Offerte</h2>
+          <OfferArchive offers={archive} currentId={offer.id} onOpen={openOffer} onNew={resetOffer} />
+        </section>
+
+        <footer className={styles.footer}>
+          TRUE DESIGN S.r.l. a socio unico — Via L. da Vinci 2, 35040 Sant&apos;Elena (PD) — T +39 0429 692483
+        </footer>
       </div>
-    </div>
-  </main>;
+    </main>
+  );
 }
