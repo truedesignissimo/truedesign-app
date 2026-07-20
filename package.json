@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "catalog:prepare": "node scripts/materialize-true-offer-catalog.mjs",
+    "dev": "npm run catalog:prepare && next dev",
+    "build": "npm run catalog:prepare && next build",
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",

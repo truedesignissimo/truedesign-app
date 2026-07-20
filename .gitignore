@@ -7,3 +7,5 @@ node_modules/
 *.tsbuildinfo
 __pycache__/
 *.py[cod]
+public/apps/true-generatore-offerte/data/
+public/apps/true-generatore-offerte/images/
