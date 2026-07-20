@@ -24,7 +24,7 @@ export default async function AdminLayout({
     .single();
 
   if (!profile?.is_admin) {
-    redirect("/dashboard");
+    redirect("/accesso-negato");
   }
 
   return (
@@ -37,6 +37,7 @@ export default async function AdminLayout({
           </div>
 
           <nav className="admin-nav" aria-label="Navigazione amministrazione">
+            <a href="/admin" className="btn btn-secondary">Panoramica</a>
             <a href="/admin/apps" className="btn btn-secondary">Applicazioni</a>
             <a href="/admin/assignments" className="btn btn-secondary">Utenti</a>
             <a href="/admin/usage" className="btn btn-secondary">Utilizzo</a>

@@ -5,10 +5,23 @@ import AppRow from "./app-row";
 export default async function AdminAppsPage() {
   const supabase = await createClient();
 
-  const { data: apps } = await supabase
+  const placementResult = await supabase
     .from("apps")
-    .select("id, name, description, url, is_active, visibility")
-    .order("created_at", { ascending: false });
+    .select("id, name, description, url, is_active, visibility, is_featured, display_order")
+    .order("display_order", { ascending: true })
+    .order("name", { ascending: true });
+
+  const supportsPlacement = !placementResult.error;
+  const fallbackResult = supportsPlacement
+    ? null
+    : await supabase
+        .from("apps")
+        .select("id, name, description, url, is_active, visibility")
+        .order("created_at", { ascending: false });
+
+  const apps = supportsPlacement
+    ? placementResult.data
+    : (fallbackResult?.data ?? []).map((app) => ({ ...app, is_featured: false, display_order: 0 }));
 
   return (
     <div className="admin-section-stack">
@@ -28,7 +41,12 @@ export default async function AdminAppsPage() {
             <p className="muted">Collega una nuova app e scegli subito chi può utilizzarla.</p>
           </div>
         </div>
-        <NewAppForm />
+        {!supportsPlacement && (
+          <p className="admin-schema-notice">
+            La gestione di posizione e ordine sarà disponibile dopo l’applicazione della migrazione catalogo Supabase.
+          </p>
+        )}
+        <NewAppForm supportsPlacement={supportsPlacement} />
       </section>
 
       <section className="card panel">
@@ -45,12 +63,14 @@ export default async function AdminAppsPage() {
                 <th>Nome</th>
                 <th>Indirizzo</th>
                 <th>Visibilità</th>
+                <th>Posizione</th>
+                <th>Ordine</th>
                 <th>Stato</th>
                 <th>Azioni</th>
               </tr>
             </thead>
             <tbody>
-              {(apps ?? []).map((app) => <AppRow key={app.id} app={app} />)}
+              {(apps ?? []).map((app) => <AppRow key={app.id} app={app} supportsPlacement={supportsPlacement} />)}
             </tbody>
           </table>
         </div>

@@ -25,7 +25,7 @@ export default async function Home() {
 
         <section className="hero">
           <div className="hero-copy">
-            <p className="eyebrow">True digital workspace</p>
+            <p className="eyebrow">Extraordinary. Everyday.</p>
             <h1 className="display-title">
               Le idee, gli strumenti, il <em>fare.</em>
             </h1>
@@ -37,7 +37,7 @@ export default async function Home() {
           </div>
 
           <aside className="hero-panel" aria-label="True Workspace">
-            <span className="hero-panel-label">Extraordinary. Everyday.</span>
+            <span className="hero-panel-label">True digital workspace</span>
             <div className="hero-panel-copy">
               Strumenti digitali per trasformare processi complessi in gesti semplici.
             </div>
@@ -82,6 +82,13 @@ export default async function Home() {
             </a>
           </div>
         </section>
+
+        {!user && (
+          <div className="home-register-note">
+            <span>Non hai ancora un account?</span>
+            <a href="/registrati">Registrati al workspace →</a>
+          </div>
+        )}
       </div>
     </main>
   );

@@ -4,11 +4,27 @@ import Brand from "../_components/brand";
 export default async function PubblicoPage() {
   const supabase = await createClient();
 
-  const { data: apps } = await supabase
+  const placementResult = await supabase
     .from("apps")
-    .select("id, name, description, url")
+    .select("id, name, description, url, is_featured, display_order")
     .eq("visibility", "pubblica")
-    .eq("is_active", true);
+    .eq("is_active", true)
+    .order("is_featured", { ascending: false })
+    .order("display_order", { ascending: true })
+    .order("name", { ascending: true });
+
+  const fallbackResult = placementResult.error
+    ? await supabase
+        .from("apps")
+        .select("id, name, description, url")
+        .eq("visibility", "pubblica")
+        .eq("is_active", true)
+        .order("name", { ascending: true })
+    : null;
+
+  const apps = placementResult.error
+    ? (fallbackResult?.data ?? []).map((app) => ({ ...app, is_featured: false, display_order: 0 }))
+    : placementResult.data;
 
   return (
     <main className="page-shell">
@@ -39,10 +55,10 @@ export default async function PubblicoPage() {
               </div>
             )}
             {(apps ?? []).map((app) => (
-              <article key={app.id} className="card app-card">
+              <article key={app.id} className={`card app-card ${app.is_featured ? "app-card-featured" : ""}`}>
                 <div className="app-card-visual">
                   <span className="app-initial" aria-hidden="true">{app.name.trim().charAt(0).toLowerCase()}</span>
-                  <span className="app-status">Open</span>
+                  <span className="app-status">{app.is_featured ? "In evidenza" : "Open"}</span>
                 </div>
                 <div className="app-card-body">
                   <h2>{app.name}</h2>

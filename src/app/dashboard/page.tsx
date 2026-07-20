@@ -23,7 +23,7 @@ export default async function DashboardPage() {
 
   let visibilityQuery = supabase
     .from("apps")
-    .select("id, name, description, url")
+    .select("id, name, description, url, is_featured, display_order")
     .eq("is_active", true);
 
   if (!profile?.is_admin) {
@@ -31,12 +31,37 @@ export default async function DashboardPage() {
     visibilityQuery = visibilityQuery.in("visibility", visibleTypes);
   }
 
-  const { data: visibleApps } = await visibilityQuery;
+  let { data: visibleApps, error: visibleAppsError } = await visibilityQuery
+    .order("is_featured", { ascending: false })
+    .order("display_order", { ascending: true })
+    .order("name", { ascending: true });
 
-  const { data: userApps } = await supabase
+  if (visibleAppsError) {
+    let fallbackQuery = supabase
+      .from("apps")
+      .select("id, name, description, url")
+      .eq("is_active", true);
+    if (!profile?.is_admin) {
+      fallbackQuery = fallbackQuery.in("visibility", ["pubblica", profile?.user_type ?? "cliente"]);
+    }
+    const fallback = await fallbackQuery.order("name", { ascending: true });
+    visibleApps = (fallback.data ?? []).map((app) => ({ ...app, is_featured: false, display_order: 0 }));
+  }
+
+  let { data: userApps, error: assignedAppsError } = await supabase
     .from("user_apps")
-    .select("apps(id, name, description, url)")
+    .select("apps(id, name, description, url, is_featured, display_order)")
     .eq("user_id", user.id);
+
+  if (assignedAppsError) {
+    const fallbackAssigned = await supabase
+      .from("user_apps")
+      .select("apps(id, name, description, url)")
+      .eq("user_id", user.id);
+    userApps = (fallbackAssigned.data ?? []).map((row: any) => ({
+      apps: row.apps ? { ...row.apps, is_featured: false, display_order: 0 } : null,
+    })) as any;
+  }
 
   const assignedApps = (userApps ?? [])
     .map((row: any) => row.apps)
@@ -46,7 +71,11 @@ export default async function DashboardPage() {
   [...(visibleApps ?? []), ...assignedApps].forEach((app) => {
     if (app) appsById.set(app.id, app);
   });
-  const apps = Array.from(appsById.values());
+  const apps = Array.from(appsById.values()).sort((first, second) =>
+    Number(Boolean(second.is_featured)) - Number(Boolean(first.is_featured)) ||
+    (first.display_order ?? 0) - (second.display_order ?? 0) ||
+    first.name.localeCompare(second.name, "it")
+  );
 
   return (
     <main className="page-shell">
@@ -54,6 +83,7 @@ export default async function DashboardPage() {
         <header className="site-header dashboard-header">
           <Brand />
           <div className="header-actions">
+            <a href="/" className="btn btn-secondary">Home</a>
             {profile?.is_admin && (
               <a href="/admin" className="btn btn-secondary">Amministrazione</a>
             )}
@@ -71,6 +101,7 @@ export default async function DashboardPage() {
                 Ciao{profile?.full_name ? `, ${profile.full_name.split(" ")[0]}` : ""}.
               </h1>
               <p className="lead">Tutto quello che ti serve, pronto da aprire.</p>
+              <p className="account-email">{user.email}</p>
             </div>
             <div className="stat-pill">
               <strong>{apps.length}</strong> {apps.length === 1 ? "app disponibile" : "app disponibili"}
@@ -82,13 +113,17 @@ export default async function DashboardPage() {
               <div className="empty-state">
                 <h2>Il tuo spazio è pronto</h2>
                 <p className="muted">Non ci sono ancora app assegnate. Contatta l’amministratore per iniziare.</p>
+                <div className="empty-state-actions">
+                  <a href="/pubblico" className="btn btn-secondary">Esplora le app pubbliche</a>
+                  <a href="/" className="btn">Torna alla home</a>
+                </div>
               </div>
             )}
             {apps.map((app: any) => (
-              <article key={app.id} className="card app-card">
+              <article key={app.id} className={`card app-card ${app.is_featured ? "app-card-featured" : ""}`}>
                 <div className="app-card-visual">
                   <span className="app-initial" aria-hidden="true">{app.name.trim().charAt(0).toLowerCase()}</span>
-                  <span className="app-status">Disponibile</span>
+                  <span className="app-status">{app.is_featured ? "In evidenza" : "Disponibile"}</span>
                 </div>
                 <div className="app-card-body">
                   <h2>{app.name}</h2>

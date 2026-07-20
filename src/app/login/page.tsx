@@ -115,6 +115,11 @@ function LoginForm() {
           </form>
 
           <a href="/" className="login-back">← Torna alla scelta dell’area</a>
+          {tipo === "cliente" && (
+            <p className="registration-login-link">
+              Non hai ancora un account? <a href="/registrati">Registrati</a>
+            </p>
+          )}
         </div>
       </section>
     </main>

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
 
-export default function NewAppForm() {
+export default function NewAppForm({ supportsPlacement }: { supportsPlacement: boolean }) {
   const router = useRouter();
   const supabase = createClient();
 
@@ -12,6 +12,8 @@ export default function NewAppForm() {
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
   const [visibility, setVisibility] = useState("interno");
+  const [isFeatured, setIsFeatured] = useState(false);
+  const [displayOrder, setDisplayOrder] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -20,12 +22,17 @@ export default function NewAppForm() {
     setError(null);
     setLoading(true);
 
-    const { error } = await supabase.from("apps").insert({
+    const newApp: Record<string, string | number | boolean | null> = {
       name,
       description: description || null,
       url: url || null,
       visibility,
-    });
+    };
+    if (supportsPlacement) {
+      newApp.is_featured = isFeatured;
+      newApp.display_order = displayOrder;
+    }
+    const { error } = await supabase.from("apps").insert(newApp);
 
     setLoading(false);
 
@@ -38,6 +45,8 @@ export default function NewAppForm() {
     setDescription("");
     setUrl("");
     setVisibility("interno");
+    setIsFeatured(false);
+    setDisplayOrder(0);
     router.refresh();
   }
 
@@ -63,6 +72,18 @@ export default function NewAppForm() {
           <option value="pubblica">Pubblica (senza login)</option>
         </select>
       </div>
+      {supportsPlacement && (
+        <>
+          <label className="app-feature-toggle">
+            <input type="checkbox" checked={isFeatured} onChange={(e) => setIsFeatured(e.target.checked)} />
+            In evidenza
+          </label>
+          <div>
+            <label className="muted">Ordine</label>
+            <input className="input" type="number" min="0" value={displayOrder} onChange={(e) => setDisplayOrder(Number(e.target.value))} />
+          </div>
+        </>
+      )}
       <button className="btn" type="submit" disabled={loading}>
         {loading ? "Creazione…" : "Crea app"}
       </button>
