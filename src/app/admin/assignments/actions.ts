@@ -52,34 +52,6 @@ export async function inviteUser(
   return data;
 }
 
-export async function listUsersWithProfiles() {
-  await assertIsAdmin();
-
-  const admin = createAdminClient();
-  const { data: usersData, error } = await admin.auth.admin.listUsers({
-    page: 1,
-    perPage: 1000,
-  });
-  if (error) throw new Error(error.message);
-
-  const supabase = await createClient();
-  const { data: profiles } = await supabase.from("profiles").select("id, full_name, is_admin, user_type");
-
-  return usersData.users.map((u) => {
-    const profile = profiles?.find((p) => p.id === u.id);
-    return {
-      id: u.id,
-      email: u.email,
-      full_name: profile?.full_name ?? null,
-      is_admin: profile?.is_admin ?? false,
-      user_type: profile?.user_type ?? "cliente",
-      created_at: u.created_at,
-      last_sign_in_at: u.last_sign_in_at ?? null,
-      email_confirmed_at: u.email_confirmed_at ?? null,
-    };
-  });
-}
-
 export async function toggleUserAdmin(userId: string, isAdmin: boolean) {
   const currentUser = await assertIsAdmin();
   if (currentUser.id === userId && !isAdmin) {
