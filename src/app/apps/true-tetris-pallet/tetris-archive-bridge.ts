@@ -22,6 +22,13 @@ interface ArchiveRepository {
 
 const isRecord = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === "object";
 
+const isFileLike = (value: unknown): value is File => {
+  if (!isRecord(value)) return false;
+  return typeof value.name === "string"
+    && typeof value.size === "number"
+    && typeof (value as unknown as Blob).arrayBuffer === "function";
+};
+
 const isRequest = (value: unknown): value is ArchiveRequest => {
   if (!isRecord(value)) return false;
   return value.channel === CHANNEL
@@ -57,7 +64,7 @@ export function createArchiveMessageHandler({
         const shipment = payload.shipment as TetrisShipmentInput | undefined;
         if (!shipment?.id) throw new Error("Piano mancante");
         const sourceFile = payload.sourceFile;
-        if (typeof File !== "undefined" && sourceFile instanceof File) {
+        if (isFileLike(sourceFile)) {
           shipment.sourceFile = await repository.uploadSourceFile(shipment.id, sourceFile) as TetrisShipmentInput["sourceFile"];
         }
         data = await repository.save(shipment);
