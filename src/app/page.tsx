@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase-admin";
 import Brand from "./_components/brand";
 import HomeLogin from "./_components/home-login";
 import HomeHeroSlideshow from "./_components/home-hero-slideshow";
+import HomeAppLink from "./_components/home-app-link";
 import SignOutButton from "./dashboard/sign-out-button";
 
 export const dynamic = "force-dynamic";
@@ -12,15 +13,33 @@ export default async function Home() {
   const admin = createAdminClient();
   const { data: { user } } = await supabase.auth.getUser();
   const { data: profile } = user
-    ? await admin.from("profiles").select("is_admin").eq("id", user.id).maybeSingle()
+    ? await admin.from("profiles").select("is_admin, approval_status").eq("id", user.id).maybeSingle()
     : { data: null };
-  const { data: publicApps } = await admin
-    .from("apps")
-    .select("id, name, url, display_order")
-    .eq("visibility", "pubblica")
-    .eq("is_active", true)
-    .order("display_order", { ascending: true })
-    .order("name", { ascending: true });
+
+  let workspaceApps: Array<{ id: string; name: string; url: string; display_order?: number | null }> = [];
+  if (user && profile?.approval_status === "approved") {
+    if (profile.is_admin) {
+      const { data } = await admin
+        .from("apps")
+        .select("id, name, url, display_order")
+        .eq("is_active", true)
+        .not("url", "is", null)
+        .order("display_order", { ascending: true })
+        .order("name", { ascending: true });
+      workspaceApps = (data ?? []).filter((app): app is typeof app & { url: string } => Boolean(app.url));
+    } else {
+      const { data } = await admin
+        .from("user_apps")
+        .select("apps(id, name, url, is_active, display_order)")
+        .eq("user_id", user.id);
+      workspaceApps = (data ?? [])
+        .map((row: any) => row.apps)
+        .filter((app: any) => app?.is_active && app?.url)
+        .sort((first: any, second: any) =>
+          (first.display_order ?? 0) - (second.display_order ?? 0) || first.name.localeCompare(second.name, "it")
+        );
+    }
+  }
 
   return (
     <main className="home-page">
@@ -46,7 +65,7 @@ export default async function Home() {
         <div className="home-hero-copy">
           <p className="home-kicker">Extraordinary. Everyday.</p>
           <h1 id="home-title">Ideas,<br />made <em>real.</em></h1>
-          <p>Strumenti digitali pensati da True Design per rendere straordinario il lavoro di ogni giorno.</p>
+          <p>Strumenti digitali pensati da True per rendere straordinario il lavoro di ogni giorno.</p>
         </div>
 
         <a className="home-scroll-cue" href="#accesso" aria-label="Vai all’accesso">
@@ -57,27 +76,23 @@ export default async function Home() {
       <section id="accesso" className="home-login-section" aria-labelledby="home-login-title">
         <div className="home-login-copy">
           <p className="home-kicker">Your space</p>
-          <h2 id="home-login-title">Tutto ciò che ti serve.<br /><em>Nient’altro.</em></h2>
-          <p>Accedi e ritrova soltanto le applicazioni scelte per te, in un unico spazio semplice e immediato.</p>
+          <h2 id="home-login-title">Il tuo spazio<br /><em>è pronto.</em></h2>
+          <p className="home-workspace-claim">Usa subito le app.</p>
         </div>
-        <div className="home-login-panel">
-          <HomeLogin isAuthenticated={Boolean(user)} />
-        </div>
-      </section>
-
-      <section className="home-apps-section" aria-labelledby="public-apps-title">
-        <div className="home-apps-heading">
-          <p className="home-kicker">Open tools</p>
-          <h2 id="public-apps-title">Pronte.<br />Ora.</h2>
-        </div>
-        <div className="home-app-title-grid">
-          {(publicApps ?? []).map((app, index) => app.url && (
-            <a key={app.id} href={app.url} className={`home-app-title home-app-title-${index % 4}`}>
-              <h3>{app.name}</h3>
-            </a>
-          ))}
-          {(publicApps ?? []).length === 0 && (
-            <div className="home-app-title home-app-title-empty"><h3>Nuovi strumenti, presto.</h3></div>
+        <div className="home-workspace-content">
+          {user && profile?.approval_status === "approved" ? (
+            <div className="home-workspace-apps" aria-label="Applicazioni disponibili">
+              {workspaceApps.map((app) => (
+                <HomeAppLink key={app.id} appId={app.id} name={app.name} url={app.url} />
+              ))}
+              {workspaceApps.length === 0 && (
+                <div className="home-workspace-empty">Le app assegnate compariranno qui.</div>
+              )}
+            </div>
+          ) : (
+            <div className="home-login-panel">
+              <HomeLogin isAuthenticated={Boolean(user)} />
+            </div>
           )}
         </div>
       </section>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import {
   assignApp,
   deleteUser,
@@ -108,6 +108,21 @@ export default function UserAppMatrix({
   const [filter, setFilter] = useState<"tutti" | "pending" | "cliente" | "interno" | "admin">("tutti");
   const [notice, setNotice] = useState<Notice>(null);
 
+  useEffect(() => {
+    function closeMenus(event: PointerEvent) {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      document
+        .querySelectorAll<HTMLDetailsElement>(".user-actions-menu[open], .permissions-menu[open]")
+        .forEach((menu) => {
+          if (!menu.contains(target)) menu.open = false;
+        });
+    }
+
+    document.addEventListener("pointerdown", closeMenus);
+    return () => document.removeEventListener("pointerdown", closeMenus);
+  }, []);
+
   const filteredUsers = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     return localUsers.filter((user) => {
@@ -172,11 +187,11 @@ export default function UserAppMatrix({
     setNotice(null);
     startTransition(async () => {
       try {
-        await setUserApproval(user.id, approved);
+        const result = await setUserApproval(user.id, approved);
         setNotice({
           type: "success",
           message: approved
-            ? `${user.full_name ?? user.email} può ora accedere alle app assegnate.`
+            ? `${result.message} ${user.full_name ?? user.email} potrà usare le app assegnate dopo il clic sul link.`
             : `Accesso di ${user.full_name ?? user.email} sospeso.`,
         });
       } catch (error) {
@@ -380,7 +395,7 @@ export default function UserAppMatrix({
                               disabled={isPending}
                               onClick={() => handleApproval(user, true)}
                             >
-                              Approva accesso
+                              Approva e invia attivazione
                             </button>
                           ) : !isCurrentUser ? (
                             <button

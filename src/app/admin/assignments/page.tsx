@@ -80,7 +80,7 @@ export default async function AssignmentsPage() {
         <div className="admin-section-heading">
           <div>
             <h2 className="section-title">Aggiungi un utente</h2>
-            <p className="muted">Scegli subito il tipo di profilo. Riceverà via email il link per attivare l’account.</p>
+            <p className="muted">Gli utenti aggiunti dall’amministratore ricevono subito il link per attivare l’account.</p>
           </div>
         </div>
         <InviteForm />

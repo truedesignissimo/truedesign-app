@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase-browser";
 import Brand from "../_components/brand";
-import { notifyRegistrationRequest } from "./actions";
+import { registerPendingUser } from "./actions";
 
 export default function RegistrationPage() {
   const [firstName, setFirstName] = useState("");
@@ -13,43 +12,23 @@ export default function RegistrationPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [complete, setComplete] = useState(false);
-  const [isInternal, setIsInternal] = useState(false);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
     setLoading(true);
-    const supabase = createClient();
-
-    const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
-    const normalizedEmail = email.trim().toLowerCase();
-    const internalAccount = normalizedEmail.endsWith("@truedesign.it");
-    const { error: signUpError } = await supabase.auth.signUp({
-      email: normalizedEmail,
+    const result = await registerPendingUser({
+      firstName,
+      lastName,
+      email,
       password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/dashboard")}`,
-        data: {
-          full_name: fullName,
-          first_name: firstName.trim(),
-          last_name: lastName.trim(),
-        },
-      },
     });
 
     setLoading(false);
-    if (signUpError) {
-      setError(signUpError.message);
+    if (!result.ok) {
+      setError(result.error);
       return;
     }
-    if (!internalAccount) {
-      try {
-        await notifyRegistrationRequest(normalizedEmail, fullName);
-      } catch {
-        // La richiesta resta visibile nel pannello admin anche se il provider email non risponde.
-      }
-    }
-    setIsInternal(internalAccount);
     setComplete(true);
   }
 
@@ -71,19 +50,18 @@ export default function RegistrationPage() {
             <div className="registration-complete">
               <span aria-hidden="true">✓</span>
               <p className="eyebrow">Registrazione ricevuta</p>
-              <h2>Controlla la tua email.</h2>
+              <h2>Richiesta inviata.</h2>
               <p className="muted">
-                {isInternal
-                  ? "Conferma l’account: il tuo indirizzo @truedesign.it viene riconosciuto automaticamente come profilo interno."
-                  : "Conferma l’account. La richiesta è stata inoltrata all’amministratore, che dovrà approvare il profilo e assegnarti le app."}
+                Riceverai a breve la notifica di avvenuta registrazione e assegnazione delle app.
+                L’email con il link di attivazione arriverà soltanto dopo l’approvazione.
               </p>
-              <a href={`/login?tipo=${isInternal ? "interno" : "cliente"}`} className="btn">Vai all’accesso →</a>
+              <a href="/" className="btn">Torna alla home →</a>
             </div>
           ) : (
             <>
               <p className="eyebrow">Crea account</p>
               <h2>Registrati</h2>
-              <p className="muted">Le email @truedesign.it sono approvate automaticamente. Gli altri profili richiedono l’approvazione dell’amministratore.</p>
+              <p className="muted">Dopo l’invio, l’amministratore approverà il profilo e assegnerà le applicazioni disponibili.</p>
 
               <form onSubmit={handleSubmit} className="grid registration-form">
                 <div className="registration-name-grid">

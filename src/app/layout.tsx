@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import PaletteSwitcher from "./_components/palette-switcher";
 
 export const metadata: Metadata = {
   title: {
@@ -16,7 +17,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="it">
-      <body>{children}</body>
+      <body>
+        <PaletteSwitcher />
+        {children}
+      </body>
     </html>
   );
 }

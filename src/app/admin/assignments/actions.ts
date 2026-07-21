@@ -110,6 +110,24 @@ export async function inviteUser(
 export async function setUserApproval(userId: string, approved: boolean) {
   const currentUser = await assertIsAdmin();
   const admin = createAdminClient();
+
+  if (approved) {
+    const { data: userResult, error: userError } = await admin.auth.admin.getUserById(userId);
+    const email = userResult.user?.email;
+    if (userError || !email) throw new Error("Indirizzo email dell’utente non disponibile.");
+
+    const { error: activationError } = await admin.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: false,
+        emailRedirectTo: getAuthRedirect("/dashboard"),
+      },
+    });
+    if (activationError) {
+      throw new Error("Non è stato possibile inviare l’email di attivazione. Il profilo resta in attesa.");
+    }
+  }
+
   const { error } = await admin
     .from("profiles")
     .update({
@@ -120,6 +138,11 @@ export async function setUserApproval(userId: string, approved: boolean) {
     .eq("id", userId);
   if (error) throw new Error(error.message);
   revalidatePath("/admin/assignments");
+  return {
+    message: approved
+      ? "Utente approvato: email di attivazione e accesso inviata."
+      : "Accesso sospeso.",
+  };
 }
 
 export async function toggleUserAdmin(userId: string, isAdmin: boolean) {
