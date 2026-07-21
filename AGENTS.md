@@ -1,8 +1,19 @@
 # Istruzioni per agenti AI (Claude Code, Codex, ecc.)
 
 Questo è il repository di **truedesign.app**, la piattaforma di True Design
-che ospita le web app create con AI. Stack: Next.js 14 (App Router),
+che ospita le web app create con AI. Stack: Next.js 15 (App Router),
 TypeScript, Supabase (auth + database), deploy su Vercel.
+
+## Design system obbligatorio
+
+Prima di creare o modificare interfacce, leggi integralmente
+[`DESIGN_SYSTEM.md`](./DESIGN_SYSTEM.md). Le sue regole sono il riferimento
+predefinito per tutte le superfici della piattaforma e per le nuove app, salvo
+indicazioni esplicite diverse dell'utente.
+
+Non introdurre automaticamente nuove librerie UI: prima riusa token,
+componenti e pattern già presenti nel progetto. Qualsiasi eccezione deve avere
+una necessità concreta e non deve rendere l'interfaccia visivamente generica.
 
 ## Comando "pubblica su sito" / "pubblica su truedesign.app"
 

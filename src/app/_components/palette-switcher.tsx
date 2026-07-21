@@ -31,8 +31,15 @@ export default function PaletteSwitcher() {
     function close(event: PointerEvent) {
       if (event.target instanceof Node && !rootRef.current?.contains(event.target)) setOpen(false);
     }
+    function closeWithKeyboard(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
     document.addEventListener("pointerdown", close);
-    return () => document.removeEventListener("pointerdown", close);
+    document.addEventListener("keydown", closeWithKeyboard);
+    return () => {
+      document.removeEventListener("pointerdown", close);
+      document.removeEventListener("keydown", closeWithKeyboard);
+    };
   }, []);
 
   return (
