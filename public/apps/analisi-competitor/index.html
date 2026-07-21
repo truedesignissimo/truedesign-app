@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Intelligence — True Design</title>
+<meta name="description" content="Una lettura editoriale di come comunicano i protagonisti dell'arredo contract: identità visiva, contenuti e aggiornamenti a confronto." />
+<style>
+@font-face {
+  font-family: 'Suisse Intl';
+  src: url('/Assets/fonts/SuisseIntl-Regular.woff2') format('woff2');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Suisse Intl';
+  src: url('/Assets/fonts/SuisseIntl-Medium.woff2') format('woff2');
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Suisse Intl';
+  src: url('/Assets/fonts/SuisseIntl-SemiBold.woff2') format('woff2');
+  font-weight: 600; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Suisse Intl';
+  src: url('/Assets/fonts/SuisseIntl-Bold.woff2') format('woff2');
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+
+:root {
+  --paper: #f1f1ee;
+  --paper-raised: #e9e9e5;
+  --ink: #17171a;
+  --ink-soft: #4a4a48;
+  --muted: #83837c;
+  --line: #dcdcd6;
+  --accent: #b3391f;
+  --max: 1240px;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Suisse Intl', -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+a { color: inherit; }
+
+img { display: block; max-width: 100%; }
+
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 2rem; }
+
+/* ---------- Nav ---------- */
+nav.top {
+  position: sticky; top: 0; z-index: 40;
+  height: 64px; display: flex; align-items: center;
+  background: rgba(241,241,238,0.92); backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--line);
+}
+nav.top .wrap { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+.brandmark { font-weight: 600; font-size: 0.95rem; letter-spacing: -0.01em; text-decoration: none; }
+.brandmark span { color: var(--muted); font-weight: 400; }
+.navlinks { display: flex; gap: 1.75rem; font-size: 0.875rem; }
+.navlinks a { text-decoration: none; color: var(--ink-soft); border-bottom: 1px solid transparent; padding-bottom: 2px; transition: border-color .2s, color .2s; }
+.navlinks a:hover { color: var(--ink); border-color: var(--ink); }
+
+/* ---------- Logo wall ---------- */
+.logowall { padding: 2.25rem 0 0; }
+.logowall-grid {
+  display: grid; grid-template-columns: repeat(6, 1fr);
+  gap: 1px; background: var(--line); border: 1px solid var(--line);
+}
+.logowall-item {
+  aspect-ratio: 1; background: var(--paper); display: flex; align-items: center; justify-content: center;
+  padding: 1.1rem; text-decoration: none; transition: background .2s;
+}
+.logowall-item:hover { background: var(--paper-raised); }
+.logowall-item img { max-width: 100%; max-height: 42px; object-fit: contain; filter: grayscale(100%); opacity: .8; transition: filter .2s, opacity .2s; }
+.logowall-item:hover img { filter: grayscale(0%); opacity: 1; }
+.logowall-item .fallback {
+  display: none; font-size: 0.82rem; font-weight: 500; text-align: center; color: var(--ink-soft); line-height: 1.3;
+}
+
+/* ---------- Hero ---------- */
+.hero { padding: clamp(2.5rem, 7vh, 5rem) 0 3rem; }
+.hero h1 {
+  margin: 0 0 1.25rem;
+  font-size: clamp(2.5rem, 5.4vw, 4.25rem);
+  font-weight: 500; letter-spacing: -0.025em; line-height: 1.04;
+  max-width: 16ch;
+}
+.hero .sub {
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem); color: var(--ink-soft);
+  max-width: 46ch; margin: 0 0 2rem; line-height: 1.55;
+}
+.hero .meta {
+  display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;
+  font-size: 0.8rem; color: var(--muted); margin-bottom: 2.75rem;
+}
+.hero .meta .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--muted); }
+.hero .cta {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-size: 0.9rem; text-decoration: none; color: var(--ink);
+  border-bottom: 1px solid var(--ink); padding-bottom: 3px;
+}
+.hero .cta:hover { color: var(--accent); border-color: var(--accent); }
+
+.hero-cover {
+  margin-top: 3rem; position: relative;
+  aspect-ratio: 21 / 9; overflow: hidden; background: var(--paper-raised);
+}
+.hero-cover img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.hero-cover figcaption {
+  margin-top: 0.6rem; font-size: 0.8rem; color: var(--muted);
+  display: flex; justify-content: space-between;
+}
+
+/* ---------- Section shell ---------- */
+section { padding: clamp(3rem, 7vh, 5.5rem) 0; }
+section.divider { border-top: 1px solid var(--line); }
+.section-head { max-width: 62ch; margin-bottom: 2.5rem; }
+.section-head h2 {
+  font-size: clamp(1.6rem, 2.6vw, 2.2rem); font-weight: 500; letter-spacing: -0.02em;
+  margin: 0 0 0.75rem;
+}
+.section-head p { color: var(--ink-soft); margin: 0; font-size: 1rem; line-height: 1.6; }
+
+/* ---------- Classifica ---------- */
+.index-list { border-top: 1px solid var(--ink); }
+.index-row {
+  display: grid; grid-template-columns: 3.5rem 1fr auto; gap: 1.25rem; align-items: baseline;
+  padding: 1.15rem 0; border-top: 1px solid var(--line); text-decoration: none; color: inherit;
+}
+.index-row:first-child { border-top: none; }
+.index-row .num { font-size: 1.15rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.index-row.rank-1 .num { color: var(--accent); }
+.index-row .body h3 { margin: 0 0 0.2rem; font-size: 1.15rem; font-weight: 500; }
+.index-row .body p { margin: 0; font-size: 0.9rem; color: var(--ink-soft); max-width: 62ch; }
+.index-row .score { font-size: 0.95rem; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.index-row:hover .body h3 { color: var(--accent); }
+
+/* ---------- Showcase gallery ---------- */
+.showcase-grid {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 1.25rem;
+}
+.showcase-item { position: relative; overflow: hidden; background: var(--paper-raised); }
+.showcase-item img { width: 100%; height: 100%; object-fit: cover; object-position: top; transition: transform .5s cubic-bezier(.16,1,.3,1); }
+.showcase-item:hover img { transform: scale(1.03); }
+.showcase-item figcaption {
+  margin-top: 0.6rem; font-size: 0.8rem; color: var(--muted);
+}
+.showcase-item figcaption b { color: var(--ink); font-weight: 500; }
+.showcase-item.span-4 { grid-column: span 4; aspect-ratio: 4 / 3; }
+.showcase-item.span-2 { grid-column: span 2; aspect-ratio: 3 / 4; }
+.showcase-item.span-3 { grid-column: span 3; aspect-ratio: 5 / 4; }
+
+/* ---------- Ricerca tematica ---------- */
+.theme-tabs { display: flex; flex-wrap: wrap; gap: 0.4rem; border-bottom: 1px solid var(--line); padding-bottom: 1.5rem; margin-bottom: 2rem; }
+.theme-tab {
+  font-family: inherit; font-size: 0.88rem; background: none; border: 1px solid var(--line); color: var(--ink-soft);
+  padding: 0.5rem 1rem; cursor: pointer; transition: border-color .2s, color .2s, background .2s;
+}
+.theme-tab:hover { color: var(--ink); border-color: var(--ink); }
+.theme-tab.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.theme-overview { font-size: 1.05rem; font-style: italic; color: var(--ink-soft); line-height: 1.6; max-width: 68ch; margin: 0 0 2rem; }
+.theme-brand-list { border-top: 1px solid var(--line); }
+.theme-brand-row {
+  display: grid; grid-template-columns: 1fr 2fr auto; gap: 1.5rem; align-items: baseline;
+  padding: 1rem 0; border-top: 1px solid var(--line); text-decoration: none; color: inherit;
+}
+.theme-brand-row:first-child { border-top: none; }
+.theme-brand-row .name { font-weight: 500; font-size: 0.98rem; }
+.theme-brand-row .note { font-size: 0.9rem; color: var(--ink-soft); line-height: 1.5; }
+.theme-brand-row .go { font-size: 0.85rem; color: var(--muted); white-space: nowrap; transition: color .2s, transform .2s; }
+.theme-brand-row:hover .go { color: var(--accent); transform: translateX(3px); }
+.theme-empty { color: var(--muted); font-size: 0.92rem; font-style: italic; }
+
+/* ---------- Watchlist grid ---------- */
+.watchlist-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.watchlist-item {
+  background: var(--paper); padding: 1rem; text-decoration: none; color: inherit;
+  display: flex; flex-direction: column; align-items: center; gap: 0.6rem; text-align: center;
+  transition: background .2s;
+}
+.watchlist-item:hover { background: var(--paper-raised); }
+.watchlist-item img { width: 28px; height: 28px; object-fit: contain; filter: grayscale(100%); opacity: .75; }
+.watchlist-item:hover img { filter: grayscale(0%); opacity: 1; }
+.watchlist-item .wl-name { font-size: 0.82rem; font-weight: 500; }
+.watchlist-item .wl-country { font-size: 0.72rem; color: var(--muted); }
+
+/* ---------- Brand spreads ---------- */
+.spread { padding: clamp(2.5rem, 6vh, 4rem) 0; border-top: 1px solid var(--line); }
+.spread-meta { display: flex; align-items: center; gap: 0.9rem; margin-bottom: 1rem; font-size: 0.8rem; color: var(--muted); }
+.tier-tag { border: 1px solid var(--line); padding: 0.15rem 0.55rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.spread h3 { font-size: clamp(1.6rem, 2.8vw, 2.35rem); font-weight: 500; letter-spacing: -0.02em; margin: 0 0 1rem; }
+.spread h3 a { text-decoration: none; }
+.spread h3 a:hover { color: var(--accent); }
+.spread h3 .ext { font-size: 0.55em; vertical-align: super; color: var(--muted); }
+.spread .quote {
+  font-size: 1.15rem; font-style: italic; line-height: 1.65; color: var(--ink-soft);
+  max-width: 56ch; margin: 0 0 1.5rem; padding-bottom: 2px;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.75rem; }
+.tag { font-size: 0.75rem; border: 1px solid var(--line); color: var(--ink-soft); padding: 0.25rem 0.6rem; }
+.idea-box { border-left: 2px solid var(--accent); padding: 0.2rem 0 0.2rem 1rem; margin-bottom: 1.75rem; }
+.idea-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--accent); margin: 0 0 0.4rem; font-weight: 600; }
+.idea-box ul { margin: 0; padding: 0; list-style: none; }
+.idea-box li { font-size: 0.92rem; color: var(--ink-soft); line-height: 1.5; margin-bottom: 0.5rem; }
+.idea-box li:last-child { margin-bottom: 0; }
+.links-title { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin: 0 0 0.6rem; }
+.link-list { list-style: none; margin: 0 0 2rem; padding: 0; }
+.link-list li { border-top: 1px solid var(--line); }
+.link-list li:first-child { border-top: none; }
+.link-list a {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+  padding: 0.65rem 0; text-decoration: none; font-size: 0.92rem;
+}
+.link-list a .t { color: var(--ink); }
+.link-list a .arrow { color: var(--muted); transition: transform .2s, color .2s; flex: none; }
+.link-list a:hover .t { color: var(--accent); }
+.link-list a:hover .arrow { color: var(--accent); transform: translateX(3px); }
+
+.spread-media { display: flex; gap: 1rem; }
+.spread-media figure { flex: 1; margin: 0; aspect-ratio: 4 / 3; overflow: hidden; background: var(--paper-raised); }
+.spread-media img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+
+.spread.layout-split .wrap { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 3rem; align-items: start; }
+.spread.layout-split.flip .wrap { grid-template-columns: 0.9fr 1.1fr; }
+.spread.layout-split.flip .spread-text { order: 2; }
+.spread.layout-split.flip .spread-media { order: 1; }
+.spread.layout-split .spread-media { flex-direction: column; }
+.spread.layout-split .spread-media figure { aspect-ratio: 16 / 10; }
+
+.spread.layout-feature .spread-media { margin-bottom: 2rem; }
+.spread.layout-feature .spread-media figure { aspect-ratio: 21 / 8; }
+.spread.layout-feature .spread-text { max-width: 68ch; }
+
+/* ---------- Footer ---------- */
+footer { border-top: 1px solid var(--line); padding: 3rem 0 4rem; }
+footer p { max-width: 60ch; color: var(--ink-soft); font-size: 0.92rem; line-height: 1.6; }
+footer .foot-links { display: flex; gap: 1.5rem; margin-top: 1.5rem; font-size: 0.85rem; }
+footer .foot-links a { text-decoration: none; border-bottom: 1px solid var(--line); padding-bottom: 2px; }
+footer .foot-links a:hover { border-color: var(--ink); }
+
+/* ---------- Reveal on scroll ---------- */
+.reveal { opacity: 0; transform: translateY(16px); transition: opacity .6s cubic-bezier(.16,1,.3,1), transform .6s cubic-bezier(.16,1,.3,1); }
+.reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .showcase-item img { transition: none; }
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 860px) {
+  .wrap { padding: 0 1.25rem; }
+  .brandmark span { display: none; }
+  .navlinks { gap: 1rem; font-size: 0.8rem; }
+  .logowall-grid { grid-template-columns: repeat(3, 1fr); }
+  .logowall-item { padding: 0.85rem; }
+  .logowall-item img { max-height: 32px; }
+  .navlinks a.secondary { display: none; }
+  .hero h1 { font-size: clamp(2rem, 8.5vw, 2.75rem); max-width: 14ch; }
+  .hero .sub { max-width: 34ch; }
+  .showcase-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .showcase-item.span-4, .showcase-item.span-3, .showcase-item.span-2 { grid-column: span 2; aspect-ratio: 4/3; }
+  .index-row { grid-template-columns: 2.5rem 1fr; }
+  .index-row .score { grid-column: 2; }
+  .theme-brand-row { grid-template-columns: 1fr; gap: 0.3rem; }
+  .watchlist-grid { grid-template-columns: repeat(3, 1fr); }
+  .spread.layout-split .wrap { grid-template-columns: 1fr; gap: 1.5rem; }
+  .spread.layout-split.flip .spread-text, .spread.layout-split.flip .spread-media { order: initial; }
+  .spread-media { flex-direction: column; }
+  .hero-cover { aspect-ratio: 4/3; }
+}
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="wrap">
+    <a class="brandmark" href="#top">True Design <span>/ Intelligence</span></a>
+    <div class="navlinks">
+      <a href="#classifica">Classifica</a>
+      <a href="#in-evidenza" class="secondary">In evidenza</a>
+      <a href="#temi" class="secondary">Temi</a>
+      <a href="#brand" class="secondary">I brand</a>
+      <a href="https://www.truedesign.it" target="_blank" rel="noopener">truedesign.it ↗</a>
+    </div>
+  </div>
+</nav>
+
+<main id="top">
+  <section class="logowall">
+    <div class="wrap">
+      <div class="logowall-grid" id="logowall-grid"></div>
+    </div>
+  </section>
+
+  <section class="hero">
+    <div class="wrap">
+      <h1 id="hero-title">Come comunicano i protagonisti dell'arredo contract.</h1>
+      <p class="sub" id="hero-sub">Un'analisi visiva ed editoriale dei principali competitor di True Design: identità, contenuti e aggiornamenti messi a confronto.</p>
+      <div class="meta" id="hero-meta"></div>
+      <a class="cta" href="#classifica">Guarda la classifica ↓</a>
+      <figure class="hero-cover" id="hero-cover"></figure>
+    </div>
+  </section>
+
+  <section class="divider" id="classifica">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>La classifica</h2>
+        <p>Il punteggio combina identità visiva, comunicazione e contenuti, e freschezza degli aggiornamenti rilevati sul sito di ciascun brand.</p>
+      </div>
+      <div class="index-list" id="index-list"></div>
+    </div>
+  </section>
+
+  <section class="divider" id="in-evidenza">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>Le pagine più belle</h2>
+        <p>Una selezione delle schermate meglio riuscite tra i brand analizzati, dalle homepage alle pagine prodotto.</p>
+      </div>
+      <div class="showcase-grid" id="showcase-grid"></div>
+    </div>
+  </section>
+
+  <section class="divider" id="temi">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>Ricerca tematica</h2>
+        <p>Scegli un tema per vedere come lo trattano i diversi brand, con link diretti alle loro pagine.</p>
+      </div>
+      <div class="theme-tabs" id="theme-tabs"></div>
+      <div class="theme-panel" id="theme-panel"></div>
+    </div>
+  </section>
+
+  <section class="divider" id="brand">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>I brand, uno per uno</h2>
+        <p>Per ogni brand: un giudizio sintetico, i temi ricorrenti nella comunicazione e le pagine del sito che vale la pena aprire.</p>
+      </div>
+    </div>
+    <div id="spreads"></div>
+  </section>
+
+  <section class="divider" id="watchlist">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>Altri da tenere d'occhio</h2>
+        <p>Brand più piccoli o di nicchia, utili da monitorare nel tempo anche se non sono concorrenti diretti.</p>
+      </div>
+      <div class="watchlist-grid" id="watchlist-grid"></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <p id="footer-note">Analisi generata automaticamente incrociando il crawling dei siti pubblici dei competitor con una valutazione qualitativa via intelligenza artificiale (identità visiva, tono di voce, profondità dei contenuti) e segnali di aggiornamento (sitemap, date editoriali). I punteggi sono indicativi e pensati per orientare l'attenzione, non come classifica definitiva.</p>
+      <div class="foot-links">
+        <a href="https://www.truedesign.it" target="_blank" rel="noopener">True Design</a>
+        <a href="#top">Torna su ↑</a>
+      </div>
+    </div>
+  </footer>
+</main>
+
+<script id="site-data" type="application/json">
+{"generated_at": "2026-07-21T09:51:45.812189+00:00", "run_id": 7, "run_started_at": "2026-07-09T12:29:36.397319+00:00", "brand_count": 19, "brands": [{"slug": "arper", "name": "Arper", "tier": "direct", "country": "IT", "url": "https://www.arper.com/ww/it/", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=arper.com", "score_overall": 4.15, "rank": 1, "tone_of_voice": "misto", "themes": ["Design circolare misurabile con dati e processi di validazione esterni (Catifa Carta, open consultation con esperti indipendenti)", "Aggiornamento diacronico dei classici di design con date esplicite (Catifa 46 del 2004 → Update 2026, Aston 2006 → Aston Club 2020)", "Arte e cultura come estensione del brand tramite fondazione dedicata (Arper Feltrin Foundation, residenze d'artista VFA)", "Segmentazione B2B iper-verticale con case study nominativi di brand terzi (Versace, Mercedes-Benz, Adobe)", "Decarbonizzazione tecnica del prodotto oltre il claim (Nco2Facto, arredi a 'emissioni negative')"], "comment": "Arper distingue la propria vetrina digitale non tanto per l'estetica delle singole foto quanto per i meccanismi narrativi (video-player custom, toggle di raggruppamento, hotspot numerati sulle collezioni) che trasformano il catalogo in un'esperienza editoriale piuttosto che in un semplice listino illustrato; questo aspetto strutturale è più imitabile e utile a True Design rispetto allo stile fotografico in sé.", "strengths": ["Player video custom con timeline e frame counter integrato nella narrazione prodotto (sezione Aston), invece del solito embed YouTube", "Il form 'Rimaniamo in contatto' ha un'illustrazione lineare a piena larghezza (persone di spalle, laptop con documenti) che rompe la rigidità del form B2B tipico del contract", "Griglia prodotto con toggle 'Raggruppa per collezione' che permette due modalità di lettura dello stesso catalogo"], "notable_ideas": ["Il modulo 'A Closer Look at [prodotto]' con video hero, player custom e CTA 'Scopri di più' potrebbe essere replicato da True Design per raccontare un singolo prodotto flagship con un mini-documentario invece della solita gallery statica", "Il toggle 'Raggruppa per collezione' nella pagina categoria è un pattern di filtro non ovvio: permette di vedere lo stesso catalogo per tipologia d'uso o per linea di design, utile se True Design ha famiglie di prodotto trasversali a più tipologie", "Podcast editoriale strutturato in stagioni ed episodi ('Arper Design Stories') che discute apertamente processi decisionali interni, tensioni e metodologie di misurazione della sostenibilità, non solo risultati finali", "Uso sistematico dell'anno di design accanto al nome del prodotto anche per le rivisitazioni ('Design by Lievore Altherr Molina, 2004 – Update 2026'), che rende esplicita la genealogia e l'evoluzione del progetto nel tempo", "Fondazione culturale autonoma (Arper Feltrin Foundation) con programma di residenze artistiche, citata con nomi propri dei fondatori, che va oltre il classico 'sponsorship culturale' generico", "Case study B2B con crediti espliciti di studio di architettura e fotografo (es. 'Architetto: Studio Jean Marc Gady; Foto: © Schüco International'), trattati quasi come editoriali di settore più che schede prodotto", "Naming tecnico specifico per iniziative ambientali (Nco2Facto) invece di claim generici, suggerendo un programma strutturato e non uno slogan"], "last_update_detected": "2026-04-21 17:34:00", "images": [{"path": "assets/img/arper/hero.jpg", "role": "hero", "page_title": "The project of living | Arper IT"}], "links": [{"title": "Divani, Poltrone Lounge e Poggiapiedi | Arper IT", "url": "https://www.arper.com/it_IT/prodotti/divani-e-lounge.html", "page_type": "products"}, {"title": "Complementi d'Arredo e Accessori Casa di Design | Arper IT", "url": "https://www.arper.com/it_IT/prodotti/complementi-e-oggetti.html", "page_type": "products"}, {"title": "Panche di Design e Moderne | Arper IT", "url": "https://www.arper.com/it_IT/prodotti/panche.html", "page_type": "products"}]}, {"slug": "muuto", "name": "Muuto", "tier": "direct", "country": "DK", "url": "https://www.muuto.com", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=muuto.com", "score_overall": 4.05, "rank": 2, "tone_of_voice": "misto", "themes": ["Edizioni numerate a tema anniversario con storytelling materico (Murano mouth-blown, aluminum extrusion by Hydro)", "Naming narrativo dei prodotti legato a un'idea concettuale (Coltre = blanket, richiamo diretto nella descrizione)", "Sistemi modulari/cluster configurabili come narrativa progettuale ricorrente (pendant cluster, sofa modulari)", "Dettaglio tecnico-materico spinto nella product page (percentuali di plastica riciclata, certificazioni FSC con codice specifico)"], "comment": "Muuto tratta il sito più come una rivista di design che come un catalogo prodotto: il ritmo tipografico marcato, l'alternanza di macro materiche e still life essenziali, e le pagine-racconto sui designer (con testo lungo, citazioni in corpo grande, foto di processo) sono elementi distintivi che True Design potrebbe adattare per dare più narrazione autoriale ai propri progetti, senza perdere la componente tecnica richiesta dal contract.", "strengths": ["Sezione 'muuto design contest' con ritratti fotografici in bianco e nero dei designer accostati a un'unica riga di caption tipografica: dà personalità autoriale invece del solito 'progettato da'", "Nella pagina prodotto, il blocco 'The Ambit Family' con carosello orizzontale a icone/line-drawing dei vari modelli (wall, pendant, cluster) invece di sole foto, utile per confrontare varianti tecniche a colpo d'occhio", "Il typography treatment nella pagina editoriale (titolo enorme in arancione bruciato/ruggine su sfondo crema) rompe la palette abituale del brand solo in quel contesto, segnalando che è un contenuto 'storytelling' e non catalogo"], "notable_ideas": ["La combinazione hero-banner monocromatico (giallo/verde oliva pieno) con testo enorme e un solo prodotto piccolo fotografato isolato in un angolo (vedi banner 'Celebrating 20 Years') è un'idea trasferibile: usare il colore pieno come 'cornice' che valorizza un singolo pezzo per le campagne stagionali di True Design, invece del solito grande still life patinato", "Serie 'Numbered editions' per il 20° anniversario: pezzi in edizione limitata (150 esemplari) con narrazione dedicata al processo produttivo artigianale (vetro soffiato a Murano) invece del semplice claim celebrativo", "Close to Heart Chair: il copy costruisce l'intera narrazione del prodotto attorno a un dettaglio nascosto (connettori a forma di cuore nella struttura in alluminio), trasformando una scelta ingegneristica in un racconto emotivo", "Sezione 'Product Material' estremamente granulare per singolo componente (es. specifica separata per cavo, canopy, meccanismo a cerniera), un livello di dettaglio tecnico raro rispetto alle schede prodotto standard del settore", "Presentazione dei designer come mini-bio editoriali contestualizzate (menzione di musei come MoMA, storia dello studio) invece della semplice firma del progettista"], "last_update_detected": null, "images": [{"path": "assets/img/muuto/hero.jpg", "role": "hero", "page_title": "MUUTO.COM"}], "links": [{"title": "Product", "url": "https://www.muuto.com/product/Ambit-Pendant-Cluster--AMBCL25A/AMBCL25A0101/", "page_type": "products"}, {"title": "Product", "url": "https://www.muuto.com/product/Coltre-Modular-Sofa-3-Seater-Configurations--CLT3SC1/CLT3SC1TC03/", "page_type": "products"}, {"title": "Product", "url": "https://www.muuto.com/product/E27-Pendant-Cluster--E27CLB/E27CLB0101/", "page_type": "products"}]}, {"slug": "prostoria", "name": "Prostoria", "tier": "direct", "country": "HR", "url": "https://www.prostoria.eu/en/", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=prostoria.eu", "score_overall": 3.75, "rank": 5, "tone_of_voice": "misto", "themes": ["Riattivazione del modernismo croato come collezione contemporanea (caso Richter/Vjenceslav Richter)", "Comfort come disciplina di ricerca progettuale, non solo claim ('Art of Comfort', processo di test e refinement)", "Integrazione verticale R&D-tecnologia-produzione in un'unica fabbrica come motore di innovazione, più che come garanzia di artigianalità", "Rete di designer regionali ricorrenti (Numen/For Use, 3LHD, SMPDO) come firma stilistica riconoscibile del catalogo outdoor", "Validazione tramite premi internazionali di settore (NeoCon, NYCxDESIGN, HiP Award) come prova di posizionamento"], "comment": "Prostoria costruisce un'identità da magazine con blocchi colore e tipografia enorme che funziona molto bene in home e sulle sezioni editoriali (award, legacy, sostenibilità), ma questa stessa impostazione mostra i suoi limiti sulle pagine funzionali (catalogo, archivio stories), dove la scarsità di contenuti visibili e il salto di qualità fotografica rispetto all'hero rendono l'esperienza meno solida di quanto la home lasci intuire.", "strengths": ["La sezione con le sole parole HOSPITALITY / WORKSPACES / PUBLIC SPACES / RESIDENTIAL in corpo gigante funziona come una mappa dei mercati serviti senza bisogno di immagini, un modo diretto di segmentare l'offerta", "Il cambio di colore di sfondo per ogni blocco tematico (navy per Legacy, giallo per il premio NeoCon, rosso per 'Compose your sofa') crea un ritmo visivo che aiuta a distinguere tipi di contenuto (storia, riconoscimenti, configuratore) pur restando dentro la stessa griglia"], "notable_ideas": ["Usare un blocco tipografico a piena larghezza con le sole categorie di mercato (come Hospitality/Workspaces/Public Spaces/Residential nella home Prostoria) come sezione di navigazione tematica: True Design potrebbe adottarlo per segmentare rapidamente contract vs residenziale senza ricorrere a fotografie, rafforzando la lettura del posizionamento in un solo scroll", "Sezione 'Legacy' dedicata a un solo prodotto/collezione (Richter) che racconta la riattivazione del lavoro di un designer/architetto modernista storico, trasformandolo in prodotto industriale contemporaneo: narrazione editoriale su un singolo pezzo invece che comunicazione di catalogo", "Ogni collezione ha un micro-claim narrativo affiancato al nome tecnico del prodotto (es. 'Move Freely Lounge Fully', 'The Icon You Deserve', 'Trans­form With One Gesture', 'Comfort That Turns With You'): un layer di copywriting emozionale sopra la scheda prodotto standard", "Pagina collezioni con filtro indoor/outdoor che mostra esplicitamente il credito 'Design:' per ogni collezione (Numen/For Use, 3LHD, SMPDO, Prostoria Development Team), rendendo il designer parte dell'architettura informativa del catalogo e non un contenuto separato in una pagina 'designer'", "Segmentazione esplicita 'For professionals' per settore d'uso (Hospitality, Workspaces, Public spaces, Residential) collegata direttamente al racconto del processo produttivo ('reliable timelines, seamless communication') rivolto ad architetti"], "last_update_detected": null, "images": [{"path": "assets/img/prostoria/hero.jpg", "role": "hero", "page_title": "Prostoria - Prostoria"}], "links": [{"title": "Sofas - Prostoria", "url": "https://www.prostoria.eu/products/sofas/?pt=6", "page_type": "products"}, {"title": "Lounge chairs - Prostoria", "url": "https://www.prostoria.eu/products/lounge-chairs/", "page_type": "products"}, {"title": "Stools - Prostoria", "url": "https://www.prostoria.eu/products/stools/", "page_type": "products"}]}, {"slug": "boss-design", "name": "Boss Design", "tier": "direct", "country": "UK", "url": "https://www.bossdesign.com/", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=bossdesign.com", "score_overall": 3.7, "rank": 6, "tone_of_voice": "misto", "themes": ["Programma di economia circolare strutturato in fasi (The Loop: lower-carbon materials, repairable construction, reupholstery, reuse, recycling) invece di generica 'sostenibilità'", "Manufacturing britannico come posizionamento identitario ('Modern British Manufacturing'), non genericamente 'locale'", "Filosofia progettuale nominata e riutilizzata come framework di brand ('Destination Spaces philosophy') applicata a comfort, appartenenza e performance degli spazi", "Storytelling di prodotto costruito attorno alla voce diretta dei designer (interni ed esterni), con citazioni in prima persona"], "comment": "Boss Design punta più sulla costruzione di un'atmosfera editoriale iniziale (macro dettagli, ritmo tipografico con rule-line, foto di processo) che sulla fotografia di prodotto vera e propria, che nel catalogo resta di livello tecnico-listino; il punto di distacco dagli altri brand contract è la sequenza narrativa di apertura, non la qualità delle immagini prodotto o l'esperienza di navigazione del catalogo, che anzi restano il punto debole più concreto da migliorare rispetto a una proposta come quella di True Design.", "strengths": ["Apertura del sito con due macro-dettagli materici (trama tessuto, giunto in legno) invece del solito hero-prodotto, usati come dispositivo narrativo prima ancora di mostrare i prodotti", "Uso della linea sottile orizzontale per separare le due metà di una frase ('Modern British — Manufacturing'), un espediente tipografico semplice ma efficace per dare ritmo senza immagini", "Foto di processo con due persone che assemblano fisicamente una poltrona-prototipo, che racconta la produzione senza ricorrere alla solita retorica da 'atelier'"], "notable_ideas": ["L'apertura con due macro-shot materici affiancati (superficie tessuto vs giunto ligneo), ciascuno con una didascalia astratta ('Driven by Detail' / 'Crafted for Connection'), funziona come soglia editoriale prima del prodotto: True Design potrebbe usare dettagli di finitura (cuciture, intarsi, texture di rivestimenti) come apertura visiva invece di mostrare subito il prodotto intero, per costruire un'aspettativa tattile.", "Sezione 'Designer Stories' strutturata secondo un framework esplicito People | Process | Production, con video-gallery dedicata a ogni collezione: non è una semplice bio designer ma un formato editoriale ricorrente e riconoscibile", "Uso di citazioni dirette e testuali dei designer (es. Wolfgang C.R. Mezger su Ola Tub) invece delle solite descrizioni in terza persona del brand, dando al contenuto un tono da 'intervista' più che da scheda prodotto", "The Loop presentato come programma con step operativi concreti (materiali a minor impatto, costruzione riparabile, rifoderatura, riuso, riciclo) invece di un generico claim di sostenibilità, e collegato esplicitamente al lancio di prodotto (Lucy) come prova pratica del programma", "Case study cliente raccontato con continuità storica reale (relazione con Everyman Cinemas dal 2004) invece del classico progetto-vetrina isolato, dando profondità e credibilità di lungo periodo alla relazione B2B", "I designer interni del team Boss (Aaron Clarkson, Mark Barrell, Ceri Lovett, Richard Jones) vengono nominati e raccontati con lo stesso peso narrativo dei designer esterni/collaboratori esterni, elemento raro nel settore dove spesso solo i nomi 'star' esterni vengono valorizzati"], "last_update_detected": "2026-01-15T12:27:37+00:00", "images": [{"path": "assets/img/boss-design/hero.jpg", "role": "hero", "page_title": "Boss Design | Modern British Contract Furniture"}], "links": [{"title": "Products - Boss Design", "url": "https://www.bossdesign.com/products", "page_type": "products"}, {"title": "Tables - Boss Design", "url": "https://www.bossdesign.com/product-category/tables/", "page_type": "products"}, {"title": "Lounge Collections - Boss Design", "url": "https://www.bossdesign.com/product-category/lounge-collections/", "page_type": "products"}]}, {"slug": "inclass", "name": "Inclass", "tier": "direct", "country": "ES", "url": "https://inclass.es/it/home/", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=inclass.es", "score_overall": 3.55, "rank": 11, "tone_of_voice": "misto", "themes": ["sistema modulare per collezione: ogni prodotto declinato in decine di varianti tecniche (basi, materiali, indoor/outdoor) elencate esplicitamente", "certificazioni e processo qualità verificabili (ISO 9001 dal 2005 con audit Bureau Veritas, ISO 14001, FSC, garanzia 5 anni)", "logica da catalogo tecnico-industriale più che narrativa: schede fisse Descrizione/Download/Designer/Sostenibilità/Spazi", "rete di designer internazionali ricorrenti (Pearson Lloyd, Christophe Pillet, Jorge Pensi, Simon Pengelly) citati come firma ma senza racconto del processo creativo"], "comment": "Il sito Inclass alterna un momento fotografico ambientato e ricco (hero Kern) a una griglia prodotto molto neutra e catalogale, senza che le due modalità dialoghino tra loro; l'idea più esportabile è l'uso di badge di stato sulle card, mentre i grandi vuoti in homepage sono un problema evidente di caricamento o contenuto mancante da correggere prima di prenderlo come riferimento strutturale.", "strengths": ["Card prodotto con etichetta di stato (New, Nuove versioni) in alto a sinistra: comunica immediatamente la freschezza del catalogo senza bisogno di filtri aggiuntivi", "Hero fotografico con ambientazione reale (parete in doghe di legno, pianta, luce laterale) invece del solito still life bianco, dando un contesto abitativo credibile al prodotto Kern"], "notable_ideas": ["L'etichetta di stato sovrapposta alla foto (New / Nuove versioni) nella pagina Collezioni è un espediente semplice ma efficace: True Design potrebbe adottarlo per segnalare aggiornamenti di finitura o varianti senza appesantire il testo descrittivo sotto l'immagine", "Sezione 'Spazi' che abbina esplicitamente coppie di collezioni diverse (es. 'Floe & Oswell', 'Essens Occasional & Wabao') come suggerimento di combinazione cross-linea, invece del solito showcase per singolo prodotto", "Scheda 'Sostenibilità' presente a livello di singolo prodotto (non solo pagina aziendale generica), scaricabile insieme a scheda tecnica, 2D/3D/BIM e certificati specifici", "Elenco esplicito e granulare delle configurazioni disponibili per singola collezione (es. Oswell con oltre 20 varianti di base/seduta/imbottitura elencate una per una) come prova di modularità reale invece che dichiarata a parole", "'Quick Guide' come formato ibrido cartaceo+digitale pensato esplicitamente per velocizzare l'accesso al catalogo, posizionato come strumento e non come contenuto ispirazionale"], "last_update_detected": "2026-06-30T13:36:10+00:00", "images": [{"path": "assets/img/inclass/hero.jpg", "role": "hero", "page_title": "INCLASS"}], "links": [{"title": "INCLASS", "url": "https://inclass.es/it/collections", "page_type": "products"}, {"title": "INCLASS", "url": "https://inclass.es/it/collections?_sft_tipology=sedie-operative", "page_type": "products"}, {"title": "INCLASS", "url": "https://inclass.es/it/collection/oswell/", "page_type": "products"}]}, {"slug": "kastel", "name": "Kastel", "tier": "direct", "country": "IT", "url": "https://www.kastel.it/", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=kastel.it", "score_overall": 3.55, "rank": 12, "tone_of_voice": "misto", "themes": ["\"Hotelification\" del workplace: il comfort domestico e l'accoglienza hospitality traslati negli spazi ufficio, esplicitamente nominati come chiave di lettura delle nuove collezioni", "Qualità come parametro misurabile e non slogan, esteso a processi e supporto tecnico a progettisti/studi", "Segmentazione del catalogo per contesto d'uso (Meeting, Waiting, Community, Healthcare, Educational, Showcase, Archive) più che per sola tipologia di prodotto", "Contract internazionale su progetti ad alto profilo istituzionale/culturale (ministeri, musei, resort) come prova di posizionamento"], "comment": "Il punto di forza di Kastel non è la fotografia prodotto (abbastanza da catalogo standard) ma l'architettura editoriale del testo: titoli enormi come elementi strutturali, indice numerato delle news e footer con CTA verticali a tutta altezza spezzano la griglia tipica del settore contract senza bisogno di immagini spettacolari.", "strengths": ["Blocchi footer 'Download Area' e 'Configurator' presentati come due fasce verticali a tutta altezza con testo ruotato e colore pieno (verde scuro/nero), che funzionano da CTA scenografiche invece che da semplici link testuali", "Pagina News strutturata come indice numerato (01-37) con colonna data e tag categoria allineati a destra, che rende il journal scorribile come un sommario piuttosto che un blog a card"], "notable_ideas": ["In home, l'elenco categorie prodotto (Sedie, Sgabelli, Sedute operative, Poltrone, Divani, Pouf, Sedute su trave, Tavoli) è trattato come un blocco tipografico gigante cliccabile a piena larghezza invece che come un menu a tendina: True Design potrebbe riprendere questo pattern per rendere la navigazione per categoria un momento visivo forte della home, non solo funzionale", "Doppia classificazione dei prodotti: per tipologia (Sedie, Sgabelli, Poltrone...) e per 'Ambienti' d'uso (Waiting, Community, Healthcare...), permettendo una navigazione orientata al progetto più che al prodotto isolato", "Sezione Progetti con 124 case study reali e nominati (Saudi Arabian Ministry of Culture, Marina Bay Sands, NOMA, GAM Genova), usata come prova sul campo del posizionamento contract invece di semplice portfolio fotografico", "Schede di lancio prodotto scritte con linguaggio quasi manifesto/poetico per ogni singolo pezzo (Konny, Kalt Stool, Klever), con racconto del gesto progettuale invece della sola scheda tecnica", "News datata a futuro ('New Collection 2026' con data 14/05/2026), segnale di un editorial calendar strutturato in anticipo sui lanci"], "last_update_detected": "2026-05-25T11:46:00+02:00", "images": [{"path": "assets/img/kastel/hero.jpg", "role": "hero", "page_title": "Kastel | Sedute per ufficio, contract e casa"}], "links": [{"title": "Poltrone design e poltrone contract | Kastel", "url": "https://www.kastel.it/prodotti/poltrone/", "page_type": "products"}, {"title": "Poltrone direzionali e sedute executive | Kastel", "url": "https://www.kastel.it/prodotti/sedute-direzionali/", "page_type": "products"}, {"title": "Kairos | Tavolo h.74 con piano quadro arrotondato | Kastel", "url": "https://www.kastel.it/prodotto/kairos-tavolo-multiuso-round-square/", "page_type": "products"}]}, {"slug": "magis", "name": "Magis", "tier": "direct", "country": "IT", "url": "https://www.magisdesign.com/", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=magisdesign.com", "score_overall": 3.45, "rank": 13, "tone_of_voice": "misto", "themes": ["Missione storica anti-plastica dichiarata dai primi anni 2000, non presentata come trend recente", "Dignità dell'oggetto quotidiano come principio progettuale esplicito", "Durata del prodotto nel tempo come definizione stessa di sostenibilità ('A good product should last. That's what we understand by sustainability')", "Evoluzione delle famiglie di prodotto esistenti (varianti/estensioni di collezioni iconiche) come narrativa di innovazione incrementale"], "comment": "Il sito di Magis costruisce identità più sul racconto editoriale (eventi, badge, allestimenti fotografati) che sulla vetrina di catalogo pura, ma questa forza si scontra con un accesso al prodotto (la griglia di thumbnail illeggibili) che sembra rimasto indietro rispetto alla cura delle pagine news/home; è un caso utile per True Design proprio perché mostra come un buon storytelling per singoli pezzi/eventi non basti se poi la navigazione del catalogo resta un muro di icone senza etichette.", "strengths": ["Uso di badge/etichette fisiche fotografate in-scena (il cartellino appeso alla sedia in legno, il bollino Compasso d'Oro sull'immagine outdoor) invece di grafica digitale sovrapposta, che dà credibilità editoriale al riconoscimento", "La pagina news alterna rapporto immagine 2:1 (galleria doppia con frecce) a blocchi editoriali con testo breve e freccia down per scroll, creando un ritmo narrativo tipo magazine piuttosto che una semplice lista cronologica"], "notable_ideas": ["Il carosello a doppia immagine con frecce laterali nella sezione news (es. il blocco Villa Giulia + foto del pubblico all'evento) permette di raccontare un singolo progetto/evento con più scatti senza aprire una pagina dedicata: True Design potrebbe usare questo formato per raccontare un progetto contract con foto di cantiere + foto finita nello stesso modulo scrollabile", "La pagina sostenibilità non usa il lessico da bilancio ESG né certificazioni elencate, ma costruisce una vera e propria mission narrativa risalente a 20+ anni fa ('End the Dictatorship of Plastic'), posizionandola come battaglia storica del brand piuttosto che come compliance recente", "News che collega un prodotto (Magis Proust, disegnato da Mendini) a una mostra museale in corso ('Alessandro Mendini. Cose – Stanze come mondi'), raccontando l'oggetto come parte di un discorso culturale/artistico più ampio invece che come semplice lancio commerciale", "Il lancio del nuovo sgabello Mariolina viene raccontato come estensione naturale di una famiglia esistente, con enfasi su come la nuova variante 'preserva' equilibrio e coerenza della collezione, invece di presentarlo come novità autonoma"], "last_update_detected": "2026-06-29T13:42:50+00:00", "images": [{"path": "assets/img/magis/hero.jpg", "role": "hero", "page_title": "Magis S.p.A. - Pushing the boundaries of design since 1976."}], "links": [{"title": "Prodotti Archive - Magis S.p.A.", "url": "https://www.magisdesign.com/product/", "page_type": "products"}, {"title": "Sustainability - Magis S.p.A.", "url": "https://www.magisdesign.com/profil/sustainability/", "page_type": "sustainability"}, {"title": "News - Magis S.p.A.", "url": "https://www.magisdesign.com/news/", "page_type": "news"}]}, {"slug": "bb-italia", "name": "B&B Italia", "tier": "direct", "country": "IT", "url": "https://www.bebitalia.com/it-it/", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=bebitalia.com", "score_overall": 3.4, "rank": 14, "tone_of_voice": "misto", "themes": ["continuità di linguaggio progettuale tra indoor e outdoor come posizionamento (non solo estensione di gamma, ma trasferimento dell'esperienza abitativa interna all'esterno)", "storicizzazione dei prodotti icona attraverso anniversari e riconoscimenti (Compasso d'Oro, 50 anni de Le Bambole) come leva narrativa", "rapporto quantificato e di lunga durata con i designer (13 designer, 40 collezioni in 15 anni) più che racconto aneddotico della collaborazione"], "comment": "Il sito B&B Italia non si distingue per innovazioni radicali di UX, ma per due dispositivi concreti e replicabili: l'hotspot navigation su foto ambientata e il contrasto narrativo storico/contemporaneo nell'hero. Il punto debole resta la frattura visiva tra la fotografia di scena, molto curata, e le immagini prodotto in stile catalogo puro, che appiattiscono la percezione qualitativa quando si entra nel dettaglio dei singoli articoli.", "strengths": ["Hotspot cliccabili direttamente sopra una foto ambientata reale (sezione 'Product Inspirations'), che permettono di esplorare i singoli pezzi senza uscire dalla scena.", "Split-screen storico vs contemporaneo nell'hero (Mario Bellini 1972 / Roman Bouroullec 2024) come dispositivo narrativo di heritage senza usare linguaggio testuale banale.", "Overlay tipografico gigante 'B&B' semitrasparente sovrapposto alle fotografie, che funge da elemento grafico di brand invece che da semplice logo in header."], "notable_ideas": ["La sezione 'Product Inspirations' con pallini numerati sovrapposti a una foto di ambiente reale (salotto con vetrate e verde) è riproponibile da True Design: invece di mostrare una griglia prodotti separata, si naviga il catalogo restando dentro una scena arredata, rafforzando il collegamento tra pezzo singolo e composizione d'ambiente.", "Certificati di circolarità scaricabili per la collezione Outdoor 2023: un approccio documentale/verificabile alla sostenibilità invece di un semplice claim, anche se nel testo estratto non si vedono dati ESG dettagliati oltre al rimando al Report", "Racconto del prodotto attraverso l'anniversario (Le Bambole 50th) che lega storia del design, premio (Compasso d'Oro 1979) ed evoluzione contemporanea del pezzo, invece di una scheda tecnica statica", "Sezione Network che mappa la presenza internazionale con indirizzi reali delle sedi (Novedrate, New York, Hong Kong) invece di una generica lista di paesi/distributori"], "last_update_detected": null, "images": [{"path": "assets/img/bb-italia/hero.jpg", "role": "hero", "page_title": "B&B Italia | Arredamento Moderno | Arredamento Contemporaneo e Design - B&B Italia"}], "links": [{"title": "Products", "url": "https://www.bebitalia.com/it-it/products.html", "page_type": "products"}, {"title": "Products", "url": "https://www.bebitalia.com/it-it/products", "page_type": "products"}, {"title": "Sustainability", "url": "https://www.bebitalia.com/it-it/about-sustainability", "page_type": "sustainability"}]}, {"slug": "andreu-world", "name": "Andreu World", "tier": "direct", "country": "ES", "url": "https://andreuworld.com/en/", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=andreuworld.com", "score_overall": 3.35, "rank": 15, "tone_of_voice": "misto", "themes": ["Cradle to Cradle come pilastro editoriale autonomo (non solo claim, ma sezione dedicata all'economia circolare)", "Solidarity Design legato a un prodotto specifico (Valencia Stool di Patricia Urquiola)", "Organizzazione dei contenuti per contesto d'uso/stato emotivo (At rest, Waiting areas, Training spaces, Working from home) invece che per sola categoria merceologica", "Case study contract reali cross-linkati dalle pagine prodotto (es. Bartlit Beck Offices, AC Marriott Kingston Hotel) con elenco puntuale delle collezioni impiegate"], "comment": "Andreu World costruisce un'identità basata su vuoti calibrati e tipografia protagonista più che su decorazione, trattando temi come i materiali biobased e la circolarità come contenuto editoriale a pieno titolo e non come nota a margine; il rischio è un'eccessiva rarefazione delle CTA che rende la navigazione meno immediata di quanto la qualità fotografica farebbe presagire.", "strengths": ["Sezione 'BIO° Thermopolymer' con macro-fotografia della texture del materiale usata come contenuto autonomo, non solo come specifica tecnica in scheda prodotto", "Nella pagina Carlotta, l'icona a forma di scudo/certificato in alto a sinistra ripetuta come marcatore fisso di pagina, elemento di orientamento insolito rispetto ai soliti breadcrumb testuali", "Blocco laterale con icone verticali (certificato, 3D, 2D, Revit, Gallery) accanto alla foto ambientata della Carlotta: raccoglie risorse tecniche/download in un'unica colonna leggibile senza affollare la pagina"], "notable_ideas": ["La presentazione del materiale BIO° Thermopolymer come sezione editoriale a sé, con foto macro della texture e titolo grande isolato su sfondo chiaro: True Design potrebbe applicare lo stesso trattamento a materiali distintivi (es. finiture particolari, tessuti tecnici) invece di relegarli a specifiche tecniche in scheda prodotto", "La colonna icone verticale con certificazioni/download accanto alla foto ambientata in pagina prodotto (vista in Carlotta) è un modo elegante di rendere accessibili risorse tecniche senza tab o accordion, mantenendo la foto come protagonista", "Formato 'Conversations': citazioni dirette dei designer come contenuto editoriale a sé stante, non relegate a bio ma presentate come pillole di pensiero progettuale (es. quote di Benjamin Hubert in home)", "Navigazione per 'situazioni d'uso' (At rest, In a meeting, Waiting areas, Training spaces) che racconta il prodotto attraverso lo spazio vissuto invece che per tipologia tecnica", "Pagine prodotto che integrano direttamente Certificate, Environmental Product Declaration (EPD) e file tecnici (2D/3D/Revit) nello stesso blocco, rendendo la sostenibilità un dato scaricabile e non uno slogan", "Sezione 'Selected Projects' agganciata a livello di singola collezione (non solo come case study generico), con elenco esplicito delle collezioni usate in ogni progetto reale (contract/hotel/uffici)", "'Digital trade show' come formato editoriale/evento ibrido citato in home, segnale di un approccio contract-oriented anche nella comunicazione online"], "last_update_detected": null, "images": [{"path": "assets/img/andreu-world/hero.jpg", "role": "hero", "page_title": "Andreu World - Manufacturing a better world - Andreu World"}], "links": [{"title": "carlotta Collection chairs - Andreu World", "url": "https://andreuworld.com/en/products/seating/chairs/carlotta", "page_type": "products"}, {"title": "Discover the outdoor Category - Andreu World", "url": "https://andreuworld.com/en/products/outdoor/barstools", "page_type": "products"}, {"title": "Products - Andreu World", "url": "https://andreuworld.com/en/products", "page_type": "products"}]}, {"slug": "buzzispace", "name": "Buzzispace", "tier": "direct", "country": "BE", "url": "https://www.buzzi.space/", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=buzzi.space", "score_overall": 3.35, "rank": 16, "tone_of_voice": "misto", "themes": ["Acustica come core-business, non decorazione: il benessere è raccontato attraverso la performance acustica dei prodotti, non solo attraverso l'estetica", "Sostenibilità con target numerici verificati da terze parti (SBTi: -60% emissioni operative al 2030, -42% supply chain, net zero 2050) invece di claim generici", "Presenza sistematica e storicizzata alle fiere di settore (NeoCon, Orgatec, Euroluce, Light+Building, Milan Design Week) come asse portante della comunicazione press, più che il racconto di progetti o designer"], "comment": "BuzziSpace si differenzia per un linguaggio grafico da prodotto digitale (kicker + trattino, chip di contatto, badge flottante) applicato a un catalogo di arredo acustico, con fotografia ambientata forte in home ma che si indebolisce nelle pagine di catalogo e nell'esecuzione mobile.", "strengths": ["Uso del trattino orizzontale come prefisso grafico costante prima di ogni titolo di sezione (Acoustic Intelligence, About the Brand, Inspiration), che funge da firma tipografica riconoscibile senza bisogno di un font particolare", "Segmentazione del contatto in chip tematici post-form (quota, campione, supporto after-sales, domanda generale) invece del solito modulo generico 'Scrivici'"], "notable_ideas": ["Il blocco 'Discover Our Latest Solutions for Privacy' in home mescola in un'unica griglia prodotti di scala e tipo diversi (una intera 'Room' acustica accanto a una pianta 'BuzziKnit Planter'), presentandoli come componenti di un unico sistema di privacy invece che come categorie merceologiche separate: True Design potrebbe applicare la stessa logica per mostrare sedute e accessori come 'soluzioni' d'ambiente invece che per tipologia di prodotto", "Sustainability page strutturata come una roadmap con milestone datate e percentuali precise (2025/2030/2050) validate da SBTi, invece del solito slogan 'attenzione all'ambiente'", "Archivio press kit organizzato per fiera ed edizione (NeoCon 2022→2026, Orgatec, Euroluce, Light+Building) che permette di ricostruire la presenza storica del brand agli eventi, un formato più simile a un archivio giornalistico che a una semplice pagina press", "Media kit dedicati a singolo prodotto (es. BuzziNest, BuzziBracks, BuzziShield, BuzziTripl) scaricabili singolarmente: un livello di granularità comunicativa che tratta ogni prodotto come una release editoriale autonoma", "Comunicato 'Change of Command' incluso tra i press kit: un titolo che suggerisce un racconto anche degli aspetti corporate/organizzativi del brand, non solo di prodotto", "Collaborazione con Lenovo (BuzziNest Smart) segnalata come press kit a sé stante, indicando un'apertura a partnership tech/cross-industry oltre al design"], "last_update_detected": null, "images": [{"path": "assets/img/buzzispace/hero.jpg", "role": "hero", "page_title": "BuzziSpace | Happy and healthy workspaces around the world"}], "links": [{"title": "Sustainability Initiatives | BuzziSpace", "url": "https://www.buzzi.space/sustainability", "page_type": "sustainability"}, {"title": "Press | BuzziSpace", "url": "https://www.buzzi.space/press", "page_type": "news"}]}, {"slug": "vitra", "name": "Vitra", "tier": "direct", "country": "CH", "url": "https://www.vitra.com/it-it/home", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=vitra.com", "score_overall": 3.3, "rank": 17, "tone_of_voice": "misto", "themes": ["Segmentazione per contesto d'uso reale (aeroporti, healthcare, co-working, educazione) più che per sola tipologia di prodotto", "Ciclo di vita del prodotto come narrazione (Vitra Circle: cura, ricambi, riparazione, garanzia, revisione in negozio)", "Celebrazione della storia del design attraverso anniversari e edizioni limitate (Verner Panton 100 Years, Heart Cone Chair Anniversary Edition, Panton Chair Limited Edition 2026)", "Infrastruttura dedicata al mondo professionale/contract (CAD, schede tecniche, pCon, dealer login) separata e ricca quasi quanto quella consumer"], "comment": "Vitra costruisce l'identità meno sull'esposizione ripetuta del prodotto e più su un registro editoriale continuo (news, campus, paper, architettura) che intreccia cataloghi e storytelling con la stessa griglia minimale; il punto debole resta la ripetitività delle CTA e alcuni moduli (Ispirazioni) meno risolti visivamente rispetto al resto.", "strengths": ["Il modulo 'MAKE ROOM / THINK BETA' usa una typo XXL a tutta larghezza in stile poster editoriale per promuovere un contenuto (Beta Paper) invece di un prodotto, rompendo il ritmo delle card prodotto", "Le caption sotto ogni immagine in home seguono uno schema fisso Titolo+sottotitolo minimale (es. 'Dining Outdoors — Design senza tempo per la vita all'aperto'), dando un tono da rivista più che da e-commerce"], "notable_ideas": ["L'homepage alterna sistematicamente 'news' editoriali (nuovi progetti, campus, edizioni limitate) a moduli prodotto: True Design potrebbe adottare uno schema simile per dare peso a contenuti di progetto/contract oltre che al catalogo, aumentando la percezione di un brand vivo e non solo transazionale", "L'uso di un blocco tipografico enorme e in negativo (bianco su nero) per lanciare un contenuto editoriale scaricabile (Beta Paper) è un modo semplice per dare peso a un lead magnet senza bisogno di immagini prodotto", "Tool di navigazione guidata per bisogno (Lounge chair finder, Office chair finder, Gift finder) invece della sola navigazione per categoria merceologica", "'Vitra Circle' come programma unico che integra riparazione, ricambi, garanzia e persino revisione fisica presso il 'Vitra Circle Store Campus', trasformando l'assistenza post-vendita in un contenuto di marca strutturato", "'Destination Workplace' come sezione che invita a visitare fisicamente progetti realizzati presso clienti/partner reali, un formato di case study esperienziale più che descrittivo", "Presenza di edizioni anniversario/limitate (es. Panton Chair Limited Edition 2026) come leva editoriale di collezionismo, distinta dal normale storytelling di prodotto", "Consulting & Planning Studio fisico dentro VitraHaus, un servizio di progettazione raccontato come esperienza in-store piuttosto che come semplice pagina di contatti"], "last_update_detected": null, "images": [{"path": "assets/img/vitra/hero.jpg", "role": "hero", "page_title": "Home | Negozio online ufficiale di Vitra® IT"}], "links": [{"title": "Istruzioni e prodotti per la cura | Negozio online ufficiale di Vitra® IT", "url": "https://www.vitra.com/it-it/care-repair/care-instructions-care-products", "page_type": "products"}, {"title": "Alexander Girard | Negozio online ufficiale di Vitra® IT", "url": "https://www.vitra.com/it-it/product/designer/alexander-girard", "page_type": "products"}, {"title": "Mynt | Negozio online ufficiale di Vitra® IT", "url": "https://www.vitra.com/it-it/product/details/mynt", "page_type": "products"}]}, {"slug": "alea-office", "name": "Alea Office", "tier": "direct", "country": "IT", "url": "https://www.aleaoffice.com/", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=aleaoffice.com", "score_overall": 3.2, "rank": 22, "tone_of_voice": "misto", "themes": ["Wellbeing lavorativo come filo conduttore ('Where people feel Better') collegato sia al prodotto sia alla sostenibilità", "Società Benefit con obiettivi di beneficio comune misurabili e Relazione di Impatto", "Doppio brand: Alea (office) e m|artedesign (contract) con collezioni e designer distinti", "Eventi come esperienza culturale trasversale (arte, musica, dj set, sport) più che semplice showcase prodotto", "Crescita internazionale raccontata per milestone temporali (1972, 2001, 2017, 2019) e presenza in 90+ paesi"], "comment": "Alea Office si distingue non tanto per la fotografia di prodotto, che è poco presente e piuttosto sobria, quanto per l'uso di elementi grafici tecnici (piante, disegni a mano) come linguaggio identitario, e per una versione mobile che non è una riduzione ma un adattamento con contenuti propri; il punto debole resta la pagina news, trattata in modo molto convenzionale a griglia densa.", "strengths": ["Sezione '#industrialartisans' che affianca claim breve a disegni tecnici in stile blueprint, dando un'identità concettuale (progettazione) invece che solo estetica", "Hero desktop con vista zenitale di poltrona su forma organica colorata a tutta larghezza, diversa dalle solite ambientazioni fotografiche patinate", "Versione mobile che aggiunge contenuti/card editoriali propri (es. 'Where people feel Better') non semplicemente ridotti dal desktop"], "notable_ideas": ["L'accostamento disegno tecnico a mano libera + claim manifesto (sezione #industrialartisans) potrebbe essere ripreso da True Design per raccontare il processo progettuale di una seduta o di un tavolo, invece di mostrare solo il prodotto finito, differenziandosi dai render fotorealistici standard del settore", "Hashtag posizionante '#industrialartisans' usato in homepage come sintesi di identità, invece delle solite etichette 'artigianalità/tradizione'", "Racconto degli eventi (MDW, Design Week) che nomina esplicitamente artisti, dj, giornalisti, mostre d'arte ospitate in showroom (es. 'SÌL-LOGE' di Alberto Pasqual), creando un layer culturale/lifestyle distinto dal catalogo prodotto", "Attribuzione puntuale del designer per ogni singola collezione nei contenuti news (Mirto Antonel per Le Roi e Chicane, Emilio Nanni per Opera Prima e Cova, Alessandro Stabile per Bolina), con dettagli di design (gamba a sezione 'S', tondino) invece di descrizioni generiche", "Sezione sostenibilità strutturata su status legale concreto (Società Benefit dal 2023) con report scaricabile e Relazione di Impatto, non solo dichiarazioni valoriali", "Case study che aggancia il progetto al valore simbolico del territorio (vicinanza a Piazza dei Miracoli, patrimonio UNESCO) come leva narrativa oltre il progetto in sé", "Timeline aziendale a milestone (HQ, showroom Miami/Londra/Milano, corporate identity 2019) usata come racconto di espansione internazionale invece della classica 'storia dal 1972'"], "last_update_detected": null, "images": [{"path": "assets/img/alea-office/hero.jpg", "role": "hero", "page_title": "Arredo Ufficio: mobili ufficio e arredo contract | Alea"}], "links": [{"title": "Sostenibilità | Alea", "url": "https://www.aleaoffice.com/sostenibilita", "page_type": "sustainability"}, {"title": "News: arredo ufficio le utlime novità ed eventi | Alea", "url": "https://www.aleaoffice.com/news", "page_type": "news"}, {"title": "Alla MDW le nuove visioni e collezioni di Alea | Alea", "url": "https://www.aleaoffice.com/news/alla-mdw-le-nuove-visioni-e-collezioni-di-alea", "page_type": "news"}]}, {"slug": "billiani", "name": "Billiani", "tier": "direct", "country": "IT", "url": "https://www.billiani.it/it/", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=billiani.it", "score_overall": 3.15, "rank": 24, "tone_of_voice": "misto", "themes": ["Filiera come rete di botteghe specializzate per fase produttiva, non un unico stabilimento", "Radicamento nel distretto della sedia del Friuli (Manzano/Udine) come identità territoriale precisa", "Storytelling attraverso luoghi e architetture storiche (ville, case di architetti) come cornice del prodotto", "Voce editoriale esterna e critica (firma di Bianca Felicori) invece del solo comunicato aziendale"], "comment": "Billiani punta su un registro editoriale (serif, storie firmate, ambientazioni da rivista) più che su una vetrina prodotto tradizionale, ma questa scelta stilistica non è ancora supportata da una struttura di navigazione e da una densità di contenuti all'altezza dell'ambizione, risultando in pagine visivamente eleganti ma vuote all'atto pratico.", "strengths": ["Formato 'Design Stories by Billiani' con firma di un autore esterno (Bianca Felicori) posiziona il brand come editore di cultura del progetto, non solo produttore di sedute", "L'header fisso 'Diventa il rivenditore/Contattaci' in nero pieno in alto a destra crea un punto di contrasto netto rispetto al resto della pagina molto chiara"], "notable_ideas": ["L'etichetta 'REALIZZAZIONI' seguita dal nome del progetto in serif grande ('Untold Editions') e sottotitolo in corsivo minuto ('Fleaon') nella hero funziona come un vero e proprio credito editoriale da rivista di interior design: True Design potrebbe adottare questo schema a due livelli tipografici per presentare i propri progetti custom/contract invece di semplici gallerie fotografiche.", "Sezione 'Design Stories' che non parla di prodotto in senso diretto ma lo inserisce in racconti su luoghi e architetture (una villa di Marcello D'Olivo, una casa di Carlo Scarpa, la Plečnik House a Lubiana): il prodotto diventa comprimario di una narrazione di luogo/architettura invece che protagonista assoluto", "Utilizzo di una firma editoriale riconoscibile e esterna al brand (Bianca Felicori, nota critica/storica del design) per un pezzo, il che dà agli articoli un taglio più giornalistico/curatoriale che da comunicato marketing", "Naming in dialetto friulano per una collezione ('Timènt') come elemento di identità linguistica territoriale, raro nel settore", "Un progetto raccontato come mostra/installazione itinerante in più sedi istituzionali slovene (Sokolski Dom, NUK, Plečnik House) sotto il titolo 'Beyond Belonging', suggerendo un registro quasi curatoriale/museale più che da catalogo prodotto"], "last_update_detected": "2024-07-30T09:23:17+00:00", "images": [{"path": "assets/img/billiani/hero.jpg", "role": "hero", "page_title": "Billiani"}], "links": []}, {"slug": "lapalma", "name": "Lapalma", "tier": "direct", "country": "IT", "url": "https://www.lapalma.it/it", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=lapalma.it", "score_overall": 3.05, "rank": 25, "tone_of_voice": "misto", "themes": ["Naming e storytelling dei prodotti tramite metafore naturalistiche/poetiche (fiumi, spiagge, rami, stagioni) invece di descrizioni tecniche standard", "Narrazione della maturazione delle collezioni nel tempo: prodotti che 'evolvono' o si reinventano a 10+ anni dal debutto (ADD Lounge, KIPU CLUB)", "Organizzazione dell'offerta per scenario d'uso/comportamento (Lounge & Relax, Cafè & Break Areas, Meetings) più che per tipologia di prodotto", "Sistema colore come strumento progettuale co-firmato dal designer (Colour Landscapes con Raffaella Mangiarotti), non solo variante estetica"], "comment": "Lapalma prova a differenziarsi con un hero atmosferico costruito su gradienti invece che su foto prodotto dirette, un'idea di comunicazione del colore interessante e replicabile; il resto del sito però non tiene il passo, con pagine prodotto povere di contenuto visivo e ampi vuoti strutturali che indeboliscono la percezione di solidità del brand.", "strengths": ["Hero 'Colour Landscapes' con gradienti sfumati che restituiscono l'idea di tonalità/superficie senza mostrare il prodotto letteralmente, un modo alternativo di comunicare una collezione colore", "Tab laterali verticali fisse (Newsletter, Contatti) sempre visibili sia in scroll che su pagine diverse, utile come pattern di conversione persistente"], "notable_ideas": ["L'hero con gradiente 'liquido' a tutta larghezza usato per presentare una gamma colori (invece della classica cartella colori a swatch) è un'idea che True Design potrebbe adattare per lanciare nuove finiture o tessuti, dando più impatto emotivo alla scelta cromatica rispetto alla griglia di campioni piatta.", "Format 'anniversario di prodotto': collezioni storiche (ADD, KIPU) vengono ripresentate esplicitando gli anni trascorsi dal lancio e la coerenza progettuale mantenuta, trasformando l'anzianità in valore narrativo invece di nasconderla", "Testi prodotto molto brevi ma con un'unica immagine poetica/naturalistica distintiva per ogni collezione (es. CROSS come 'viaggio tra dinamismo e stabilità', AARON come 'germoglio'), usata come firma di ogni famiglia invece di elenchi di caratteristiche tecniche", "Cenno a sostenibilità circolare concreta su un singolo prodotto (SEELA: disassemblabile, riciclabile, pad sostituibile per allungare la vita utile) ma non generalizzato in una sezione dedicata: rischio di lasciare un asset di contenuto forte poco valorizzato"], "last_update_detected": null, "images": [{"path": "assets/img/lapalma/hero.jpg", "role": "hero", "page_title": "Lapalma"}], "links": [{"title": "Sistemi ufficio moderni e contemporanei - Lapalma", "url": "https://www.lapalma.it/it/prodotti/sistemi-ufficio", "page_type": "products"}, {"title": "Sedie da esterno – Lapalma", "url": "https://www.lapalma.it/it/prodotti-outdoor/sedie", "page_type": "products"}, {"title": "Complementi d'arredo di design e moderni – Lapalma", "url": "https://www.lapalma.it/it/prodotti/complementi", "page_type": "products"}]}, {"slug": "roche-bobois", "name": "Roche Bobois", "tier": "direct", "country": "FR", "url": "https://www.roche-bobois.com/it-IT/", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=roche-bobois.com", "score_overall": 2.85, "rank": 30, "tone_of_voice": "misto", "themes": ["firma del designer come elemento ripetuto su ogni singolo prodotto (non solo nelle collezioni hero)", "personalizzazione estesa come leva commerciale primaria (colori, rivestimenti, dimensioni multiple per ogni referenza)", "cross-over con mondo lifestyle/luxury esterno all'arredo (hotellerie, orologeria) come costruzione di posizionamento", "logica promozionale/retail (sconti, saldi, prezzi comparati) integrata nella narrazione prodotto"], "comment": "Il punto di forza del sito non è la griglia prodotto in sé (abbastanza standard, cutout su grigio con varianti a pallini) ma la regia delle immagini editoriali — arco come maschera ricorrente, still life con sculture e fiori secchi, padiglione fotografato come installazione — che alza la percezione del brand rispetto a un tipico e-commerce contract. Il limite principale è nella versione mobile della campagna saldi, ripetuta meccanicamente sezione dopo sezione con un rapporto testo/spazio vuoto poco efficiente.", "strengths": ["Il crop ad arco usato come maschera ricorrente per le immagini hero crea un segno visivo riconoscibile senza dover mostrare un'architettura reale in ogni scatto", "Inserimento di un tile editoriale (campagna Outdoor 2026) direttamente dentro la griglia prodotti invece che solo in un banner separato, così chi scorre il catalogo incrocia comunque il contenuto di storytelling", "Pallini colore cliccabili sotto il nome prodotto per mostrare le varianti senza aprire la scheda, utile per una lettura rapida del catalogo"], "notable_ideas": ["Il 'tile editoriale incastonato nella griglia prodotto' (visibile nella pagina Oggettistica Outdoor, terza posizione della prima riga) è uno spunto concreto: invece di isolare la campagna in un banner a tutta larghezza, la si inserisce come una card in più dentro il grid dei prodotti, mantenendo l'utente nel flusso di navigazione catalogo mentre gli si comunica la nuova collezione — True Design potrebbe applicarlo per veicolare edizioni limitate o nuovi outdoor senza interrompere la sfoglia prodotto.", "Ogni prodotto in griglia riporta il nome del designer accanto al nome del prodotto stesso (es. 'Deltalis, designer Maurizio Manzoni'), trasformando il catalogo in una sorta di 'firma diffusa' anche nelle liste, non solo nelle pagine dedicate al designer", "'Le Mag by Roche Bobois' in homepage mescola contenuti eterogenei (collezione outdoor, partnership con hotel Peninsula, rapporto sostenibilità, evento Watches and Wonders) sotto un'unica vetrina editoriale, segnalando un posizionamento che esce dal prodotto per abbracciare mondo lifestyle/eventi", "Presenza esplicita di un 'Rapporto sullo Sviluppo Sostenibile 2025' come contenuto scaricabile/named, invece di un generico slogan 'sostenibilità' - indica un approccio più documentale (da verificare approfondimento nel testo integrale)", "CTA 'Personalizzalo' distinta da 'Scoprire' segnala una segmentazione chiara tra prodotti configurabili e prodotti a catalogo fisso, visibile già a colpo d'occhio in lista"], "last_update_detected": null, "images": [{"path": "assets/img/roche-bobois/hero.jpg", "role": "hero", "page_title": "ROCHE BOBOIS | Italia | Sito Officiale | French Art de Vivre"}], "links": [{"title": "Oggettistica Outdoor | Roche Bobois", "url": "https://www.roche-bobois.com/it-IT/prodotti/decorazione-esterna", "page_type": "products"}, {"title": "Sedie, Sgabelli & Panche | Roche Bobois", "url": "https://www.roche-bobois.com/it-IT/prodotti/sedie-sgabelli-panche", "page_type": "products"}, {"title": "Specchi | Roche Bobois", "url": "https://www.roche-bobois.com/it-IT/prodotti/specchi", "page_type": "products"}]}, {"slug": "viccarbe", "name": "Viccarbe", "tier": "direct", "country": "ES", "url": "https://www.viccarbe.com/", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=viccarbe.com", "score_overall": 2.8, "rank": 31, "tone_of_voice": "misto", "themes": ["Trasparenza ambientale quantificata (EPD con 39 indicatori, ISO 14025/EN 15804+A2)", "Il prodotto come sistema configurabile per spazi collaborativi/contract (seating systems scalabili)", "Design come dialogo autoriale con il singolo designer, raccontato come processo condiviso ('based the design process together with the team')", "Diversity & Inclusion come narrazione strutturata con dati interni (60% workforce donne)"], "comment": "Il punto di forza di Viccarbe non è la fotografia in sé ma il trattamento degli elementi di interfaccia (freccia Up verticale, carosello loghi partner) come dettagli editoriali coerenti con la palette terrosa del brand; il rischio è che il minimalismo scivoli in pagine percepite come vuote quando il contenuto testuale non ha ancora caricato le sezioni intermedie.", "strengths": ["Freccia 'Up' ruotata 90° con testo verticale nel footer, elemento grafico riconoscibile invece del solito bottone circolare", "Loghi partner/dealer in footer/sezione 'Design thrives together' trattati come componenti editoriali orizzontali scorrevoli, non come griglia statica di badge"], "notable_ideas": ["La sezione 'Design thrives together' con loghi di studi/partner disposti in fila orizzontale con frecce di navigazione laterali (visibile nel footer della home) è un modo originale di mostrare credibilità/collaborazioni senza il classico wall-of-logos statico: True Design potrebbe adottarlo per mostrare partnership con studi di progettazione in modo dinamico e navigabile.", "Pagina EPD dedicata che spiega nel merito la metodologia (39 indicatori, standard ISO/EN citati, registro pubblico environdec.com) invece di limitarsi a uno slogan sulla sostenibilità: rende il contenuto verificabile e utile a professionisti/architetti", "Doppia via di accesso agli EPD (sezione Sustainability + sottocategoria Indoor organizzata per tipo di prodotto + area Professionals scaricabile) — pensata per flussi di lavoro B2B reali, non solo per compliance formale", "Pagina Diversity & Inclusion con un vero e proprio 'DEI Manifesto' strutturato in tre pilastri (Diversity/Equality/Inclusion) con un dato quantitativo concreto (60% workforce femminile) invece di un generico paragrafo valoriale", "Presentazione dei nuovi designer in homepage con micro-racconto del processo creativo specifico per singolo prodotto (es. Monica Armani e Manto) invece della semplice scheda anagrafica del designer"], "last_update_detected": "2022-11-03T08:49:27+00:00", "images": [{"path": "assets/img/viccarbe/hero.jpg", "role": "hero", "page_title": "Timeless furniture design for collaborative spaces"}], "links": [{"title": "EPD's: Viccarbe's commitment to environmental transparency - Viccarbe", "url": "https://www.viccarbe.com/compromiso/environmental-product-declarations-epd-viccarbes-commitment-to-environmental-transparency/", "page_type": "products"}, {"title": "Contract furniture for professionals | Viccarbe", "url": "https://www.viccarbe.com/products/", "page_type": "products"}, {"title": "Sustainability - Viccarbe", "url": "https://www.viccarbe.com/sustainability/", "page_type": "sustainability"}]}, {"slug": "miniforms", "name": "Miniforms", "tier": "direct", "country": "IT", "url": "https://www.miniforms.com", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=miniforms.com", "score_overall": 2.7, "rank": 33, "tone_of_voice": "misto", "themes": ["identità di marca raccontata attraverso metafore letterarie e culinarie invece che vocabolario da design", "versatilità materica di un singolo prodotto come narrazione (Albio e i suoi finish intercambiabili)", "progetti reali con nome di studio/architetto come prova sul campo, ma solo elencati senza approfondimento", "showroom/casa del brand (Ca' miniforms) come esperienza da visitare più che come semplice spazio espositivo"], "comment": "Miniforms si distingue per l'uso spregiudicato del colore (blu elettrico + frange verde-acqua) in un settore dominato da toni neutri, ma questa audacia cromatica non è supportata da una fotografia prodotto altrettanto distintiva, restando piatta e catalogale nella griglia; True Design può prendere spunto dalla costruzione di un momento scenico/installativo in home senza però sacrificare la varietà di formati nella pagina prodotti.", "strengths": ["Backdrop a frange verticali verde-blu iridescenti nella sezione 'ca' miniforms' rompe la convenzione fotografica da showroom e crea un momento quasi installativo/pop", "Badge circolare blu fluttuante 'GOOD NEWS!' come elemento di richiamo extra-griglia, diverso dai classici banner rettangolari"], "notable_ideas": ["L'elemento scenografico a frange colorate usato come sfondo/quinta teatrale per il claim 'ca' miniforms' (invece di un'ambientazione fotografica standard) potrebbe essere adattato da True Design per presentare showroom o eventi, usando un elemento fisico/materico distintivo come sfondo brandizzato invece del solito render fotorealistico", "'Things That Are Very Miniforms': invece del solito racconto valori/mission, il brand usa tre aggettivi (Bizarre, Bold, Bright) accostati a una citazione di Calvino e alla ricetta dello zabaglione — un modo insolito e più letterario di dichiarare la propria identità", "'Ca' miniforms' presentata come 'la nostra casa' da scoprire, non come showroom aziendale: un frame narrativo-domestico raro nel B2B contract", "'Inbox Stories' rivendica esplicitamente un'anti-posizione ('No gossip') rispetto alla comunicazione da PR standard del settore, promettendo contenuti curati e rari invece che newsletter frequenti", "Naming dei prodotti fortemente colloquiale/italiano (Cuoppo, Briscola, Tototò, Bonbon) che costruisce un immaginario quasi pop, distintivo rispetto al lessico tecnico tipico del contract"], "last_update_detected": null, "images": [{"path": "assets/img/miniforms/hero.jpg", "role": "hero", "page_title": "miniforms . italian manufacturer of tables, chairs, sideboards and furniture"}], "links": [{"title": "products . miniforms", "url": "https://www.miniforms.com/en/products/all/", "page_type": "products"}, {"title": "products . miniforms", "url": "https://www.miniforms.com/en/products/all/4-padded/", "page_type": "products"}, {"title": "products . miniforms", "url": "https://www.miniforms.com/en/products/all/3-lighting-and-accessories/", "page_type": "products"}]}, {"slug": "moroso", "name": "Moroso", "tier": "direct", "country": "IT", "url": "https://moroso.it/", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=moroso.it", "score_overall": 2.5, "rank": 35, "tone_of_voice": "misto", "themes": [], "comment": "Il sito regge su un sistema tipografico ed editoriale ben congegnato (tagline brevi, contrasti di scala, metadati coerenti) più che sulla fotografia di prodotto in sé, che resta convenzionale; il vero differenziale rispetto ad altri brand contract è l'uso narrativo della tipografia nei moduli editoriali (banner progetto, tagline prodotto) piuttosto che l'art direction fotografica delle sedute.", "strengths": ["Tagline editoriale breve e poetica ('Un bordo che disegna la morbidezza.') posizionata sopra la descrizione tecnica nella scheda prodotto, che aggiunge un registro narrativo distinto dal testo informativo", "Contrasto di scala deliberato tra tipografia enorme e immagine piccola nel banner progetto 'TIAMANTTI SHANGHAI', che spezza la griglia regolare e attira l'attenzione sul contenuto testuale", "Metadati prodotto standardizzati (nome / designer / anno) ripetuti identici in griglia home, pagina prodotto e correlati, che rendono il sistema molto leggibile e replicabile"], "notable_ideas": ["Il banner 'TIAMANTTI SHANGHAI' in home, dove la scritta occupa quasi tutta la larghezza pagina mentre l'immagine di progetto resta piccola e allineata a destra: True Design potrebbe usare questo schema per raccontare eventi/collaborazioni dando priorità al messaggio testuale rispetto all'immagine, invertendo la gerarchia usuale image-first del settore."], "last_update_detected": "2026-05-08T07:05:15+00:00", "images": [{"path": "assets/img/moroso/hero.jpg", "role": "hero", "page_title": "Moroso | The beauty of design"}], "links": [{"title": "Sedona Edge - Moroso", "url": "https://moroso.it/prodotti/sedona-edge/", "page_type": "products"}, {"title": "Clay - Moroso", "url": "https://moroso.it/prodotti/clay-armchair-2/", "page_type": "products"}, {"title": "Dammi i colori - Moroso", "url": "https://moroso.it/prodotti/dammi-i-colori/", "page_type": "products"}]}, {"slug": "segis", "name": "Segis", "tier": "direct", "country": "IT", "url": "https://www.segis.it/", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=segis.it", "score_overall": 2.0, "rank": 39, "tone_of_voice": "misto", "themes": ["Radicamento e narrazione dell'espansione in Vietnam/Asia (20° anniversario, business forum, premi locali) come asset distintivo più che aneddoto", "Design italiano come patrimonio storico-culturale certificato da terzi (francobollo Poste Italiane, Compasso d'Oro, musei del design)", "Presenza in contesti culturali estranei all'arredo (Premio Letterario Boccaccio) come leva di posizionamento", "Certificazioni tecniche verificabili (ISO 9001 dal 1998, SA8000 dal 2005, standard ANSI BIFMA/EN) più che claim generici di qualità"], "comment": "Il sito di Segis appare più come un impianto strutturale non completato che come un'identità visiva definita: gli elementi distintivi (floating CTA rosse, abbinamento data-prodotto) ci sono ma restano isolati in un impaginato pieno di vuoti non intenzionali, e la fotografia prodotto non emerge mai come racconto coerente tra le pagine.", "strengths": ["Il numero '+1983' abbinato al claim 'CHARUE, la prima seduta' come storytelling in cifre accanto all'immagine prodotto è un'idea di layout non banale, anche se qui sotto-sviluppata", "Le due icone rosse circolari fluttuanti sul bordo destro (tipo floating action button) per catalogo/download sono un pattern di interazione meno comune nel settore, potenzialmente utile se arricchito"], "notable_ideas": ["L'abbinamento cifra-storica + prodotto hero (CHARUE, +1983) suggerisce un format riutilizzabile per True Design: raccontare un prodotto iconico con un dato/anno in grande accanto al render, invece della sola scheda tecnica, per dare profondità narrativa senza testo lungo", "Sponsorizzazione/presenza al Premio Letterario Giovanni Boccaccio raccontata come una news aziendale a sé stante, senza legarla esplicitamente a un prodotto se non una citazione finale — un posizionamento culturale insolito per un brand di sedute", "Il francobollo Poste Italiane dedicato al 'Design Italiano' con protagonista un prodotto Segis (Breeze di Carlo Bartoli) trattato come contenuto editoriale a sé, usato come attestazione esterna di rilevanza storica", "Narrazione ricorrente e dettagliata della presenza in Vietnam (20 anni, nomi di fondatore e direttori coinvolti, eventi locali come Business Forum e Asia's Top Trusted Brands) che racconta un radicamento internazionale specifico invece del generico 'esportiamo il made in Italy'", "La sezione news è quasi interamente un calendario fiere/eventi (NeoCon, Workspace Expo, Salone, Hawa Expo) senza approfondimento editoriale sui singoli prodotti o processi progettuali: più agenda istituzionale che content storytelling"], "last_update_detected": "2025-10-21T14:56:14+00:00", "images": [{"path": "assets/img/segis/hero.jpg", "role": "hero", "page_title": "Home | Segis"}], "links": [{"title": "Sostenibilità e Politica Ambientale | Segis", "url": "https://www.segis.it/azienda/sostenibilita-e-politica-ambientale/", "page_type": "sustainability"}, {"title": "Archivi Press | Segis", "url": "https://www.segis.it/press/", "page_type": "news"}, {"title": "Francobollo Poste Italiane - Tematica \"DESIGN ITALIANO\" | Segis", "url": "https://www.segis.it/news/francobollo-poste-italiane-tematica-design-italiano/", "page_type": "news"}]}], "watchlist_brands": [{"slug": "narbutas", "name": "Narbutas", "country": "LT", "url": "https://www.narbutas.com", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=narbutas.com", "score_overall": 3.95, "last_update_detected": "2026-07-07T05:34:26+00:00"}, {"slug": "actiu", "name": "Actiu", "country": "ES", "url": "https://www.actiu.com", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=actiu.com", "score_overall": 3.7, "last_update_detected": "2026-01-19T00:00:00+01:00"}, {"slug": "poltrona-frau", "name": "Poltrona Frau", "country": "IT", "url": "https://www.poltronafrau.com", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=poltronafrau.com", "score_overall": 3.7, "last_update_detected": "2026-06-25T00:00:00+02:00"}, {"slug": "wilkhahn", "name": "Wilkhahn", "country": "DE", "url": "https://www.wilkhahn.com", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=wilkhahn.com", "score_overall": 3.7, "last_update_detected": null}, {"slug": "and-tradition", "name": "&Tradition", "country": "DK", "url": "https://www.andtradition.com", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=andtradition.com", "score_overall": 3.6, "last_update_detected": null}, {"slug": "cassina", "name": "Cassina", "country": "IT", "url": "https://www.cassina.com", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=cassina.com", "score_overall": 3.3, "last_update_detected": "2026-05-08T00:00:00+02:00"}, {"slug": "kristalia", "name": "Kristalia", "country": "IT", "url": "https://www.kristalia.it", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=kristalia.it", "score_overall": 3.3, "last_update_detected": "2023-07-24T12:02:16+00:00"}, {"slug": "pedrali", "name": "Pedrali", "country": "IT", "url": "https://www.pedrali.com", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=pedrali.com", "score_overall": 3.25, "last_update_detected": null}, {"slug": "very-wood", "name": "Very Wood", "country": "IT", "url": "https://www.verywood.it", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=verywood.it", "score_overall": 3.25, "last_update_detected": null}, {"slug": "zanotta", "name": "Zanotta", "country": "IT", "url": "https://www.zanotta.com", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=zanotta.com", "score_overall": 3.2, "last_update_detected": null}, {"slug": "diemmebi", "name": "Diemmebi", "country": "IT", "url": "https://www.diemmebi.com", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=diemmebi.com", "score_overall": 2.95, "last_update_detected": null}, {"slug": "kartell", "name": "Kartell", "country": "IT", "url": "https://www.kartell.com", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=kartell.com", "score_overall": 2.75, "last_update_detected": null}, {"slug": "sedus", "name": "Sedus", "country": "DE", "url": "https://www.sedus.com", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=sedus.com", "score_overall": 2.7, "last_update_detected": null}, {"slug": "capdell", "name": "Capdell", "country": "ES", "url": "https://www.capdell.com", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=capdell.com", "score_overall": 2.3, "last_update_detected": "2024-09-10T09:28:45+02:00"}, {"slug": "fredericia", "name": "Fredericia", "country": "DK", "url": "https://www.fredericia.com", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=fredericia.com", "score_overall": 2.2, "last_update_detected": null}, {"slug": "gubi", "name": "Gubi", "country": "DK", "url": "https://www.gubi.com", "logo_url": "https://www.google.com/s2/favicons?sz=256&domain=gubi.com", "score_overall": 2.2, "last_update_detected": null}], "themes": [{"key": "prodotti", "label": "Prodotti", "overview": "I competitor si dividono tra chi tratta i prodotti come semplice catalogo filtrabile per tipologia e chi costruisce narrazioni editoriali attorno a collezioni, designer o stagionalità. Alcuni brand usano tassonomie doppie (tipo + ambiente d'uso) o dati quantitativi per orientare la navigazione, altri puntano su singole parole chiave concettuali per dare coerenza tematica alla gamma.", "brand_count": 31, "brands": [{"slug": "kastel", "name": "Kastel", "url": "https://www.kastel.it/prodotti/", "title": "Catalogo sedute e arredo ufficio | Kastel", "note": "Espone il catalogo con conteggi numerici precisi per ogni tipologia (Sedie 15, Sgabelli 18, Poltrone 34, Tavoli 08...), dando un'impressione di sistema strutturato e misurabile piuttosto che di semplice elenco."}, {"slug": "inclass", "name": "Inclass", "url": "https://inclass.es/collections", "title": "INCLASS", "note": "Attribuisce sistematicamente ogni prodotto al designer o studio che lo ha creato direttamente nell'elenco principale, trattando il catalogo quasi come un portfolio di autori."}, {"slug": "lapalma", "name": "Lapalma", "url": "https://www.lapalma.it/it/prodotti", "title": "Prodotti indoor - Lapalma", "note": "Sintetizza l'intera offerta indoor attorno a un'unica parola chiave concettuale, 'Connessione', usata come filtro di lettura per l'intero catalogo invece che come slogan isolato."}, {"slug": "miniforms", "name": "Miniforms", "url": "https://www.miniforms.com/en/products/all/", "title": "products . miniforms", "note": "Incrocia la classificazione per tipologia di prodotto (Tables, Seating, Storage...) con quella per contesto d'uso (Residential, Hospitality, Office, Dining), offrendo due chiavi di navigazione parallele."}, {"slug": "boss-design", "name": "Boss Design", "url": "https://www.bossdesign.com/products", "title": "Products - Boss Design", "note": "Presenta il catalogo per collezioni narrate singolarmente, con descrizioni di design specifiche (es. Beau come 'modular lounge system' per creare 'landscape' di conversazione) invece di un semplice elenco prodotti."}, {"slug": "bb-italia", "name": "B&B Italia", "url": "https://www.bebitalia.com/it-it/products", "title": "Products", "note": "Organizza la pagina prodotti attorno a un calendario stagionale ('Season Highlights') con novità datate e abbinate a designer, dando un taglio editoriale simile a un lancio di collezione moda."}]}, {"key": "azienda", "label": "Azienda", "overview": "La maggior parte dei brand racconta l'azienda attraverso storytelling generico su fondazione e valori, ma alcuni si distinguono per approcci concreti: dati legali/corporate invece di narrazione, garanzie misurabili come prova di qualità, o strutture concettuali/editoriali anziché istituzionali.", "brand_count": 27, "brands": [{"slug": "andreu-world", "name": "Andreu World", "url": "https://andreuworld.com/en/about/quality", "title": "Quality - Andreu World", "note": "Lega il concetto di qualità a una garanzia concreta di 10 anni, trasformando un valore astratto in un dato verificabile."}, {"slug": "bb-italia", "name": "B&B Italia", "url": "https://www.bebitalia.com/it-it/company-data", "title": "Company Data - IT", "note": "La pagina 'Azienda' è letteralmente un elenco di dati legali e societari (capitale sociale, REA, P.IVA) invece di una narrazione, un approccio radicalmente anti-storytelling."}, {"slug": "lapalma", "name": "Lapalma", "url": "https://www.lapalma.it/it/chi-siamo/storia", "title": "Storia  - Lapalma", "note": "Racconta le origini con dettagli concreti e umani: un garage a Cadoneghe nei primi anni '80, due fratelli (Dario e Romano Marcato) che costruiscono a mano i primi prototipi portati in fiera."}, {"slug": "miniforms", "name": "Miniforms", "url": "https://www.miniforms.com/en/company/about/", "title": "things that are very miniforms . miniforms", "note": "Sostituisce la classica sezione 'Chi siamo' con un contenuto concettuale/editoriale ('Things that are very Miniforms') che cita Italo Calvino, uscendo dal registro corporate tipico del settore."}, {"slug": "kastel", "name": "Kastel", "url": "https://www.kastel.it/progetto/ristorante-aziendale/", "title": "Ristorante aziendale | Progetti | Kastel", "note": "Struttura la pagina aziendale come un case study di progetto (ristorante aziendale) con gallery e lista prodotti utilizzati, fondendo racconto d'azienda e portfolio prodotti in un unico formato."}]}, {"key": "sostenibilita", "label": "Sostenibilità", "overview": "Il settore si divide tra chi tratta la sostenibilità come narrazione valoriale astratta (racconti, filosofie, missioni) e chi la ancora a elementi verificabili come target scientifici, normative di settore o caratteristiche tecniche di prodotto. Solo pochi brand escono dalla retorica per mostrare meccanismi concreti: obiettivi quantificati, certificazioni normative specifiche o scelte progettuali che incidono sulla durata del prodotto.", "brand_count": 18, "brands": [{"slug": "arper", "name": "Arper", "url": "https://www.arper.com/it_IT/sostenibilita", "title": "Designing the world we live in | Arper IT", "note": "Struttura la sostenibilità come percorso navigabile con sezioni distinte (Pilastri, Certificazioni, Report di Sostenibilità) e la lega a un prodotto specifico, Catifa Carta, invece di restare sul piano dei principi."}, {"slug": "buzzispace", "name": "Buzzispace", "url": "https://www.buzzi.space/sustainability", "title": "Sustainability Initiatives | BuzziSpace", "note": "Cita un riferimento scientifico esterno (il warning IPCC del 2018 sul limite di 1.5°C) e aderisce a framework misurabili come SBTi e Net Zero Commitment, un livello di specificità dati assente negli altri brand."}, {"slug": "kastel", "name": "Kastel", "url": "https://www.kastel.it/sostenibilita/", "title": "Sostenibilità e CAM arredi | Kastel", "note": "Inserisce nel titolo stesso i CAM (Criteri Ambientali Minimi), il riferimento normativo italiano per gli appalti pubblici, posizionando la sostenibilità come requisito tecnico-legale per il contract piuttosto che come valore."}, {"slug": "prostoria", "name": "Prostoria", "url": "https://www.prostoria.eu/sustainability/", "title": "Sustainability - Prostoria", "note": "Punta sulla riparabilità come strategia esplicita: componenti sostituibili e riparabili pensati per allungare la vita del prodotto e ridurre lo scarto, un impegno progettuale concreto più che dichiarativo."}, {"slug": "inclass", "name": "Inclass", "url": "https://inclass.es/it/sostenibilita", "title": "INCLASS", "note": "Parla di obiettivi annuali quantificabili per il proprio sistema di gestione ambientale, introducendo una logica di misurazione periodica assente nella maggior parte dei competitor."}, {"slug": "segis", "name": "Segis", "url": "https://www.segis.it/azienda/sostenibilita-e-politica-ambientale/", "title": "Sostenibilità e Politica Ambientale | Segis", "note": "Apre la pagina con una narrazione storica (l'uomo antico che usava i materiali del proprio territorio senza alterare l'equilibrio ambientale) per introdurre il tema, un espediente narrativo distintivo rispetto al linguaggio istituzionale degli altri brand."}]}, {"key": "designers", "label": "Designer", "overview": "I brand adottano approcci molto diversi: alcuni trattano i designer come voci editoriali da intervistare (interviste dirette, citazioni), altri li usano come tag/categoria di navigazione senza narrazione, altri ancora costruiscono pagine-prodotto ibride che uniscono designer, processo produttivo e video.", "brand_count": 5, "brands": [{"slug": "boss-design", "name": "Boss Design", "url": "https://www.bossdesign.com/designer-stories/", "title": "Designer Stories - Boss Design", "note": "struttura i contenuti come 'People | Process | Production' e associa ogni prodotto a un designer nominato (es. Aaron Clarkson) con tagline funzionale ('Sustainable Lounge Chair', 'Focus Booth') e video dedicato, invece di una semplice bio designer."}, {"slug": "and-tradition", "name": "&Tradition", "url": "https://www.andtradition.com/journal/the-architecture-of-home-in-conversation-with-stephen-and-elodie-fasano", "title": "&Tradition — The Architecture of Home: In Conversation with Stephen and Elodie Fasano", "note": "usa un formato editoriale da rivista - titoli tipo 'In Conversation with...' - e separa nella navigazione 'Designers' da 'Stories', 'Cases' e 'Community', trattando il designer come uno snodo tra più contenuti diversi (pubblicazioni, casi, community) piuttosto che una pagina isolata."}, {"slug": "narbutas", "name": "Narbutas", "url": "https://www.narbutas.com/designers-and-product-awards/", "title": "Designers & Product Awards | Narbutas", "note": "accorpa 'Designers' e 'Product Awards' nello stesso titolo di pagina e presenta i designer tramite interviste con citazioni dirette (es. Christina Strand e Niels Hvass su 'let's help people be themselves'), legando la figura del designer a riconoscimenti oggettivi vinti dai prodotti."}]}, {"key": "tavoli", "label": "Tavoli", "overview": "Il settore si divide tra chi organizza i tavoli per attributo estetico/decorativo (materiali, forme, colori) e chi invece struttura il contenuto attorno a criteri funzionali come contesto d'uso, misure/altezze regolabili o specifiche tecniche certificate. Alcuni brand puntano tutto sull'attribuzione al designer come elemento di navigazione primario, altri sulla segmentazione per ambiente (residenziale vs contract vs hospitality).", "brand_count": 20, "brands": [{"slug": "kastel", "name": "Kastel", "url": "https://www.kastel.it/prodotti/tavoli/", "title": "Tavoli contract e tavoli riunione | Kastel", "note": "Descrive i tavoli in chiave puramente funzionale-contract, elencando altezze regolabili e contesti d'uso specifici (riunione, conferenza, attesa, lounge, ristorazione) invece di puntare su estetica o narrazione."}, {"slug": "miniforms", "name": "Miniforms", "url": "https://www.miniforms.com/en/products/5_coffee-tables/", "title": "products . miniforms", "note": "Organizza il catalogo per 'Spaces' (Residential, Hospitality, Office, Dining), usando il contesto d'uso come criterio di navigazione primario invece della tipologia di prodotto."}, {"slug": "muuto", "name": "Muuto", "url": "https://www.muuto.com/products/tables/cafe/", "title": "Café", "note": "Offre filtri tecnici granulari (materiale del piano, certificazioni EN/BIFMA/VOC, disponibilità 'Ready to ship') che nessun altro competitor mostra così esplicitamente in fase di navigazione prodotto."}, {"slug": "inclass", "name": "Inclass", "url": "https://inclass.es/it/collections?_sft_tipology=tavoli+tavolini", "title": "INCLASS", "note": "Ogni singola collezione di tavoli è affiancata dal nome del designer in un elenco fitto e continuo (Pearson Lloyd, Christophe Pillet, Francesc Rifé, Jonathan Prestwich), rendendo la varietà di autori il vero filo conduttore della pagina."}, {"slug": "andreu-world", "name": "Andreu World", "url": "https://andreuworld.com/en/products/tables/dining", "title": "All the dining collections of Andreu World in the tables category - Andreu World", "note": "Accosta sistematicamente ogni singolo modello al nome del designer già nella lista prodotti (Bolete/Patricia Urquiola, Extra/Lievore Altherr Molina), trasformando il catalogo in una sorta di indice per autore."}, {"slug": "roche-bobois", "name": "Roche Bobois", "url": "https://www.roche-bobois.com/it-IT/prodotti/tavoli", "title": "Tavoli | Roche Bobois", "note": "Presenta il tavolo esplicitamente come 'oggetto di decorazione' più che come mobile funzionale, elencando la gamma materica (vetro, metallo, legno, marmo, lacca) come leva creativa principale."}]}, {"key": "poltrone", "label": "Poltrone", "overview": "La maggior parte dei brand si limita a liste prodotto con descrizioni generiche, ma alcuni si distinguono per struttura informativa (tassonomie funzionali, dati quantitativi) o per il tono di comunicazione (slogan per singolo prodotto, copy informale, spotlight su designer). Le differenze più nette riguardano il livello di dettaglio tecnico/contract vs. quello puramente estetico-emozionale.", "brand_count": 16, "brands": [{"slug": "andreu-world", "name": "Andreu World", "url": "https://andreuworld.com/en/products/soft-seating/lounge-chairs", "title": "Discover the soft-seating Category - Andreu World", "note": "Ogni poltrona è abbinata esplicitamente al nome del designer direttamente in griglia (Starck, Lievore Altherr Molina, Urquiola), trasformando il catalogo in una sorta di elenco 'firmato' pezzo per pezzo."}, {"slug": "arper", "name": "Arper", "url": "https://www.arper.com/it_IT/prodotti/divani-e-lounge.html", "title": "Divani, Poltrone Lounge e Poggiapiedi | Arper IT", "note": "Tassonomia molto granulare che distingue Divani, Divani Modulari, Sedie Lounge, Poggiapiedi, Poltrone e Ottoman come categorie separate, invece di un generico 'lounge'."}, {"slug": "kastel", "name": "Kastel", "url": "https://www.kastel.it/prodotti/poltrone/", "title": "Poltrone design e poltrone contract | Kastel", "note": "Usa linguaggio tecnico-contract esplicito ('contesti ad alta frequentazione', 'allineare estetica e requisiti funzionali') e riporta conteggi numerici per tipologia (34 poltrone, 15 sedie, 18 sgabelli), dando un taglio da capitolato più che da moodboard."}, {"slug": "prostoria", "name": "Prostoria", "url": "https://www.prostoria.eu/products/lounge-chairs/", "title": "Lounge chairs - Prostoria", "note": "Ogni modello ha un micro-slogan dedicato ('Move Freely Lounge Fully', 'The Icon You Deserve', 'Comfort That Turns With You'), creando un copy narrativo prodotto per prodotto invece di una descrizione unica di categoria."}, {"slug": "miniforms", "name": "Miniforms", "url": "https://www.miniforms.com/en/products/10_poltrone/314_amiona/", "title": "amiona . miniforms", "note": "Tono di voce informale e diretto ('what a stunning shape!') e navigazione organizzata per contesto d'uso (Residential, Hospitality, Office, Dining) invece che per tipologia di prodotto."}, {"slug": "roche-bobois", "name": "Roche Bobois", "url": "https://www.roche-bobois.com/it-IT/prodotti/poltrone", "title": "Poltrone | Roche Bobois", "note": "Apre la pagina con una collaborazione di design in evidenza (Pedro Almodóvar) come contenuto editoriale, oltre a insistere su varianti funzionali specifiche (fissa, relax, girevole)."}, {"slug": "cassina", "name": "Cassina", "url": "https://www.cassina.com/it/it/prodotti/poltrone.7.html", "title": "Poltrone design, in Pelle e Chaise Longue Cassina", "note": "Descrive la gamma poltrone attraverso un contrasto dimensionale esplicito ('misure estese e avvolgenti' vs 'proporzioni ridotte e squadrate'), usando la variazione di formato come criterio narrativo."}]}, {"key": "sedie", "label": "Sedie", "overview": "Il settore oscilla tra due estremi: da un lato brand che trattano la sedia come dato tecnico-normativo (certificazioni, materiali, file CAD), dall'altro chi ne fa un pretesto narrativo o filosofico. Pochi differenziano davvero i contenuti: la maggior parte si limita a liste prodotto con designer e varianti.", "brand_count": 19, "brands": [{"slug": "andreu-world", "name": "Andreu World", "url": "https://andreuworld.com/en/products/outdoor/chairs", "title": "All the chairs collections of Andreu World in the outdoor category - Andreu World", "note": "Affianca ai prodotti documentazione tecnica scaricabile (Certificate, Environmental Product Declaration, DWG/3D/Revit), posizionando la sedia come oggetto da capitolato più che da showroom."}, {"slug": "kastel", "name": "Kastel", "url": "https://www.kastel.it/prodotto/konny-sedia-imbottita/", "title": "Konny | Poltroncina imbottita | Kastel", "note": "Descrive la sedia con specifiche materiche dettagliate (polipropilene imbottito in poliuretano ignifugo schiumato a freddo, frassino massello, piedini in nylon), un linguaggio quasi da scheda tecnica industriale."}, {"slug": "lapalma", "name": "Lapalma", "url": "https://www.lapalma.it/it/prodotti-outdoor/sedie", "title": "Sedie da esterno – Lapalma", "note": "Segmenta esplicitamente indoor/outdoor e motiva la scelta dei materiali outdoor citando gli agenti aggressivi specifici (sole, acqua, salsedine) invece di parlare genericamente di resistenza."}, {"slug": "prostoria", "name": "Prostoria", "url": "https://www.prostoria.eu/products/lounge-chairs/", "title": "Lounge chairs - Prostoria", "note": "Usa micro-tagline emozionali per singolo prodotto (\"Move Freely Lounge Fully\", \"The Icon You Deserve\", \"Comfort That Turns With You\") trasformando il catalogo in una sequenza di claim pubblicitari brevi."}, {"slug": "segis", "name": "Segis", "url": "https://www.segis.it/azienda/", "title": "Produttori di sedie di design | Segis", "note": "Apre la sezione con una riflessione quasi filosofica sul gesto del sedersi (\"Sit down\", il rituale di guardare/toccare prima di accomodarsi), un approccio narrativo raro nel settore."}, {"slug": "vitra", "name": "Vitra", "url": "https://www.vitra.com/it-it/product/category/chairs", "title": "Sedie | Negozio online ufficiale di Vitra® IT", "note": "Adotta una tassonomia molto granulare per contesto d'uso (sedie da ufficio, per conferenze, per aeroporti, micro architecture), più vicina a una logica di progettazione spaziale che di collezione prodotto."}, {"slug": "cassina", "name": "Cassina", "url": "https://www.cassina.com/it/it/prodotti/prodotti.5.html", "title": "Collezione Mobili e Arredo di Design Cassina: Divani, Sedie e Poltrone", "note": "Inquadra le sedie dentro un racconto storico-editoriale con la collezione \"I Maestri\", presentando la riedizione filologica di pezzi originali del XX secolo come valore distintivo rispetto al nuovo design."}]}, {"key": "outdoor", "label": "Outdoor", "overview": "La maggior parte dei brand tratta l'outdoor come una semplice categoria di prodotto nel menu, senza elaborazione contenutistica; le differenze reali emergono nel modo di presentare i prodotti (dati tecnici vs. storytelling di contesto) e nella terminologia usata per definire gli spazi d'uso.", "brand_count": 9, "brands": [{"slug": "inclass", "name": "Inclass", "url": "https://inclass.es/it/collections?_sft_tipology=outdoor", "title": "INCLASS", "note": "Ogni collezione outdoor è trattata come linea autonoma con suffisso esplicito 'OUTDOOR' e designer sempre citato in coppia (es. 'LEA OUTDOOR by Perezochando'), creando un catalogo-firma parallelo a quello indoor."}, {"slug": "lapalma", "name": "Lapalma", "url": "https://www.lapalma.it/it/prodotti-outdoor", "title": "Prodotti outdoor - Lapalma", "note": "Usa terminologia specifica del contract di ospitalità italiana come 'plateatici e dehors' invece del generico 'giardino/terrazza', posizionando l'outdoor nel mercato ristorazione/hospitality più che residenziale."}, {"slug": "roche-bobois", "name": "Roche Bobois", "url": "https://www.roche-bobois.com/it-IT/outdoor-collection.html", "title": "Collezione Outdoor 2026 | Roche Bobois", "note": "Presenta l'offerta con dati concreti e configurabili (100 prodotti, prezzo esatto €8.350, 8 rivestimenti, 5 dimensioni) invece di descrizioni evocative, rendendo il catalogo outdoor navigabile come un configuratore."}, {"slug": "poltrona-frau", "name": "Poltrona Frau", "url": "https://www.poltronafrau.com/it/it/products-landing/environments/outdoor.html", "title": "Outdoor di design - Idee per arredare gli spazi esterni", "note": "Estende il concetto di outdoor oltre giardini e terrazzi fino ai 'deck di yacht e navi', ampliando il perimetro d'uso a un contesto nautico/luxury che gli altri brand non menzionano."}, {"slug": "prostoria", "name": "Prostoria", "url": "https://www.prostoria.eu/collections/?t=outdoor", "title": "Collections - Prostoria", "note": "Chiama una linea 'Convert outdoor', suggerendo un concetto di adattabilità/trasformazione del prodotto tra interno ed esterno come proposta distintiva rispetto alla semplice separazione in categorie."}]}]}
+</script>
+
+<script>
+const DATA = JSON.parse(document.getElementById('site-data').textContent);
+
+const PAGE_TYPE_LABEL = {
+  hero: 'Homepage', homepage: 'Homepage', products: 'Prodotti',
+  news: 'Journal', sustainability: 'Sostenibilità', about: 'Chi siamo', other: 'Pagina',
+};
+
+function excerpt(text, maxLen) {
+  if (!text) return '';
+  return text.length > maxLen ? text.slice(0, maxLen).trim() + '…'.replace('…', '...') : text;
+}
+
+function fmtDate(iso) {
+  if (!iso) return null;
+  try { return new Date(iso).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }); }
+  catch (e) { return null; }
+}
+
+function renderLogoWall() {
+  const el = document.getElementById('logowall-grid');
+  el.innerHTML = DATA.brands.map(b => {
+    const img = b.logo_url
+      ? `<img src="${b.logo_url}" alt="${b.name}" loading="lazy"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />`
+      : '';
+    const fallbackDisplay = b.logo_url ? '' : 'style="display:flex;"';
+    return `
+      <a class="logowall-item" href="#brand-${b.slug}" title="${b.name}">
+        ${img}
+        <span class="fallback" ${fallbackDisplay}>${b.name}</span>
+      </a>
+    `;
+  }).join('');
+}
+
+function renderHeroMeta() {
+  const el = document.getElementById('hero-meta');
+  const parts = [];
+  const date = fmtDate(DATA.run_started_at);
+  if (date) parts.push(`Analisi del ${date}`);
+  parts.push(`${DATA.brand_count} brand analizzati`);
+  el.innerHTML = parts.map(p => `<span>${p}</span>`).join('<span class="dot"></span>');
+}
+
+function renderHeroCover() {
+  const top = DATA.brands.find(b => b.images && b.images.length);
+  const el = document.getElementById('hero-cover');
+  if (!top) { el.remove(); return; }
+  const img = top.images[0];
+  el.innerHTML = `
+    <img src="${img.path}" alt="Homepage di ${top.name}" loading="eager" />
+    <figcaption><span>Homepage &mdash; ${top.name}</span><span>#1 in classifica</span></figcaption>
+  `;
+}
+
+function renderIndex() {
+  const el = document.getElementById('index-list');
+  el.innerHTML = DATA.brands.map((b, i) => {
+    const insight = excerpt(b.comment, 110);
+    const score = b.score_overall !== null && b.score_overall !== undefined ? b.score_overall.toFixed(2) : '—';
+    return `
+      <a class="index-row reveal ${i === 0 ? 'rank-1' : ''}" href="#brand-${b.slug}">
+        <span class="num">${b.rank ?? (i + 1)}</span>
+        <span class="body"><h3>${b.name}</h3><p>${insight}</p></span>
+        <span class="score">${score}</span>
+      </a>
+    `;
+  }).join('');
+}
+
+function renderShowcase() {
+  const el = document.getElementById('showcase-grid');
+  const spans = ['span-4', 'span-2', 'span-3', 'span-3', 'span-2', 'span-4'];
+  const picks = [];
+  DATA.brands.forEach(b => {
+    if (picks.length >= 6) return;
+    const img = (b.images || [])[0];
+    if (img) picks.push({ brand: b, img });
+  });
+  el.innerHTML = picks.map((p, i) => `
+    <figure class="showcase-item reveal ${spans[i % spans.length]}">
+      <img src="${p.img.path}" alt="${p.img.page_title}" loading="lazy" />
+      <figcaption><b>${p.brand.name}</b> &middot; ${PAGE_TYPE_LABEL[p.img.role] || 'Pagina'}</figcaption>
+    </figure>
+  `).join('');
+}
+
+let activeThemeKey = null;
+
+function renderThemeTabs() {
+  const tabsEl = document.getElementById('theme-tabs');
+  const themes = DATA.themes || [];
+  if (!themes.length) {
+    document.getElementById('temi').style.display = 'none';
+    return;
+  }
+  activeThemeKey = themes[0].key;
+  tabsEl.innerHTML = themes.map(t => `
+    <button class="theme-tab ${t.key === activeThemeKey ? 'active' : ''}" data-key="${t.key}">${t.label}</button>
+  `).join('');
+  tabsEl.querySelectorAll('.theme-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeThemeKey = btn.dataset.key;
+      tabsEl.querySelectorAll('.theme-tab').forEach(b => b.classList.toggle('active', b === btn));
+      renderThemePanel();
+    });
+  });
+  renderThemePanel();
+}
+
+function renderThemePanel() {
+  const el = document.getElementById('theme-panel');
+  const theme = (DATA.themes || []).find(t => t.key === activeThemeKey);
+  if (!theme) { el.innerHTML = ''; return; }
+
+  const overview = theme.overview ? `<p class="theme-overview">${theme.overview}</p>` : '';
+  const rows = (theme.brands || []).map(b => `
+    <a class="theme-brand-row" href="${b.url}" target="_blank" rel="noopener">
+      <span class="name">${b.name}</span>
+      <span class="note">${b.note}</span>
+      <span class="go">Apri →</span>
+    </a>
+  `).join('');
+
+  el.innerHTML = `
+    ${overview}
+    ${rows ? `<div class="theme-brand-list">${rows}</div>` : '<p class="theme-empty">Nessuna nota distintiva rilevata per questo tema in questo run.</p>'}
+  `;
+}
+
+function renderWatchlist() {
+  const el = document.getElementById('watchlist-grid');
+  const list = DATA.watchlist_brands || [];
+  if (!list.length) {
+    document.getElementById('watchlist').style.display = 'none';
+    return;
+  }
+  el.innerHTML = list.map(b => {
+    const img = b.logo_url ? `<img src="${b.logo_url}" alt="${b.name}" loading="lazy" onerror="this.style.display='none';" />` : '';
+    return `
+      <a class="watchlist-item" href="${b.url}" target="_blank" rel="noopener" title="${b.name}">
+        ${img}
+        <span class="wl-name">${b.name}</span>
+        <span class="wl-country">${b.country || ''}</span>
+      </a>
+    `;
+  }).join('');
+}
+
+function renderSpreads() {
+  const el = document.getElementById('spreads');
+  el.innerHTML = DATA.brands.map((b, i) => {
+    const layout = (i % 3 === 2) ? 'layout-feature' : 'layout-split' + (i % 2 === 1 ? ' flip' : '');
+    const images = (b.images || []).slice(0, layout === 'layout-feature' ? 1 : 2);
+    const mediaHtml = images.map(img => `<figure><img src="${img.path}" alt="${img.page_title}" loading="lazy" /></figure>`).join('');
+
+    const tags = (b.themes || []).slice(0, 5).map(t => `<span class="tag">${t.replace(/_/g, ' ')}</span>`).join('');
+
+    const links = (b.links || []).map(l => `
+      <li><a href="${l.url}" target="_blank" rel="noopener">
+        <span class="t">${l.title}</span><span class="arrow">→</span>
+      </a></li>
+    `).join('');
+
+    const scoreLine = b.score_overall !== null && b.score_overall !== undefined
+      ? `<span>Punteggio ${b.score_overall.toFixed(2)}</span>` : '';
+    const tierLabel = b.tier === 'direct' ? 'Diretto' : b.tier === 'watchlist' ? 'Watchlist' : 'True Design';
+
+    const ideas = (b.notable_ideas || []).filter(Boolean);
+    const ideasHtml = ideas.length
+      ? `<div class="idea-box"><p class="idea-label">Spunto</p><ul>${ideas.map(i => `<li>${i}</li>`).join('')}</ul></div>`
+      : '';
+
+    return `
+      <article class="spread ${layout} reveal" id="brand-${b.slug}">
+        <div class="wrap">
+          <div class="spread-text">
+            <div class="spread-meta">
+              <span class="tier-tag">${tierLabel}</span>
+              <span>${b.country || ''}</span>
+              ${scoreLine}
+            </div>
+            <h3><a href="${b.url}" target="_blank" rel="noopener">${b.name} <span class="ext">↗</span></a></h3>
+            ${b.comment ? `<p class="quote">${b.comment}</p>` : ''}
+            ${tags ? `<div class="tags">${tags}</div>` : ''}
+            ${ideasHtml}
+            ${links ? `<p class="links-title">Pagine più interessanti</p><ul class="link-list">${links}</ul>` : ''}
+          </div>
+          <div class="spread-media">${mediaHtml}</div>
+        </div>
+      </article>
+    `;
+  }).join('');
+}
+
+function initReveal() {
+  const items = document.querySelectorAll('.reveal');
+  if (!('IntersectionObserver' in window)) { items.forEach(i => i.classList.add('in')); return; }
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) { entry.target.classList.add('in'); io.unobserve(entry.target); }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  items.forEach(i => io.observe(i));
+}
+
+renderLogoWall();
+renderHeroMeta();
+renderHeroCover();
+renderIndex();
+renderShowcase();
+renderThemeTabs();
+renderSpreads();
+renderWatchlist();
+initReveal();
+</script>
+
+</body>
+</html>
