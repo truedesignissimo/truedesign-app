@@ -116,13 +116,20 @@ export async function setUserApproval(userId: string, approved: boolean) {
     const email = userResult.user?.email;
     if (userError || !email) throw new Error("Indirizzo email dell’utente non disponibile.");
 
-    const { error: activationError } = await admin.auth.signInWithOtp({
-      email,
-      options: {
-        shouldCreateUser: false,
-        emailRedirectTo: getAuthRedirect("/dashboard"),
-      },
-    });
+    const activationResult = userResult.user.email_confirmed_at
+      ? await admin.auth.signInWithOtp({
+          email,
+          options: {
+            shouldCreateUser: false,
+            emailRedirectTo: getAuthRedirect("/dashboard"),
+          },
+        })
+      : await admin.auth.resend({
+          type: "signup",
+          email,
+          options: { emailRedirectTo: getAuthRedirect("/dashboard") },
+        });
+    const activationError = activationResult.error;
     if (activationError) {
       throw new Error("Non è stato possibile inviare l’email di attivazione. Il profilo resta in attesa.");
     }
