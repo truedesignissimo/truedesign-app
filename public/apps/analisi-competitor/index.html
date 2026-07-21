@@ -32,7 +32,7 @@
   --paper-raised: #e9e9e5;
   --ink: #17171a;
   --ink-soft: #4a4a48;
-  --muted: #83837c;
+  --muted: #6b6a64;
   --line: #dcdcd6;
   --accent: #b3391f;
   --max: 1240px;
@@ -52,6 +52,12 @@ body {
 }
 
 a { color: inherit; }
+
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
 
 img { display: block; max-width: 100%; }
 
