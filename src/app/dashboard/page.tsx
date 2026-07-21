@@ -79,7 +79,6 @@ export default async function DashboardPage() {
     if (app) appsById.set(app.id, app);
   });
   const apps = Array.from(appsById.values()).sort((first, second) =>
-    Number(Boolean(second.is_featured)) - Number(Boolean(first.is_featured)) ||
     (first.display_order ?? 0) - (second.display_order ?? 0) ||
     first.name.localeCompare(second.name, "it")
   );
@@ -134,17 +133,7 @@ export default async function DashboardPage() {
               </div>
             )}
             {apps.map((app: any) => (
-              <article key={app.id} className={`card app-card ${app.is_featured ? "app-card-featured" : ""}`}>
-                <div className="app-card-visual">
-                  <span className="app-initial" aria-hidden="true">{app.name.trim().charAt(0).toLowerCase()}</span>
-                  <span className="app-status">{app.is_featured ? "In evidenza" : "Disponibile"}</span>
-                </div>
-                <div className="app-card-body">
-                  <h2>{app.name}</h2>
-                  <p className="muted">{app.description || "Uno strumento del workspace True Design."}</p>
-                  <AppLink appId={app.id} url={app.url} userId={user.id} />
-                </div>
-              </article>
+              <AppLink key={app.id} appId={app.id} name={app.name} url={app.url} />
             ))}
           </div>
         </section>

@@ -1,13 +1,29 @@
 "use server";
 
 import { createAdminClient } from "@/lib/supabase-admin";
+import { getSiteUrl } from "@/lib/site-url";
 
 const DEFAULT_OWNER_EMAIL = "dario.breggie@truedesign.it";
 
+function escapeHtml(value: string) {
+  return value.replace(/[&<>'"]/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "'": "&#39;",
+    '"': "&quot;",
+  })[character]!);
+}
+
 export async function notifyRegistrationRequest(email: string, fullName: string) {
   const normalizedEmail = email.trim().toLowerCase();
-  const normalizedName = fullName.trim();
-  if (!normalizedEmail || !normalizedName || normalizedEmail.endsWith("@truedesign.it")) {
+  const normalizedName = fullName.trim().replace(/[\r\n]+/g, " ");
+  if (
+    !/^\S+@\S+\.\S+$/.test(normalizedEmail) ||
+    !normalizedName ||
+    normalizedName.length > 120 ||
+    normalizedEmail.endsWith("@truedesign.it")
+  ) {
     return { notified: false };
   }
 
@@ -20,7 +36,9 @@ export async function notifyRegistrationRequest(email: string, fullName: string)
   if (!apiKey) return { notified: false };
 
   const ownerEmail = process.env.APPROVAL_NOTIFICATION_EMAIL || DEFAULT_OWNER_EMAIL;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.truedesign.app";
+  const siteUrl = getSiteUrl();
+  const safeName = escapeHtml(normalizedName);
+  const safeEmail = escapeHtml(normalizedEmail);
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -31,7 +49,7 @@ export async function notifyRegistrationRequest(email: string, fullName: string)
       from: process.env.REGISTRATION_FROM_EMAIL || "True Design Workspace <noreply@truedesign.app>",
       to: [ownerEmail],
       subject: `Nuova richiesta di accesso: ${normalizedName}`,
-      html: `<p><strong>${normalizedName}</strong> (${normalizedEmail}) ha richiesto l'accesso al workspace.</p><p><a href="${siteUrl}/admin/assignments">Apri il pannello utenti per approvare</a></p>`,
+      html: `<p><strong>${safeName}</strong> (${safeEmail}) ha richiesto l'accesso al workspace.</p><p><a href="${siteUrl}/admin/assignments">Apri il pannello utenti per approvare</a></p>`,
     }),
     cache: "no-store",
   });

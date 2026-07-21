@@ -28,6 +28,7 @@ export default function RegistrationPage() {
       email: normalizedEmail,
       password,
       options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/dashboard")}`,
         data: {
           full_name: fullName,
           first_name: firstName.trim(),

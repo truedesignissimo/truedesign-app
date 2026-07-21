@@ -12,6 +12,7 @@ function LoginForm() {
 
   const tipo = searchParams.get("tipo") === "interno" ? "interno" : "cliente";
   const isInternal = tipo === "interno";
+  const linkError = searchParams.get("errore");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -84,6 +85,14 @@ function LoginForm() {
           <p className="eyebrow">{isInternal ? "Team True" : "Area clienti"}</p>
           <h2>Accedi</h2>
           <p className="muted">Usa le tue credenziali oppure crea un nuovo account.</p>
+
+          {linkError && (
+            <p className="error" role="alert">
+              {linkError === "link-scaduto"
+                ? "Il link è scaduto o è già stato utilizzato. Richiedi una nuova email."
+                : "Il link di accesso non è valido. Richiedi un nuovo invito o una nuova conferma."}
+            </p>
+          )}
 
           <form onSubmit={handleLogin} className="grid">
             <div>

@@ -57,7 +57,7 @@ export default async function AdminAppsPage() {
           </div>
         </div>
         <div className="table-wrap">
-          <table>
+          <table className="app-catalog-table">
             <thead>
               <tr>
                 <th>Nome</th>

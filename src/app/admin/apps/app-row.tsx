@@ -29,8 +29,32 @@ export default function AppRow({ app, supportsPlacement }: { app: App; supportsP
   const [isFeatured, setIsFeatured] = useState(app.is_featured);
   const [displayOrder, setDisplayOrder] = useState(app.display_order);
   const [saving, setSaving] = useState(false);
+  const [changingStatus, setChangingStatus] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const hasResultsDashboard = app.url === "/apps/true-sondaggio-iconici";
+  const isDirty =
+    name !== app.name ||
+    description !== (app.description ?? "") ||
+    url !== (app.url ?? "") ||
+    visibility !== app.visibility ||
+    (supportsPlacement && (isFeatured !== app.is_featured || displayOrder !== app.display_order));
+
+  function beginEdit() {
+    setError(null);
+    setSaved(false);
+  }
+
+  function resetChanges() {
+    setName(app.name);
+    setDescription(app.description ?? "");
+    setUrl(app.url ?? "");
+    setVisibility(app.visibility);
+    setIsFeatured(app.is_featured);
+    setDisplayOrder(app.display_order);
+    setError(null);
+    setSaved(false);
+  }
 
   async function saveApp() {
     setSaving(true);
@@ -48,7 +72,12 @@ export default function AppRow({ app, supportsPlacement }: { app: App; supportsP
     }
 
     try {
-      await updateAppRecord(app.id, update);
+      const result = await updateAppRecord(app.id, update);
+      if (!result.ok) {
+        setSaving(false);
+        setError(result.error);
+        return;
+      }
     } catch (updateError) {
       setSaving(false);
       setError(updateError instanceof Error ? updateError.message : "Salvataggio non riuscito.");
@@ -61,10 +90,19 @@ export default function AppRow({ app, supportsPlacement }: { app: App; supportsP
 
   async function toggleActive() {
     setError(null);
+    setSaved(false);
+    setChangingStatus(true);
     try {
-      await setAppActive(app.id, !app.is_active);
+      const result = await setAppActive(app.id, !app.is_active);
+      if (!result.ok) {
+        setChangingStatus(false);
+        setError(result.error);
+        return;
+      }
+      setChangingStatus(false);
       router.refresh();
     } catch (updateError) {
+      setChangingStatus(false);
       setError(updateError instanceof Error ? updateError.message : "Aggiornamento non riuscito.");
     }
   }
@@ -72,7 +110,11 @@ export default function AppRow({ app, supportsPlacement }: { app: App; supportsP
   async function deleteApp() {
     if (!confirm(`Eliminare l'app "${app.name}"? Verranno rimosse anche le assegnazioni e i log collegati.`)) return;
     try {
-      await deleteAppRecord(app.id);
+      const result = await deleteAppRecord(app.id);
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
       router.refresh();
     } catch (deleteError) {
       setError(deleteError instanceof Error ? deleteError.message : "Eliminazione non riuscita.");
@@ -80,47 +122,106 @@ export default function AppRow({ app, supportsPlacement }: { app: App; supportsP
   }
 
   return (
-    <tr className="app-admin-row">
-      <td>
-        <input className="input app-name-input" value={name} onChange={(e) => setName(e.target.value)} aria-label="Nome applicazione" />
-        <textarea className="input app-description-input" value={description} onChange={(e) => setDescription(e.target.value)} aria-label="Descrizione applicazione" placeholder="Descrizione" />
-      </td>
-      <td>
-        <input className="input app-url-input" value={url} onChange={(e) => setUrl(e.target.value)} aria-label="URL applicazione" placeholder="/apps/nome" />
-      </td>
-      <td>
-        <select className="input" value={visibility} onChange={(e) => setVisibility(e.target.value)}>
-          <option value="interno">Team interno</option>
-          <option value="cliente">Clienti</option>
-          <option value="pubblica">Pubblica</option>
-        </select>
-      </td>
-      <td>
-        {supportsPlacement ? (
-          <label className="app-feature-toggle compact">
-            <input type="checkbox" checked={isFeatured} onChange={(e) => setIsFeatured(e.target.checked)} />
-            In evidenza
-          </label>
-        ) : <span className="muted">Standard</span>}
-      </td>
-      <td>
-        {supportsPlacement ? (
-          <input className="input app-order-input" type="number" min="0" value={displayOrder} onChange={(e) => setDisplayOrder(Number(e.target.value))} aria-label="Ordine applicazione" />
-        ) : <span className="muted">—</span>}
-      </td>
-      <td>
-        <button className={`btn ${app.is_active ? "btn-status-active" : "btn-secondary"}`} onClick={toggleActive}>
-          {app.is_active ? "Online" : "In pausa"}
-        </button>
-      </td>
-      <td>
-        <div className="app-row-actions">
-          <button className="btn" onClick={saveApp} disabled={saving || !name.trim()}>{saving ? "Salvo…" : "Salva"}</button>
-          <button className="btn btn-danger" onClick={deleteApp}>Elimina</button>
-        </div>
-        {saved && <span className="app-row-feedback success-text">Salvata</span>}
-        {error && <span className="app-row-feedback error">{error}</span>}
-      </td>
-    </tr>
+    <>
+      <tr className={`app-admin-row ${isDirty ? "app-admin-row-dirty" : ""}`}>
+        <td>
+          <input
+            className="input app-name-input"
+            value={name}
+            onChange={(event) => { beginEdit(); setName(event.target.value); }}
+            aria-label="Nome applicazione"
+            maxLength={120}
+          />
+          <textarea
+            className="input app-description-input"
+            value={description}
+            onChange={(event) => { beginEdit(); setDescription(event.target.value); }}
+            aria-label="Descrizione applicazione"
+            placeholder="Descrizione"
+            maxLength={1000}
+          />
+        </td>
+        <td>
+          <input
+            className="input app-url-input"
+            value={url}
+            onChange={(event) => { beginEdit(); setUrl(event.target.value); }}
+            aria-label="URL applicazione"
+            placeholder="/apps/nome"
+            spellCheck={false}
+          />
+        </td>
+        <td>
+          <select
+            className="input"
+            value={visibility}
+            onChange={(event) => { beginEdit(); setVisibility(event.target.value); }}
+            aria-label="Visibilità applicazione"
+          >
+            <option value="interno">Team interno</option>
+            <option value="cliente">Clienti</option>
+            <option value="pubblica">Pubblica</option>
+          </select>
+        </td>
+        <td>
+          {supportsPlacement ? (
+            <label className="app-feature-toggle compact">
+              <input
+                type="checkbox"
+                checked={isFeatured}
+                onChange={(event) => { beginEdit(); setIsFeatured(event.target.checked); }}
+              />
+              In evidenza
+            </label>
+          ) : <span className="muted">Standard</span>}
+        </td>
+        <td>
+          {supportsPlacement ? (
+            <input
+              className="input app-order-input"
+              type="number"
+              min="0"
+              value={displayOrder}
+              onChange={(event) => { beginEdit(); setDisplayOrder(Number(event.target.value)); }}
+              aria-label="Ordine applicazione"
+            />
+          ) : <span className="muted">—</span>}
+        </td>
+        <td>
+          <button
+            className={`btn ${app.is_active ? "btn-status-active" : "btn-secondary"}`}
+            onClick={toggleActive}
+            disabled={changingStatus}
+          >
+            {changingStatus ? "Aggiorno…" : app.is_active ? "Online" : "In pausa"}
+          </button>
+        </td>
+        <td>
+          <div className="app-row-actions">
+            <button className="btn" onClick={saveApp} disabled={saving || !name.trim() || !isDirty}>
+              {saving ? "Salvo…" : "Salva"}
+            </button>
+            {isDirty && (
+              <button className="btn btn-secondary" onClick={resetChanges}>Annulla</button>
+            )}
+            {hasResultsDashboard && (
+              <a className="btn btn-secondary" href="/admin/apps/true-sondaggio-iconici">Risultati</a>
+            )}
+            <button className="btn btn-danger" onClick={deleteApp}>Elimina</button>
+          </div>
+        </td>
+      </tr>
+      {(saved || error) && (
+        <tr className="app-row-message" aria-live="polite">
+          <td colSpan={7}>
+            {saved ? (
+              <div className="app-row-notice app-row-notice-success"><strong>Modifiche salvate.</strong> Il catalogo è stato aggiornato.</div>
+            ) : (
+              <div className="app-row-notice app-row-notice-error"><strong>Salvataggio non riuscito.</strong> {error}</div>
+            )}
+          </td>
+        </tr>
+      )}
+    </>
   );
 }

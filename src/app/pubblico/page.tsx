@@ -57,21 +57,15 @@ export default async function PubblicoPage() {
               </div>
             )}
             {(apps ?? []).map((app) => (
-              <article key={app.id} className={`card app-card ${app.is_featured ? "app-card-featured" : ""}`}>
-                <div className="app-card-visual">
-                  <span className="app-initial" aria-hidden="true">{app.name.trim().charAt(0).toLowerCase()}</span>
-                  <span className="app-status">{app.is_featured ? "In evidenza" : "Open"}</span>
-                </div>
-                <div className="app-card-body">
+              app.url ? (
+                <a key={app.id} className="app-title-card" href={app.url}>
                   <h2>{app.name}</h2>
-                  <p className="muted">{app.description || "Uno strumento pubblico di True Design."}</p>
-                  {app.url && (
-                    <a className="btn" href={app.url} target="_blank" rel="noopener noreferrer">
-                      Apri applicazione →
-                    </a>
-                  )}
+                </a>
+              ) : (
+                <div key={app.id} className="app-title-card app-title-card-disabled" aria-disabled="true">
+                  <h2>{app.name}</h2>
                 </div>
-              </article>
+              )
             ))}
           </div>
         </section>

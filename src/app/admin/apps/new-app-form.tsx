@@ -32,7 +32,12 @@ export default function NewAppForm({ supportsPlacement }: { supportsPlacement: b
       newApp.display_order = displayOrder;
     }
     try {
-      await createAppRecord(newApp);
+      const result = await createAppRecord(newApp);
+      if (!result.ok) {
+        setLoading(false);
+        setError(result.error);
+        return;
+      }
     } catch (createError) {
       setLoading(false);
       setError(createError instanceof Error ? createError.message : "Creazione non riuscita.");

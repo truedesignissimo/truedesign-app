@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase-server";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { revalidatePath } from "next/cache";
+import { getAuthRedirect } from "@/lib/site-url";
 
 async function assertIsAdmin() {
   const supabase = await createClient();
@@ -12,13 +13,14 @@ async function assertIsAdmin() {
 
   if (!user) throw new Error("Non autenticato");
 
-  const { data: profile } = await supabase
+  const admin = createAdminClient();
+  const { data: profile, error } = await admin
     .from("profiles")
     .select("is_admin")
     .eq("id", user.id)
     .single();
 
-  if (!profile?.is_admin) throw new Error("Non autorizzato");
+  if (error || !profile?.is_admin) throw new Error("Non autorizzato");
 
   return user;
 }
@@ -34,6 +36,13 @@ export async function inviteUser(
     const normalizedEmail = email.trim().toLowerCase();
     const normalizedName = fullName.trim();
 
+    if (!normalizedName || normalizedName.length > 120) {
+      return { ok: false as const, error: "Inserisci un nome valido." };
+    }
+    if (!/^\S+@\S+\.\S+$/.test(normalizedEmail)) {
+      return { ok: false as const, error: "Inserisci un indirizzo email valido." };
+    }
+
     const { data: usersData, error: listError } = await admin.auth.admin.listUsers({
       page: 1,
       perPage: 1000,
@@ -48,7 +57,7 @@ export async function inviteUser(
     if (!invitedUser) {
       const { data, error } = await admin.auth.admin.inviteUserByEmail(normalizedEmail, {
         data: { full_name: normalizedName, user_type: userType },
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.truedesign.app"}/login`,
+        redirectTo: getAuthRedirect("/imposta-password"),
       });
       if (error || !data.user) {
         return {
@@ -58,6 +67,15 @@ export async function inviteUser(
       }
       invitedUser = data.user;
       alreadyExisted = false;
+    } else if (!invitedUser.email_confirmed_at) {
+      const { error: resendError } = await admin.auth.resend({
+        type: "signup",
+        email: normalizedEmail,
+        options: { emailRedirectTo: getAuthRedirect("/dashboard") },
+      });
+      if (resendError) {
+        return { ok: false as const, error: "L’account esiste, ma non è stato possibile reinviare la conferma." };
+      }
     }
 
     const profilePayload = {
@@ -78,10 +96,13 @@ export async function inviteUser(
     return {
       ok: true as const,
       message: alreadyExisted
-        ? "L’account esisteva già: profilo approvato e aggiornato."
+        ? invitedUser.email_confirmed_at
+          ? "L’account esisteva già: profilo approvato e aggiornato."
+          : "Account approvato e nuova email di conferma inviata."
         : "Invito inviato via email e profilo approvato.",
     };
-  } catch {
+  } catch (error) {
+    console.error("[admin/assignments] invite", error instanceof Error ? error.message : error);
     return { ok: false as const, error: "Sessione non valida o permessi amministratore mancanti." };
   }
 }
@@ -137,7 +158,9 @@ export async function updateUserName(userId: string, fullName: string) {
 export async function sendPasswordReset(email: string) {
   await assertIsAdmin();
   const admin = createAdminClient();
-  const { error } = await admin.auth.resetPasswordForEmail(email);
+  const { error } = await admin.auth.resetPasswordForEmail(email, {
+    redirectTo: getAuthRedirect("/imposta-password"),
+  });
   if (error) throw new Error(error.message);
 }
 
