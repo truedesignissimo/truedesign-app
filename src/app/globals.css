@@ -664,46 +664,32 @@ label.muted {
 .app-title-card {
   position: relative;
   display: flex;
-  min-height: clamp(260px, 30vw, 410px);
+  min-height: clamp(220px, 24vw, 340px);
   align-items: flex-end;
   overflow: hidden;
   padding: clamp(26px, 3.4vw, 48px);
-  border: 1px solid rgba(74, 63, 57, 0.08);
-  border-radius: 30px;
-  background: #e7ded7;
-  color: #292523;
+  border: 1px solid rgba(65, 48, 23, 0.12);
+  border-radius: 24px;
+  background: #d9b75f;
+  color: #2d2417;
   text-align: left;
   text-decoration: none;
-  isolation: isolate;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.62) inset, 0 18px 48px rgba(68, 55, 48, 0.07);
-  transition: transform 220ms ease, border-radius 220ms ease, box-shadow 220ms ease;
-}
-
-.app-title-card::before {
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  background: radial-gradient(circle at 80% 16%, rgba(255, 255, 255, 0.62), transparent 42%);
-  content: "";
-  transition: transform 500ms ease;
+  box-shadow: 0 16px 42px rgba(67, 48, 20, 0.08);
+  transition: transform 220ms ease, box-shadow 220ms ease;
 }
 
 .app-title-card:nth-child(3n + 2) {
-  background: #d9cec7;
+  background: #c99950;
 }
 
 .app-title-card:nth-child(3n) {
-  background: #cfc1c1;
+  background: #ae7544;
+  color: #fff7e7;
 }
 
 .app-title-card:hover {
-  transform: translateY(-4px);
-  border-radius: 38px;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset, 0 26px 64px rgba(68, 55, 48, 0.12);
-}
-
-.app-title-card:hover::before {
-  transform: scale(1.18);
+  transform: translateY(-5px);
+  box-shadow: 0 24px 58px rgba(67, 48, 20, 0.15);
 }
 
 .app-title-card h2 {
@@ -711,8 +697,8 @@ label.muted {
   margin: 0;
   font-size: clamp(2.4rem, 4vw, 4.9rem);
   font-weight: 500;
-  letter-spacing: -0.048em;
-  line-height: 0.93;
+  letter-spacing: -0.04em;
+  line-height: 0.96;
 }
 
 .app-title-card-disabled {
@@ -723,7 +709,6 @@ label.muted {
 
 .app-title-card-disabled:hover {
   transform: none;
-  border-radius: 30px;
 }
 
 .empty-state {
@@ -2051,7 +2036,7 @@ input[type="checkbox"] {
 /* Homepage — Golden Breath / fotografia alpina */
 .home-page {
   overflow: hidden;
-  background: #fff7ee;
+  background: #f6edda;
 }
 
 .home-hero {
@@ -2062,11 +2047,37 @@ input[type="checkbox"] {
   justify-content: flex-end;
   overflow: hidden;
   padding: clamp(32px, 5vw, 76px);
-  background:
-    linear-gradient(180deg, rgba(20, 25, 25, 0.28) 0%, rgba(30, 25, 24, 0.02) 38%, rgba(42, 23, 23, 0.74) 100%),
-    linear-gradient(90deg, rgba(244, 95, 66, 0.18), transparent 58%),
-    url("/Assets/home-landscape.jpg") center 48% / cover no-repeat;
+  background: #4b3b25;
   color: #fff;
+}
+
+.home-hero-slideshow,
+.home-hero-slide,
+.home-hero-shade {
+  position: absolute;
+  inset: 0;
+}
+
+.home-hero-slideshow {
+  z-index: 0;
+  background: #4b3b25;
+}
+
+.home-hero-slide {
+  background-position: center;
+  background-size: cover;
+  opacity: 0;
+  transform: scale(1.025);
+  transition: opacity 1.45s ease, transform 7s ease;
+}
+
+.home-hero-slide.is-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.home-hero-shade {
+  background: linear-gradient(180deg, rgba(36, 29, 19, 0.28) 0%, rgba(36, 29, 19, 0.03) 40%, rgba(45, 30, 14, 0.74) 100%);
 }
 
 .home-header {
@@ -2079,6 +2090,14 @@ input[type="checkbox"] {
   align-items: center;
   justify-content: space-between;
   padding: clamp(24px, 3.5vw, 52px) clamp(28px, 5vw, 76px);
+}
+
+.home-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .home-header .brand-logo {
@@ -2094,7 +2113,7 @@ input[type="checkbox"] {
   display: inline-flex;
   min-height: 48px;
   align-items: center;
-  gap: 28px;
+  gap: 22px;
   padding: 0 22px;
   border: 1px solid rgba(255, 255, 255, 0.58);
   border-radius: 999px;
@@ -2105,6 +2124,17 @@ input[type="checkbox"] {
   text-decoration: none;
   backdrop-filter: blur(16px);
   transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.home-header-action-primary {
+  border-color: rgba(243, 193, 86, 0.9);
+  background: #e6b84f;
+  color: #2d2417;
+}
+
+.home-header-button {
+  font-family: inherit;
+  cursor: pointer;
 }
 
 .home-header-action:hover {
@@ -2129,19 +2159,19 @@ input[type="checkbox"] {
 }
 
 .home-hero-copy .home-kicker {
-  color: #ffd2bf;
+  color: #f4d896;
 }
 
 .home-hero-copy h1 {
   margin: 0;
   font-size: clamp(5rem, 10.6vw, 11rem);
   font-weight: 600;
-  letter-spacing: -0.085em;
-  line-height: 0.76;
+  letter-spacing: -0.064em;
+  line-height: 0.8;
 }
 
 .home-hero-copy h1 em {
-  color: #ffb9a0;
+  color: #edbd58;
   font-style: normal;
 }
 
@@ -2184,7 +2214,7 @@ input[type="checkbox"] {
 
 .home-scroll-cue:hover {
   transform: scale(1.06);
-  background: rgba(244, 95, 66, 0.8);
+  background: rgba(196, 132, 55, 0.86);
 }
 
 .home-login-section {
@@ -2194,8 +2224,8 @@ input[type="checkbox"] {
   align-items: center;
   gap: clamp(46px, 8vw, 140px);
   padding: clamp(80px, 11vw, 170px) clamp(28px, 7vw, 110px);
-  background: #ff7857;
-  color: #291d21;
+  background: #d8ad55;
+  color: #302515;
 }
 
 .home-login-copy h2,
@@ -2203,8 +2233,8 @@ input[type="checkbox"] {
   margin: 0;
   font-size: clamp(4rem, 7.4vw, 8.5rem);
   font-weight: 600;
-  letter-spacing: -0.085em;
-  line-height: 0.86;
+  letter-spacing: -0.064em;
+  line-height: 0.9;
 }
 
 .home-login-copy h2 em {
@@ -2222,8 +2252,8 @@ input[type="checkbox"] {
 .home-login-panel {
   padding: clamp(28px, 4.2vw, 64px);
   border-radius: 32px;
-  background: #fff8ee;
-  box-shadow: 0 38px 90px rgba(72, 31, 30, 0.18);
+  background: #fffaf0;
+  box-shadow: 0 38px 90px rgba(75, 49, 17, 0.17);
 }
 
 .home-login-form {
@@ -2237,7 +2267,7 @@ input[type="checkbox"] {
 }
 
 .home-login-field label {
-  color: #8a6662;
+  color: #80663d;
   font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.12em;
@@ -2248,20 +2278,20 @@ input[type="checkbox"] {
   min-width: 0;
   padding: 12px 0 16px;
   border: 0;
-  border-bottom: 1px solid #cdaea5;
+  border-bottom: 1px solid #cbb98f;
   border-radius: 0;
   outline: 0;
   background: transparent;
-  color: #291d21;
+  color: #302515;
   font-size: clamp(1.2rem, 1.8vw, 1.65rem);
 }
 
 .home-login-field input:focus {
-  border-bottom-color: #f45f42;
+  border-bottom-color: #a86b32;
 }
 
 .home-login-field input::placeholder {
-  color: #bda49d;
+  color: #ae9a72;
 }
 
 .home-login-submit {
@@ -2273,7 +2303,7 @@ input[type="checkbox"] {
   padding: 0 24px;
   border: 0;
   border-radius: 999px;
-  background: #243b3a;
+  background: #3a301f;
   color: #fff;
   font: inherit;
   font-size: 0.9rem;
@@ -2289,7 +2319,7 @@ input[type="checkbox"] {
 
 .home-login-submit:hover:not(:disabled) {
   transform: translateY(-2px);
-  background: #f45f42;
+  background: #9f6733;
 }
 
 .home-login-submit:disabled {
@@ -2305,13 +2335,13 @@ input[type="checkbox"] {
 }
 
 .home-login-meta a {
-  color: #7d5b58;
+  color: #755e38;
   font-size: 0.74rem;
   text-decoration: none;
 }
 
 .home-login-meta a:hover {
-  color: #f45f42;
+  color: #9f6733;
 }
 
 .home-login-error {
@@ -2341,8 +2371,8 @@ input[type="checkbox"] {
   grid-template-columns: minmax(280px, 0.64fr) minmax(0, 1.36fr);
   gap: clamp(44px, 7vw, 110px);
   padding: clamp(90px, 11vw, 170px) clamp(28px, 7vw, 110px);
-  background: #d8cfca;
-  color: #292523;
+  background: #eee1bd;
+  color: #2d2417;
 }
 
 .home-apps-heading {
@@ -2350,49 +2380,34 @@ input[type="checkbox"] {
 }
 
 .home-apps-heading .home-kicker {
-  color: #6d625c;
+  color: #77623e;
 }
 
 .home-app-title-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  gap: 18px;
 }
 
 .home-app-title {
   position: relative;
   display: flex;
-  min-height: clamp(260px, 31vw, 480px);
+  min-height: clamp(220px, 25vw, 360px);
   align-items: flex-end;
   overflow: hidden;
   padding: clamp(24px, 3.2vw, 48px);
-  border: 1px solid rgba(74, 63, 57, 0.08);
-  border-radius: 30px;
-  background: #e7ded7;
-  color: #292523;
+  border: 1px solid rgba(65, 48, 23, 0.12);
+  border-radius: 24px;
+  background: #d9b75f;
+  color: #2d2417;
   text-decoration: none;
-  isolation: isolate;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.62) inset, 0 18px 48px rgba(68, 55, 48, 0.07);
-  transition: transform 220ms ease, border-radius 220ms ease, box-shadow 220ms ease;
-}
-
-.home-app-title::before {
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  background: radial-gradient(circle at 78% 18%, rgba(255, 255, 255, 0.62), transparent 42%);
-  content: "";
-  transition: transform 500ms ease;
+  box-shadow: 0 16px 42px rgba(67, 48, 20, 0.08);
+  transition: transform 220ms ease, box-shadow 220ms ease;
 }
 
 .home-app-title:hover {
-  transform: translateY(-4px);
-  border-radius: 38px;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset, 0 26px 64px rgba(68, 55, 48, 0.12);
-}
-
-.home-app-title:hover::before {
-  transform: scale(1.18);
+  transform: translateY(-5px);
+  box-shadow: 0 24px 58px rgba(67, 48, 20, 0.15);
 }
 
 .home-app-title h3 {
@@ -2400,29 +2415,30 @@ input[type="checkbox"] {
   margin: 0;
   font-size: clamp(2.5rem, 4.3vw, 5.5rem);
   font-weight: 500;
-  letter-spacing: -0.048em;
-  line-height: 0.93;
+  letter-spacing: -0.04em;
+  line-height: 0.96;
 }
 
 .home-app-title-0 {
-  background: #e7ded7;
+  background: #d9b75f;
 }
 
 .home-app-title-1 {
-  background: #d9cec7;
+  background: #c99950;
 }
 
 .home-app-title-2 {
-  background: #cfc1c1;
+  background: #ae7544;
+  color: #fff7e7;
 }
 
 .home-app-title-3 {
-  background: #d9cec7;
+  background: #c28b49;
 }
 
 .home-app-title-empty {
   grid-column: 1 / -1;
-  background: #e7ded7;
+  background: #d9b75f;
 }
 
 .home-footer {
@@ -2430,8 +2446,8 @@ input[type="checkbox"] {
   align-items: center;
   justify-content: space-between;
   padding: 48px clamp(28px, 7vw, 110px);
-  background: #243b3a;
-  color: #f9f0df;
+  background: #3a301f;
+  color: #fbf1d9;
 }
 
 .home-footer .brand-logo {
@@ -2439,13 +2455,13 @@ input[type="checkbox"] {
 }
 
 .home-footer .brand-context {
-  color: #bdd0c9;
+  color: #d7c59b;
   border-left-color: rgba(255, 255, 255, 0.25);
 }
 
 .home-footer p {
   margin: 0;
-  color: #bdd0c9;
+  color: #d7c59b;
   font-size: 0.74rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -2478,10 +2494,19 @@ input[type="checkbox"] {
     padding: 22px 20px;
   }
 
+  .home-header .brand-context {
+    display: none;
+  }
+
+  .home-header-actions {
+    gap: 6px;
+  }
+
   .home-header-action {
     min-height: 42px;
-    gap: 14px;
-    padding: 0 16px;
+    gap: 10px;
+    padding: 0 13px;
+    font-size: 0.68rem;
   }
 
   .home-hero-copy {
@@ -2544,7 +2569,7 @@ input[type="checkbox"] {
   }
 
   .home-app-title {
-    min-height: 280px;
+    min-height: 240px;
   }
 
   .home-app-title h3 {

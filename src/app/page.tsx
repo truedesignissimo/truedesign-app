@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase-server";
 import { createAdminClient } from "@/lib/supabase-admin";
 import Brand from "./_components/brand";
 import HomeLogin from "./_components/home-login";
+import HomeHeroSlideshow from "./_components/home-hero-slideshow";
+import SignOutButton from "./dashboard/sign-out-button";
 
 export const dynamic = "force-dynamic";
 
@@ -9,6 +11,9 @@ export default async function Home() {
   const supabase = await createClient();
   const admin = createAdminClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const { data: profile } = user
+    ? await admin.from("profiles").select("is_admin").eq("id", user.id).maybeSingle()
+    : { data: null };
   const { data: publicApps } = await admin
     .from("apps")
     .select("id, name, url, display_order")
@@ -20,11 +25,22 @@ export default async function Home() {
   return (
     <main className="home-page">
       <section className="home-hero" aria-labelledby="home-title">
+        <HomeHeroSlideshow />
         <header className="home-header">
           <Brand context="digital workspace" />
-          <a href={user ? "/dashboard" : "#accesso"} className="home-header-action">
-            {user ? "Le tue app" : "Accedi"} <span>↘</span>
-          </a>
+          <div className="home-header-actions">
+            {user && profile?.is_admin && (
+              <a href="/admin" className="home-header-action home-header-action-primary">Console</a>
+            )}
+            {user ? (
+              <>
+                <a href="/dashboard" className="home-header-action">Le tue app</a>
+                <SignOutButton className="home-header-action home-header-button" redirectTo="/" label="Logout" />
+              </>
+            ) : (
+              <a href="#accesso" className="home-header-action">Accedi <span>↘</span></a>
+            )}
+          </div>
         </header>
 
         <div className="home-hero-copy">
