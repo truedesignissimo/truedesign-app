@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase-server";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { revalidatePath } from "next/cache";
 import { getAuthRedirect } from "@/lib/site-url";
+import { provisionAdminUser } from "./invitation";
 
 async function assertIsAdmin() {
   const supabase = await createClient();
@@ -49,34 +50,17 @@ export async function inviteUser(
     });
     if (listError) return { ok: false as const, error: "Impossibile verificare gli utenti esistenti." };
 
-    let invitedUser = usersData.users.find(
+    const existingUser = usersData.users.find(
       (user) => user.email?.toLowerCase() === normalizedEmail
-    );
-    let alreadyExisted = Boolean(invitedUser);
-
-    if (!invitedUser) {
-      const { data, error } = await admin.auth.admin.inviteUserByEmail(normalizedEmail, {
-        data: { full_name: normalizedName, user_type: userType },
-        redirectTo: getAuthRedirect("/imposta-password"),
-      });
-      if (error || !data.user) {
-        return {
-          ok: false as const,
-          error: error?.message || "Il servizio email non ha accettato l’invito.",
-        };
-      }
-      invitedUser = data.user;
-      alreadyExisted = false;
-    } else if (!invitedUser.email_confirmed_at) {
-      const { error: resendError } = await admin.auth.resend({
-        type: "signup",
-        email: normalizedEmail,
-        options: { emailRedirectTo: getAuthRedirect("/dashboard") },
-      });
-      if (resendError) {
-        return { ok: false as const, error: "L’account esiste, ma non è stato possibile reinviare la conferma." };
-      }
-    }
+    ) ?? null;
+    const alreadyExisted = Boolean(existingUser);
+    const { user: invitedUser } = await provisionAdminUser(admin.auth, {
+      email: normalizedEmail,
+      fullName: normalizedName,
+      userType,
+      redirectTo: getAuthRedirect("/imposta-password"),
+      existingUser,
+    });
 
     const profilePayload = {
       id: invitedUser.id,
@@ -96,14 +80,17 @@ export async function inviteUser(
     return {
       ok: true as const,
       message: alreadyExisted
-        ? invitedUser.email_confirmed_at
-          ? "L’account esisteva già: profilo approvato e aggiornato."
-          : "Account approvato e nuova email di conferma inviata."
-        : "Invito inviato via email e profilo approvato.",
+        ? "Account aggiornato. È stata inviata una nuova email per scegliere la password."
+        : "Utente creato. Riceverà via email il link per scegliere la password.",
     };
   } catch (error) {
     console.error("[admin/assignments] invite", error instanceof Error ? error.message : error);
-    return { ok: false as const, error: "Sessione non valida o permessi amministratore mancanti." };
+    return {
+      ok: false as const,
+      error: error instanceof Error
+        ? error.message
+        : "Non è stato possibile creare l’utente e inviare l’email.",
+    };
   }
 }
 
@@ -116,23 +103,19 @@ export async function setUserApproval(userId: string, approved: boolean) {
     const email = userResult.user?.email;
     if (userError || !email) throw new Error("Indirizzo email dell’utente non disponibile.");
 
-    const activationResult = userResult.user.email_confirmed_at
-      ? await admin.auth.signInWithOtp({
-          email,
-          options: {
-            shouldCreateUser: false,
-            emailRedirectTo: getAuthRedirect("/dashboard"),
-          },
-        })
-      : await admin.auth.resend({
-          type: "signup",
-          email,
-          options: { emailRedirectTo: getAuthRedirect("/dashboard") },
-        });
-    const activationError = activationResult.error;
-    if (activationError) {
-      throw new Error("Non è stato possibile inviare l’email di attivazione. Il profilo resta in attesa.");
-    }
+    const { data: existingProfile } = await admin
+      .from("profiles")
+      .select("full_name, user_type")
+      .eq("id", userId)
+      .maybeSingle();
+
+    await provisionAdminUser(admin.auth, {
+      email,
+      fullName: existingProfile?.full_name || email.split("@")[0],
+      userType: existingProfile?.user_type === "interno" ? "interno" : "cliente",
+      redirectTo: getAuthRedirect("/imposta-password"),
+      existingUser: userResult.user,
+    });
   }
 
   const { error } = await admin
@@ -147,7 +130,7 @@ export async function setUserApproval(userId: string, approved: boolean) {
   revalidatePath("/admin/assignments");
   return {
     message: approved
-      ? "Utente approvato: email di attivazione e accesso inviata."
+      ? "Utente approvato: email inviata per scegliere la password e accedere."
       : "Accesso sospeso.",
   };
 }
