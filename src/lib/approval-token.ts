@@ -2,12 +2,27 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 const TTL_MS = 72 * 60 * 60 * 1000;
 
+type ApprovalEnvironment = {
+  [key: string]: string | undefined;
+  APPROVAL_LINK_SECRET?: string;
+  SUPABASE_SERVICE_ROLE_KEY?: string;
+};
+
 export type ApprovalTokenResult =
   | { ok: true; userId: string; expiresAt: number }
   | { ok: false; reason: "invalid" | "expired" };
 
 function sign(payload: string, secret: string) {
   return createHmac("sha256", secret).update(payload).digest("base64url");
+}
+
+export function resolveApprovalSecret(env: ApprovalEnvironment = process.env) {
+  const secret = env.APPROVAL_LINK_SECRET?.trim()
+    || env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+  if (!secret || secret.length < 32) {
+    throw new Error("Configurazione token non valida.");
+  }
+  return secret;
 }
 
 export function createApprovalToken(userId: string, secret: string, nowMs = Date.now()) {

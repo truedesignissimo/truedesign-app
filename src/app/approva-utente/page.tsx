@@ -1,6 +1,6 @@
 import Brand from "../_components/brand";
 import { createAdminClient } from "@/lib/supabase-admin";
-import { verifyApprovalToken } from "@/lib/approval-token";
+import { resolveApprovalSecret, verifyApprovalToken } from "@/lib/approval-token";
 import { getApprovalPageState } from "./approval-page-state";
 import { approveUserFromEmail } from "./actions";
 
@@ -27,7 +27,7 @@ export default async function ApprovalPage({
     invalid: { title: "Link non valido.", text: "Controlla di aver aperto il link completo." },
   };
   const resultMessage = status ? messages[status] : null;
-  const verified = verifyApprovalToken(token, process.env.APPROVAL_LINK_SECRET ?? "");
+  const verified = verifyApprovalToken(token, resolveApprovalSecret());
   const state = getApprovalPageState(verified);
 
   let account: { fullName: string; email: string } | null = null;

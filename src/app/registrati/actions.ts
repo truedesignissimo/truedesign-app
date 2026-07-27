@@ -2,6 +2,7 @@
 
 import { createAdminClient } from "@/lib/supabase-admin";
 import { getSiteUrl } from "@/lib/site-url";
+import { resolveApprovalSecret } from "@/lib/approval-token";
 import { buildApprovalUrl } from "@/lib/registration-approval-links";
 import { buildAdminApprovalEmail, sendResendEmail } from "@/lib/registration-email";
 import { revalidatePath } from "next/cache";
@@ -20,8 +21,8 @@ async function notifyRegistrationRequest(userId: string, email: string, fullName
   }
 
   const apiKey = process.env.RESEND_API_KEY;
-  const secret = process.env.APPROVAL_LINK_SECRET;
-  if (!apiKey || !secret) return { notified: false };
+  if (!apiKey) return { notified: false };
+  const secret = resolveApprovalSecret();
 
   const ownerEmail = process.env.APPROVAL_NOTIFICATION_EMAIL || DEFAULT_OWNER_EMAIL;
   const siteUrl = getSiteUrl();
