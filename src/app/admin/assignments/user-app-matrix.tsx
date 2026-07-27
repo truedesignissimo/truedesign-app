@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import {
   assignApp,
   deleteUser,
+  resendActivationEmail,
   sendPasswordReset,
   setUserApproval,
   setUserType,
@@ -238,6 +239,21 @@ export default function UserAppMatrix({
     });
   }
 
+  function handleActivationEmail(user: User) {
+    setNotice(null);
+    startTransition(async () => {
+      try {
+        const result = await resendActivationEmail(user.id);
+        setNotice({ type: "success", message: result.message });
+      } catch (error) {
+        setNotice({
+          type: "error",
+          message: error instanceof Error ? error.message : "Invio non riuscito.",
+        });
+      }
+    });
+  }
+
   function handleDelete(user: User) {
     const label = user.full_name || user.email || "questo utente";
     if (!confirm(`Eliminare definitivamente ${label}? L’utente non potrà più accedere al workspace.`)) return;
@@ -415,6 +431,16 @@ export default function UserAppMatrix({
                           >
                             Recupera password
                           </button>
+                          {user.approval_status === "approved" && (
+                            <button
+                              className="btn btn-secondary"
+                              type="button"
+                              disabled={isPending || !user.email}
+                              onClick={() => handleActivationEmail(user)}
+                            >
+                              Reinvia conferma account
+                            </button>
+                          )}
                           <button
                             className="btn btn-danger"
                             type="button"

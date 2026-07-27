@@ -2,21 +2,13 @@
 
 import { createAdminClient } from "@/lib/supabase-admin";
 import { getSiteUrl } from "@/lib/site-url";
+import { buildApprovalUrl } from "@/lib/registration-approval-links";
+import { buildAdminApprovalEmail, sendResendEmail } from "@/lib/registration-email";
 import { revalidatePath } from "next/cache";
 
 const DEFAULT_OWNER_EMAIL = "dario.breggie@truedesign.it";
 
-function escapeHtml(value: string) {
-  return value.replace(/[&<>'"]/g, (character) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    "'": "&#39;",
-    '"': "&quot;",
-  })[character]!);
-}
-
-async function notifyRegistrationRequest(email: string, fullName: string) {
+async function notifyRegistrationRequest(userId: string, email: string, fullName: string) {
   const normalizedEmail = email.trim().toLowerCase();
   const normalizedName = fullName.trim().replace(/[\r\n]+/g, " ");
   if (
@@ -27,34 +19,22 @@ async function notifyRegistrationRequest(email: string, fullName: string) {
     return { notified: false };
   }
 
-  const admin = createAdminClient();
-  const { data } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
-  const registeredUser = data.users.find((user) => user.email?.toLowerCase() === normalizedEmail);
-  if (!registeredUser) return { notified: false };
-
   const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return { notified: false };
+  const secret = process.env.APPROVAL_LINK_SECRET;
+  if (!apiKey || !secret) return { notified: false };
 
   const ownerEmail = process.env.APPROVAL_NOTIFICATION_EMAIL || DEFAULT_OWNER_EMAIL;
   const siteUrl = getSiteUrl();
-  const safeName = escapeHtml(normalizedName);
-  const safeEmail = escapeHtml(normalizedEmail);
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: process.env.REGISTRATION_FROM_EMAIL || "True Design <accesso@truedesign.app>",
-      to: [ownerEmail],
-      subject: `Nuova richiesta di accesso: ${normalizedName}`,
-      html: `<p><strong>${safeName}</strong> (${safeEmail}) ha richiesto l'accesso al workspace.</p><p><a href="${siteUrl}/admin/assignments">Apri il pannello utenti per approvare</a></p>`,
-    }),
-    cache: "no-store",
+  await sendResendEmail(buildAdminApprovalEmail({
+    recipient: ownerEmail,
+    fullName: normalizedName,
+    email: normalizedEmail,
+    approvalUrl: buildApprovalUrl(userId, secret, siteUrl),
+  }), {
+    apiKey,
+    from: process.env.REGISTRATION_FROM_EMAIL || "True Design <accesso@truedesign.app>",
   });
-
-  return { notified: response.ok };
+  return { notified: true };
 }
 
 export async function registerPendingUser(input: {
@@ -117,7 +97,7 @@ export async function registerPendingUser(input: {
   }
 
   try {
-    await notifyRegistrationRequest(email, fullName);
+    await notifyRegistrationRequest(data.user.id, email, fullName);
   } catch {
     // Il profilo resta comunque visibile nel pannello amministratore.
   }

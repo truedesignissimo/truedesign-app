@@ -4,7 +4,12 @@ import { createClient } from "@/lib/supabase-server";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { revalidatePath } from "next/cache";
 import { getAuthRedirect } from "@/lib/site-url";
+import { getSiteUrl } from "@/lib/site-url";
 import { provisionAdminUser } from "./invitation";
+import { approvePendingRegistration } from "@/lib/registration-approval";
+import { createSupabaseApprovalGateway } from "@/lib/supabase-registration-approval";
+import { buildAccountActiveEmail, sendResendEmail } from "@/lib/registration-email";
+import { deleteWorkspaceUser } from "@/lib/workspace-user-deletion";
 
 async function assertIsAdmin() {
   const supabase = await createClient();
@@ -99,23 +104,29 @@ export async function setUserApproval(userId: string, approved: boolean) {
   const admin = createAdminClient();
 
   if (approved) {
-    const { data: userResult, error: userError } = await admin.auth.admin.getUserById(userId);
-    const email = userResult.user?.email;
-    if (userError || !email) throw new Error("Indirizzo email dell’utente non disponibile.");
-
-    const { data: existingProfile } = await admin
-      .from("profiles")
-      .select("full_name, user_type")
-      .eq("id", userId)
-      .maybeSingle();
-
-    await provisionAdminUser(admin.auth, {
-      email,
-      fullName: existingProfile?.full_name || email.split("@")[0],
-      userType: existingProfile?.user_type === "interno" ? "interno" : "cliente",
-      redirectTo: getAuthRedirect("/imposta-password"),
-      existingUser: userResult.user,
+    const result = await approvePendingRegistration({
+      userId,
+      approvedBy: currentUser.id,
+      gateway: createSupabaseApprovalGateway(admin),
+      sendActivationEmail: async ({ email, fullName, appCount }) => {
+        await sendResendEmail(buildAccountActiveEmail({
+          recipient: email,
+          firstName: fullName.trim().split(/\s+/)[0] || "Ciao",
+          appCount,
+          loginUrl: `${getSiteUrl()}/login`,
+        }), {
+          apiKey: process.env.RESEND_API_KEY ?? "",
+          from: process.env.REGISTRATION_FROM_EMAIL
+            || "True Design <accesso@truedesign.app>",
+        });
+      },
     });
+    revalidatePath("/admin/assignments");
+    return {
+      message: result.emailSent
+        ? "Utente approvato, app assegnate e conferma inviata."
+        : "Utente approvato e app assegnate; conferma email da reinviare.",
+    };
   }
 
   const { error } = await admin
@@ -129,10 +140,38 @@ export async function setUserApproval(userId: string, approved: boolean) {
   if (error) throw new Error(error.message);
   revalidatePath("/admin/assignments");
   return {
-    message: approved
-      ? "Utente approvato: email inviata per scegliere la password e accedere."
-      : "Accesso sospeso.",
+    message: "Accesso sospeso.",
   };
+}
+
+export async function resendActivationEmail(userId: string) {
+  await assertIsAdmin();
+  const admin = createAdminClient();
+  const [{ data: authData, error: authError }, { data: profile }, { count, error: countError }] =
+    await Promise.all([
+      admin.auth.admin.getUserById(userId),
+      admin.from("profiles").select("full_name, approval_status").eq("id", userId).maybeSingle(),
+      admin.from("user_apps").select("app_id", { count: "exact", head: true }).eq("user_id", userId),
+    ]);
+  if (
+    authError ||
+    countError ||
+    !authData.user?.email ||
+    profile?.approval_status !== "approved"
+  ) {
+    throw new Error("Account approvato non disponibile.");
+  }
+  const fullName = profile.full_name || authData.user.email;
+  await sendResendEmail(buildAccountActiveEmail({
+    recipient: authData.user.email,
+    firstName: fullName.trim().split(/\s+/)[0] || "Ciao",
+    appCount: count ?? 0,
+    loginUrl: `${getSiteUrl()}/login`,
+  }), {
+    apiKey: process.env.RESEND_API_KEY ?? "",
+    from: process.env.REGISTRATION_FROM_EMAIL || "True Design <accesso@truedesign.app>",
+  });
+  return { message: `Conferma account reinviata a ${authData.user.email}.` };
 }
 
 export async function toggleUserAdmin(userId: string, isAdmin: boolean) {
@@ -184,8 +223,25 @@ export async function deleteUser(userId: string) {
   }
 
   const admin = createAdminClient();
-  const { error } = await admin.auth.admin.deleteUser(userId);
-  if (error) throw new Error(error.message);
+  await deleteWorkspaceUser(userId, {
+    async deleteAuthUser(id) {
+      const { error } = await admin.auth.admin.deleteUser(id, false);
+      if (error) throw new Error(`Eliminazione Auth non riuscita: ${error.message}`);
+    },
+    async authUserExists(id) {
+      const { data, error } = await admin.auth.admin.getUserById(id);
+      if (!error) return Boolean(data.user);
+      if (error.status === 404 || /not found/i.test(error.message)) return false;
+      throw new Error(`Verifica eliminazione non riuscita: ${error.message}`);
+    },
+    async deleteResidualData(id) {
+      for (const table of ["user_apps", "usage_log", "profiles"] as const) {
+        const column = table === "profiles" ? "id" : "user_id";
+        const { error } = await admin.from(table).delete().eq(column, id);
+        if (error) throw new Error(`Pulizia dati ${table} non riuscita: ${error.message}`);
+      }
+    },
+  });
   revalidatePath("/admin/assignments");
 }
 

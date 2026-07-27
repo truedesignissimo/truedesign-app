@@ -4,6 +4,7 @@ import Brand from "./_components/brand";
 import HomeLogin from "./_components/home-login";
 import HomeHeroSlideshow from "./_components/home-hero-slideshow";
 import HomeAppLink from "./_components/home-app-link";
+import HomeHeroActions from "./_components/home-hero-actions";
 import SignOutButton from "./dashboard/sign-out-button";
 
 export const dynamic = "force-dynamic";
@@ -56,21 +57,22 @@ export default async function Home() {
                 <a href="/dashboard" className="home-header-action">Le tue app</a>
                 <SignOutButton className="home-header-action home-header-button" redirectTo="/" label="Logout" />
               </>
-            ) : (
-              <a href="#accesso" className="home-header-action">Accedi <span>↘</span></a>
-            )}
+            ) : null}
           </div>
         </header>
 
         <div className="home-hero-copy">
           <p className="home-kicker">Extraordinary. Everyday.</p>
           <h1 id="home-title">Ideas,<br />made <em>real.</em></h1>
+          <HomeHeroActions isAuthenticated={Boolean(user)} />
           <p>Strumenti digitali pensati da True per rendere straordinario il lavoro di ogni giorno.</p>
         </div>
 
-        <a className="home-scroll-cue" href="#accesso" aria-label="Vai all’accesso">
-          <span>Entra</span><b>↓</b>
-        </a>
+        {user && (
+          <a className="home-scroll-cue" href="#accesso" aria-label="Vai alle tue app">
+            <span>Le tue app</span><b>↓</b>
+          </a>
+        )}
       </section>
 
       <section id="accesso" className="home-login-section" aria-labelledby="home-login-title">
