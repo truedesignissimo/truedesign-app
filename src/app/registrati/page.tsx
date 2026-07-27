@@ -8,7 +8,6 @@ export default function RegistrationPage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [complete, setComplete] = useState(false);
@@ -21,7 +20,6 @@ export default function RegistrationPage() {
       firstName,
       lastName,
       email,
-      password,
     });
 
     setLoading(false);
@@ -52,8 +50,8 @@ export default function RegistrationPage() {
               <p className="eyebrow">Registrazione ricevuta</p>
               <h2>Richiesta inviata.</h2>
               <p className="muted">
-                Riceverai a breve la notifica di avvenuta registrazione e assegnazione delle app.
-                L’email con il link di attivazione arriverà soltanto dopo l’approvazione.
+                Dopo l’approvazione riceverai un link personale per scegliere la password,
+                verificare l’indirizzo email e attivare il tuo spazio.
               </p>
               <a href="/" className="btn">Torna alla home →</a>
             </div>
@@ -78,14 +76,9 @@ export default function RegistrationPage() {
                   <label className="muted" htmlFor="registration-email">Email</label>
                   <input id="registration-email" className="input" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
-                <div>
-                  <label className="muted" htmlFor="registration-password">Password</label>
-                  <input id="registration-password" className="input" type="password" minLength={8} required autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} />
-                  <span className="field-help">Almeno 8 caratteri.</span>
-                </div>
                 {error && <p className="error" role="alert">{error}</p>}
                 <button className="btn" type="submit" disabled={loading}>
-                  {loading ? "Creazione account…" : "Crea il mio account →"}
+                  {loading ? "Invio richiesta…" : "Invia la richiesta →"}
                 </button>
               </form>
               <p className="registration-login-link">Hai già un account? <a href="/login?tipo=cliente">Accedi</a></p>
