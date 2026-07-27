@@ -5,6 +5,7 @@ import type {
   TetrisShipmentListItem,
   TetrisSourceFile,
 } from "./types";
+import { creatorFirstName } from "./creator-name";
 
 export const TETRIS_BUCKET = "true-tetris-pallet-orders";
 const MAX_SOURCE_BYTES = 20 * 1024 * 1024;
@@ -51,7 +52,16 @@ const shipmentFromRow = (row: Record<string, unknown>): TetrisShipment => {
     createdAt: String(row.created_at || ""),
     updatedAt: String(row.updated_at || ""),
     createdBy: String(row.created_by || ""),
+    createdByName: creatorFirstName(typeof payload.createdByName === "string" ? payload.createdByName : ""),
   };
+};
+
+const creatorNamesFor = async (supabase: SupabaseClient, rows: Record<string, unknown>[]) => {
+  const ids = [...new Set(rows.map((row) => String(row.created_by || "")).filter(Boolean))];
+  if (!ids.length) return new Map<string, string>();
+  const { data, error } = await supabase.from("profiles").select("id, full_name").in("id", ids);
+  if (error) return new Map<string, string>();
+  return new Map((data || []).map((profile) => [String(profile.id), creatorFirstName(profile.full_name)]));
 };
 
 export function createTetrisShipmentsRepository(supabase: SupabaseClient) {
@@ -62,6 +72,7 @@ export function createTetrisShipmentsRepository(supabase: SupabaseClient) {
         .select("id, title, order_number, order_series, customer, order_date, destination, source_file_name, source_file_path, source_file_type, source_file_size, payload, created_at, updated_at, created_by")
         .order("updated_at", { ascending: false });
       const rows = assertResult(result as never, "Elenco piani") as Record<string, unknown>[];
+      const creatorNames = await creatorNamesFor(supabase, rows);
       return rows.map((row) => {
         const shipment = shipmentFromRow(row);
         return {
@@ -73,6 +84,7 @@ export function createTetrisShipmentsRepository(supabase: SupabaseClient) {
           createdAt: shipment.createdAt || "",
           updatedAt: shipment.updatedAt || "",
           createdBy: shipment.createdBy || "",
+          createdByName: shipment.createdByName || creatorNames.get(shipment.createdBy || "") || "",
         };
       });
     },
@@ -83,11 +95,17 @@ export function createTetrisShipmentsRepository(supabase: SupabaseClient) {
         .select("*")
         .eq("id", id)
         .single();
-      return shipmentFromRow(assertResult(result as never, "Apertura piano") as Record<string, unknown>);
+      const row = assertResult(result as never, "Apertura piano") as Record<string, unknown>;
+      const shipment = shipmentFromRow(row);
+      if (!shipment.createdByName) shipment.createdByName = (await creatorNamesFor(supabase, [row])).get(shipment.createdBy || "") || "";
+      return shipment;
     },
 
     async save(input: TetrisShipmentInput): Promise<TetrisShipment> {
       const source = input.sourceFile || null;
+      const authData = supabase.auth?.getUser ? (await supabase.auth.getUser()).data : { user: null };
+      const createdByName = creatorFirstName(input.createdByName || authData.user?.user_metadata?.full_name);
+      const payload = { ...input, createdByName };
       const result = await supabase
         .from("tetris_pallet_shipments")
         .upsert({
@@ -102,12 +120,14 @@ export function createTetrisShipmentsRepository(supabase: SupabaseClient) {
           source_file_path: source?.path || null,
           source_file_type: source?.type || null,
           source_file_size: source?.size || null,
-          payload: input,
+          payload,
           updated_at: new Date().toISOString(),
         })
         .select("*")
         .single();
-      return shipmentFromRow(assertResult(result as never, "Salvataggio piano") as Record<string, unknown>);
+      const shipment = shipmentFromRow(assertResult(result as never, "Salvataggio piano") as Record<string, unknown>);
+      shipment.createdByName = shipment.createdByName || createdByName;
+      return shipment;
     },
 
     async uploadSourceFile(shipmentId: string, file: File): Promise<TetrisSourceFile> {

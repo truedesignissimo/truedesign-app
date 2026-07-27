@@ -26,6 +26,7 @@ export interface TetrisShipment {
   createdAt?: string;
   updatedAt?: string;
   createdBy?: string;
+  createdByName?: string;
 }
 
 export type TetrisShipmentInput = Omit<TetrisShipment, "createdAt" | "updatedAt" | "createdBy">;
@@ -39,4 +40,5 @@ export interface TetrisShipmentListItem {
   createdAt: string;
   updatedAt: string;
   createdBy: string;
+  createdByName?: string;
 }
