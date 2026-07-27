@@ -1,48 +1,42 @@
 "use server";
 
+import { randomBytes } from "node:crypto";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { getSiteUrl } from "@/lib/site-url";
 import { resolveApprovalSecret } from "@/lib/approval-token";
 import { buildApprovalUrl } from "@/lib/registration-approval-links";
 import { buildAdminApprovalEmail, sendResendEmail } from "@/lib/registration-email";
+import {
+  submitRegistrationRequest,
+  type RegistrationIdentity,
+  type RegistrationRequestGateway,
+} from "@/lib/registration-request";
 import { revalidatePath } from "next/cache";
 
 const DEFAULT_OWNER_EMAIL = "dario.breggie@truedesign.it";
 
-async function notifyRegistrationRequest(userId: string, email: string, fullName: string) {
-  const normalizedEmail = email.trim().toLowerCase();
-  const normalizedName = fullName.trim().replace(/[\r\n]+/g, " ");
-  if (
-    !/^\S+@\S+\.\S+$/.test(normalizedEmail) ||
-    !normalizedName ||
-    normalizedName.length > 120
-  ) {
-    return { notified: false };
-  }
-
+async function notifyRegistrationRequest(userId: string, identity: RegistrationIdentity) {
   const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return { notified: false };
+  if (!apiKey) throw new Error("Configurazione Resend assente.");
   const secret = resolveApprovalSecret();
 
   const ownerEmail = process.env.APPROVAL_NOTIFICATION_EMAIL || DEFAULT_OWNER_EMAIL;
   const siteUrl = getSiteUrl();
   await sendResendEmail(buildAdminApprovalEmail({
     recipient: ownerEmail,
-    fullName: normalizedName,
-    email: normalizedEmail,
+    fullName: identity.fullName,
+    email: identity.email,
     approvalUrl: buildApprovalUrl(userId, secret, siteUrl),
   }), {
     apiKey,
     from: process.env.REGISTRATION_FROM_EMAIL || "True Design <accesso@truedesign.app>",
   });
-  return { notified: true };
 }
 
 export async function registerPendingUser(input: {
   firstName: string;
   lastName: string;
   email: string;
-  password: string;
 }) {
   const firstName = input.firstName.trim().replace(/[\r\n]+/g, " ");
   const lastName = input.lastName.trim().replace(/[\r\n]+/g, " ");
@@ -55,54 +49,105 @@ export async function registerPendingUser(input: {
   if (!/^\S+@\S+\.\S+$/.test(email)) {
     return { ok: false as const, error: "Inserisci un indirizzo email valido." };
   }
-  if (input.password.length < 8 || input.password.length > 128) {
-    return { ok: false as const, error: "La password deve contenere almeno 8 caratteri." };
-  }
-
   const admin = createAdminClient();
-  const { data, error } = await admin.auth.admin.createUser({
-    email,
-    password: input.password,
-    email_confirm: false,
-    user_metadata: {
-      full_name: fullName,
-      first_name: firstName,
-      last_name: lastName,
-    },
-  });
-
-  if (error || !data.user) {
-    const alreadyExists = /already|registered|exists/i.test(error?.message ?? "");
-    return {
-      ok: false as const,
-      error: alreadyExists
-        ? "Esiste già un account con questo indirizzo email."
-        : "Non è stato possibile completare la registrazione. Riprova tra poco.",
-    };
-  }
-
   const userType = email.endsWith("@truedesign.it") ? "interno" : "cliente";
-  const { error: profileError } = await admin.from("profiles").upsert({
-    id: data.user.id,
+  const identity = { firstName, lastName, fullName, email };
+  const profilePayload = {
     full_name: fullName,
     user_type: userType,
-    is_admin: false,
-    approval_status: "pending",
+    approval_status: "pending" as const,
     approved_at: null,
     approved_by: null,
-  });
+  };
 
-  if (profileError) {
-    await admin.auth.admin.deleteUser(data.user.id);
-    return { ok: false as const, error: "Non è stato possibile preparare il profilo." };
-  }
+  const gateway: RegistrationRequestGateway = {
+    async findByEmail(candidateEmail) {
+      const { data, error } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      if (error) throw new Error("Impossibile verificare gli account esistenti.");
+      const authUser = data.users.find(
+        (user) => user.email?.toLowerCase() === candidateEmail
+      );
+      if (!authUser) return null;
+      const { data: profile, error: profileError } = await admin
+        .from("profiles")
+        .select("approval_status")
+        .eq("id", authUser.id)
+        .maybeSingle();
+      if (profileError) throw new Error("Impossibile verificare il profilo.");
+      return {
+        id: authUser.id,
+        status: profile?.approval_status ?? "pending",
+      };
+    },
+    async createPendingAccount(accountIdentity) {
+      const { data, error } = await admin.auth.admin.createUser({
+        email: accountIdentity.email,
+        password: randomBytes(32).toString("base64url"),
+        email_confirm: false,
+        user_metadata: {
+          full_name: accountIdentity.fullName,
+          first_name: accountIdentity.firstName,
+          last_name: accountIdentity.lastName,
+        },
+      });
+      if (error || !data.user) {
+        throw new Error("Non è stato possibile creare l'account.");
+      }
+      const { error: profileError } = await admin.from("profiles").upsert({
+        id: data.user.id,
+        is_admin: false,
+        ...profilePayload,
+      });
+      if (profileError) {
+        await admin.auth.admin.deleteUser(data.user.id, false);
+        throw new Error("Non è stato possibile preparare il profilo.");
+      }
+      return data.user.id;
+    },
+    async refreshPendingAccount(userId, accountIdentity) {
+      const { error: authError } = await admin.auth.admin.updateUserById(userId, {
+        user_metadata: {
+          full_name: accountIdentity.fullName,
+          first_name: accountIdentity.firstName,
+          last_name: accountIdentity.lastName,
+        },
+      });
+      if (authError) throw new Error("Non è stato possibile aggiornare l'account.");
+      const { error: profileError } = await admin.from("profiles").upsert({
+        id: userId,
+        ...profilePayload,
+      });
+      if (profileError) throw new Error("Non è stato possibile aggiornare il profilo.");
+    },
+    notifyOwner: notifyRegistrationRequest,
+  };
 
   try {
-    await notifyRegistrationRequest(data.user.id, email, fullName);
-  } catch {
-    // Il profilo resta comunque visibile nel pannello amministratore.
-  }
+    const result = await submitRegistrationRequest(identity, gateway);
+    revalidatePath("/admin/assignments");
 
-  revalidatePath("/admin/assignments");
-  return { ok: true as const };
+    if (result.status === "already-active") {
+      return {
+        ok: false as const,
+        status: result.status,
+        error: "Questo account è già attivo. Accedi oppure recupera la password.",
+      };
+    }
+    if (result.status === "notification-failed") {
+      console.error("[registration] owner_notification_failed");
+      return {
+        ok: false as const,
+        status: result.status,
+        error: "La richiesta è stata salvata, ma la notifica non è partita. Riprova tra poco.",
+      };
+    }
+    return { ok: true as const, status: result.status };
+  } catch (error) {
+    console.error("[registration] request_failed", error instanceof Error ? error.message : "unknown");
+    return {
+      ok: false as const,
+      status: "failed" as const,
+      error: "Non è stato possibile completare la registrazione. Riprova tra poco.",
+    };
+  }
 }
