@@ -34,14 +34,32 @@ describe("registration emails", () => {
     expect(message.html).toContain("https://supabase.test/recovery");
   });
 
-  it("invia tramite Resend", async () => {
-    const fetcher = vi.fn().mockResolvedValue({ ok: true, text: async () => "" });
-    await sendResendEmail(
+  it("invia tramite Resend e restituisce l'id del messaggio", async () => {
+    const fetcher = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ id: "email-1" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      })
+    );
+    const result = await sendResendEmail(
       { to: ["mario@example.com"], subject: "Oggetto", html: "<p>Test</p>" },
       { apiKey: "resend-secret", from: "True Design <accesso@truedesign.app>" },
       fetcher as typeof fetch
     );
+    expect(result).toBe("email-1");
     expect(fetcher).toHaveBeenCalledOnce();
     expect(JSON.stringify(fetcher.mock.calls[0][1]?.body)).not.toContain("resend-secret");
+  });
+
+  it("segnala lo stato HTTP senza esporre la chiave Resend", async () => {
+    const fetcher = vi.fn().mockResolvedValue(
+      new Response("forbidden", { status: 403 })
+    );
+
+    await expect(sendResendEmail(
+      { to: ["mario@example.com"], subject: "Oggetto", html: "<p>Test</p>" },
+      { apiKey: "resend-secret", from: "True Design <accesso@truedesign.app>" },
+      fetcher as typeof fetch
+    )).rejects.toThrow("HTTP 403");
   });
 });

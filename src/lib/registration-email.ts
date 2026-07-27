@@ -72,5 +72,12 @@ export async function sendResendEmail(
     body: JSON.stringify({ from: config.from, ...message }),
     cache: "no-store",
   });
-  if (!response.ok) throw new Error("Invio email non riuscito.");
+  if (!response.ok) {
+    throw new Error(`Invio email non riuscito (HTTP ${response.status}).`);
+  }
+  const payload = await response.json() as { id?: unknown };
+  if (typeof payload.id !== "string" || !payload.id) {
+    throw new Error("Invio email non confermato dal provider.");
+  }
+  return payload.id;
 }
