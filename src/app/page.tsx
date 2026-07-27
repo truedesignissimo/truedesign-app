@@ -85,7 +85,7 @@ export default async function Home() {
           {user && profile?.approval_status === "approved" ? (
             <div className="home-workspace-apps" aria-label="Applicazioni disponibili">
               {workspaceApps.map((app) => (
-                <HomeAppLink key={app.id} appId={app.id} name={app.name} url={app.url} />
+                <HomeAppLink key={app.id} name={app.name} url={app.url} />
               ))}
               {workspaceApps.length === 0 && (
                 <div className="home-workspace-empty">Le app assegnate compariranno qui.</div>

@@ -50,8 +50,23 @@ export async function middleware(request: NextRequest) {
       .eq("url", appPath)
       .maybeSingle();
 
-    if (app?.is_active && app.visibility === "pubblica") {
+    const allowAppAccess = async () => {
+      if (user && app?.id && shouldTrackAppNavigation(request)) {
+        const { error } = await admin.from("usage_log").insert({
+          user_id: user.id,
+          app_id: app.id,
+        });
+
+        if (error) {
+          console.error("[usage] Unable to record app access:", error.message);
+        }
+      }
+
       return response;
+    };
+
+    if (app?.is_active && app.visibility === "pubblica") {
+      return allowAppAccess();
     }
 
     if (!user) {
@@ -69,7 +84,7 @@ export async function middleware(request: NextRequest) {
     }
 
     if (profile?.is_admin && app?.is_active) {
-      return response;
+      return allowAppAccess();
     }
 
     if (!app?.is_active) {
@@ -86,6 +101,8 @@ export async function middleware(request: NextRequest) {
     if (!assignment) {
       return NextResponse.redirect(new URL("/accesso-negato?motivo=app", request.url));
     }
+
+    return allowAppAccess();
   }
 
   return response;
@@ -97,6 +114,20 @@ export function isProtectedPath(pathname: string) {
 
 export function getCatalogAppPath(pathname: string) {
   return `/${pathname.split("/").filter(Boolean).slice(0, 2).join("/")}`;
+}
+
+export function shouldTrackAppNavigation(
+  request: Pick<Request, "method" | "headers">
+) {
+  if (request.method !== "GET") return false;
+  if (request.headers.has("rsc") || request.headers.has("next-router-prefetch")) {
+    return false;
+  }
+
+  const destination = request.headers.get("sec-fetch-dest");
+  if (destination) return destination === "document";
+
+  return (request.headers.get("accept") ?? "").includes("text/html");
 }
 
 export const config = { matcher: ["/dashboard/:path*", "/admin/:path*", "/apps/:path*"] };

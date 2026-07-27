@@ -133,7 +133,7 @@ export default async function DashboardPage() {
               </div>
             )}
             {apps.map((app: any) => (
-              <AppLink key={app.id} appId={app.id} name={app.name} url={app.url} />
+              <AppLink key={app.id} name={app.name} url={app.url} />
             ))}
           </div>
         </section>
