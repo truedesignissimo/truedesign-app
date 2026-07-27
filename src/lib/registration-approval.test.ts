@@ -12,25 +12,35 @@ function createGateway(overrides: Partial<ApprovalGateway> = {}): ApprovalGatewa
     listActiveAppIds: vi.fn().mockResolvedValue(["app-1", "app-2"]),
     listAssignedAppIds: vi.fn().mockResolvedValue(["app-1"]),
     assignApps: vi.fn().mockResolvedValue(undefined),
-    confirmEmail: vi.fn().mockResolvedValue(undefined),
+    createPasswordSetupUrl: vi.fn().mockResolvedValue("https://supabase.test/recovery"),
     approveProfile: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
 }
 
 describe("approvePendingRegistration", () => {
-  it("assegna le app mancanti, conferma email e approva", async () => {
+  it("assegna le app, approva e invia un link per scegliere la password", async () => {
     const gateway = createGateway();
     const sendActivationEmail = vi.fn().mockResolvedValue(undefined);
     const result = await approvePendingRegistration({
       userId: "user-1",
       approvedBy: null,
+      passwordSetupRedirect: "https://www.truedesign.app/imposta-password",
       gateway,
       sendActivationEmail,
     });
     expect(gateway.assignApps).toHaveBeenCalledWith("user-1", ["app-2"]);
-    expect(gateway.confirmEmail).toHaveBeenCalledWith("user-1");
     expect(gateway.approveProfile).toHaveBeenCalledWith("user-1", null);
+    expect(gateway.createPasswordSetupUrl).toHaveBeenCalledWith(
+      "user-1",
+      "https://www.truedesign.app/imposta-password"
+    );
+    expect(sendActivationEmail).toHaveBeenCalledWith({
+      email: "mario@example.com",
+      fullName: "Mario Rossi",
+      appCount: 2,
+      activationUrl: "https://supabase.test/recovery",
+    });
     expect(result).toEqual({ status: "approved", appCount: 2, emailSent: true });
   });
 
@@ -41,7 +51,11 @@ describe("approvePendingRegistration", () => {
       }),
     });
     const result = await approvePendingRegistration({
-      userId: "user-1", approvedBy: null, gateway, sendActivationEmail: vi.fn(),
+      userId: "user-1",
+      approvedBy: null,
+      passwordSetupRedirect: "https://www.truedesign.app/imposta-password",
+      gateway,
+      sendActivationEmail: vi.fn(),
     });
     expect(gateway.assignApps).not.toHaveBeenCalled();
     expect(result.status).toBe("already-approved");
@@ -52,7 +66,11 @@ describe("approvePendingRegistration", () => {
       assignApps: vi.fn().mockRejectedValue(new Error("database")),
     });
     await expect(approvePendingRegistration({
-      userId: "user-1", approvedBy: null, gateway, sendActivationEmail: vi.fn(),
+      userId: "user-1",
+      approvedBy: null,
+      passwordSetupRedirect: "https://www.truedesign.app/imposta-password",
+      gateway,
+      sendActivationEmail: vi.fn(),
     })).rejects.toThrow("assegnare");
     expect(gateway.approveProfile).not.toHaveBeenCalled();
   });
@@ -62,6 +80,7 @@ describe("approvePendingRegistration", () => {
     const result = await approvePendingRegistration({
       userId: "user-1",
       approvedBy: null,
+      passwordSetupRedirect: "https://www.truedesign.app/imposta-password",
       gateway,
       sendActivationEmail: vi.fn().mockRejectedValue(new Error("email")),
     });

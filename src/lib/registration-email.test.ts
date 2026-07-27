@@ -24,13 +24,14 @@ describe("registration emails", () => {
       recipient: "mario@example.com",
       firstName: "Mario",
       appCount: 4,
-      loginUrl: "https://www.truedesign.app/login",
+      activationUrl: "https://supabase.test/recovery",
     });
     expect(message.subject).toBe("Il tuo spazio True è pronto");
     expect(message.html).toContain("Extraordinary. Everyday.");
     expect(message.html).toContain("Il tuo spazio è pronto");
     expect(message.html).toContain("4 app");
-    expect(message.html).toContain("Accedi al workspace");
+    expect(message.html).toContain("Scegli la password");
+    expect(message.html).toContain("https://supabase.test/recovery");
   });
 
   it("invia tramite Resend", async () => {

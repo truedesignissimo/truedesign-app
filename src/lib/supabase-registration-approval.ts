@@ -36,9 +36,21 @@ export function createSupabaseApprovalGateway(
       );
       if (error) throw new Error("Impossibile creare le assegnazioni.");
     },
-    async confirmEmail(userId) {
-      const { error } = await admin.auth.admin.updateUserById(userId, { email_confirm: true });
-      if (error) throw new Error("Impossibile confermare l'indirizzo email.");
+    async createPasswordSetupUrl(userId, redirectTo) {
+      const { data: authData, error: authError } = await admin.auth.admin.getUserById(userId);
+      if (authError || !authData.user?.email) {
+        throw new Error("Account non disponibile per l'attivazione.");
+      }
+      const { data, error } = await admin.auth.admin.generateLink({
+        type: "recovery",
+        email: authData.user.email,
+        options: { redirectTo },
+      });
+      const actionLink = data?.properties?.action_link;
+      if (error || !actionLink) {
+        throw new Error("Impossibile generare il link di attivazione.");
+      }
+      return actionLink;
     },
     async approveProfile(userId, approvedBy) {
       const { error } = await admin.from("profiles").update({

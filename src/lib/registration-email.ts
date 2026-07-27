@@ -33,10 +33,10 @@ export function buildAccountActiveEmail(input: {
   recipient: string;
   firstName: string;
   appCount: number;
-  loginUrl: string;
+  activationUrl: string;
 }): MailMessage {
   const firstName = escapeHtml(input.firstName);
-  const loginUrl = escapeHtml(input.loginUrl);
+  const activationUrl = escapeHtml(input.activationUrl);
   const appLabel = input.appCount === 1 ? "1 app" : `${input.appCount} app`;
   return {
     to: [input.recipient],
@@ -49,10 +49,10 @@ export function buildAccountActiveEmail(input: {
 <tr><td style="padding:28px 38px 42px">
 <p style="margin:0 0 20px;color:#795529;font-size:12px;font-weight:bold;letter-spacing:2px;text-transform:uppercase">Extraordinary. Everyday.</p>
 <h1 style="margin:0 0 22px;font-size:42px;line-height:1.02;letter-spacing:-1.8px">Il tuo spazio è pronto</h1>
-<p style="margin:0 0 14px;color:#1d1d1f;font-size:18px;line-height:1.55">Ciao ${firstName}, il tuo account True Design è attivo.</p>
-<p style="margin:0 0 30px;color:#6e6e73;font-size:16px;line-height:1.6">Puoi utilizzare subito le ${appLabel} assegnate al tuo workspace.</p>
-<a href="${loginUrl}" style="display:inline-block;padding:14px 24px;border-radius:999px;background:#1d1d1f;color:#fff;font-size:15px;font-weight:bold;text-decoration:none">Accedi al workspace</a>
-<p style="margin:30px 0 0;color:#6e6e73;font-size:12px;line-height:1.5">Se il pulsante non funziona, copia questo indirizzo:<br><a href="${loginUrl}" style="color:#795529">${loginUrl}</a></p>
+<p style="margin:0 0 14px;color:#1d1d1f;font-size:18px;line-height:1.55">Ciao ${firstName}, la tua richiesta True Design è stata approvata.</p>
+<p style="margin:0 0 30px;color:#6e6e73;font-size:16px;line-height:1.6">Scegli la password per verificare il tuo indirizzo e accedere alle ${appLabel} assegnate.</p>
+<a href="${activationUrl}" style="display:inline-block;padding:14px 24px;border-radius:999px;background:#1d1d1f;color:#fff;font-size:15px;font-weight:bold;text-decoration:none">Scegli la password</a>
+<p style="margin:30px 0 0;color:#6e6e73;font-size:12px;line-height:1.5">Se il pulsante non funziona, copia questo indirizzo:<br><a href="${activationUrl}" style="color:#795529">${activationUrl}</a></p>
 </td></tr></table></td></tr></table></body></html>`,
   };
 }

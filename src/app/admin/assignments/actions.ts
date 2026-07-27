@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase-server";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { revalidatePath } from "next/cache";
 import { getAuthRedirect } from "@/lib/site-url";
-import { getSiteUrl } from "@/lib/site-url";
 import { provisionAdminUser } from "./invitation";
 import { approvePendingRegistration } from "@/lib/registration-approval";
 import { createSupabaseApprovalGateway } from "@/lib/supabase-registration-approval";
@@ -107,13 +106,14 @@ export async function setUserApproval(userId: string, approved: boolean) {
     const result = await approvePendingRegistration({
       userId,
       approvedBy: currentUser.id,
+      passwordSetupRedirect: getAuthRedirect("/imposta-password"),
       gateway: createSupabaseApprovalGateway(admin),
-      sendActivationEmail: async ({ email, fullName, appCount }) => {
+      sendActivationEmail: async ({ email, fullName, appCount, activationUrl }) => {
         await sendResendEmail(buildAccountActiveEmail({
           recipient: email,
           firstName: fullName.trim().split(/\s+/)[0] || "Ciao",
           appCount,
-          loginUrl: `${getSiteUrl()}/login`,
+          activationUrl,
         }), {
           apiKey: process.env.RESEND_API_KEY ?? "",
           from: process.env.REGISTRATION_FROM_EMAIL
@@ -162,11 +162,13 @@ export async function resendActivationEmail(userId: string) {
     throw new Error("Account approvato non disponibile.");
   }
   const fullName = profile.full_name || authData.user.email;
+  const activationUrl = await createSupabaseApprovalGateway(admin)
+    .createPasswordSetupUrl(userId, getAuthRedirect("/imposta-password"));
   await sendResendEmail(buildAccountActiveEmail({
     recipient: authData.user.email,
     firstName: fullName.trim().split(/\s+/)[0] || "Ciao",
     appCount: count ?? 0,
-    loginUrl: `${getSiteUrl()}/login`,
+    activationUrl,
   }), {
     apiKey: process.env.RESEND_API_KEY ?? "",
     from: process.env.REGISTRATION_FROM_EMAIL || "True Design <accesso@truedesign.app>",
