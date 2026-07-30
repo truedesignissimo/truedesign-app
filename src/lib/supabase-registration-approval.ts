@@ -1,5 +1,6 @@
 import { createAdminClient } from "./supabase-admin";
 import type { ApprovalGateway } from "./registration-approval";
+import { generatePasswordSetupUrl } from "./password-setup-url";
 
 export function createSupabaseApprovalGateway(
   admin = createAdminClient()
@@ -36,21 +37,12 @@ export function createSupabaseApprovalGateway(
       );
       if (error) throw new Error("Impossibile creare le assegnazioni.");
     },
-    async createPasswordSetupUrl(userId, redirectTo) {
+    async createPasswordSetupUrl(userId, siteUrl) {
       const { data: authData, error: authError } = await admin.auth.admin.getUserById(userId);
       if (authError || !authData.user?.email) {
         throw new Error("Account non disponibile per l'attivazione.");
       }
-      const { data, error } = await admin.auth.admin.generateLink({
-        type: "recovery",
-        email: authData.user.email,
-        options: { redirectTo },
-      });
-      const actionLink = data?.properties?.action_link;
-      if (error || !actionLink) {
-        throw new Error("Impossibile generare il link di attivazione.");
-      }
-      return actionLink;
+      return generatePasswordSetupUrl(admin.auth, authData.user.email, siteUrl);
     },
     async approveProfile(userId, approvedBy) {
       const { error } = await admin.from("profiles").update({

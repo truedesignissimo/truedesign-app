@@ -32,6 +32,9 @@ describe("registration emails", () => {
     expect(message.html).toContain("4 app");
     expect(message.html).toContain("Scegli la password");
     expect(message.html).toContain("https://supabase.test/recovery");
+    expect(message.html).toContain("Se il pulsante non funziona, premi su");
+    expect(message.html).toContain(">questo link</a>");
+    expect(message.html).not.toContain(">https://supabase.test/recovery</a>");
   });
 
   it("invia tramite Resend e restituisce l'id del messaggio", async () => {

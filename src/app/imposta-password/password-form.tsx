@@ -2,8 +2,13 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
+import { setPasswordFromRecoveryToken } from "./actions";
 
-export default function PasswordForm() {
+export default function PasswordForm({
+  tokenHash,
+}: {
+  tokenHash: string | null;
+}) {
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
   const [loading, setLoading] = useState(false);
@@ -24,12 +29,19 @@ export default function PasswordForm() {
     }
 
     setLoading(true);
-    const supabase = createClient();
-    const { error: updateError } = await supabase.auth.updateUser({ password });
+    const result = tokenHash
+      ? await setPasswordFromRecoveryToken(tokenHash, password)
+      : await (async () => {
+          const supabase = createClient();
+          const { error: updateError } = await supabase.auth.updateUser({ password });
+          return updateError
+            ? { ok: false as const, error: "Non è stato possibile impostare la password." }
+            : { ok: true as const };
+        })();
     setLoading(false);
 
-    if (updateError) {
-      setError("Non è stato possibile impostare la password. Il link potrebbe essere scaduto.");
+    if (!result.ok) {
+      setError(result.error);
       return;
     }
 

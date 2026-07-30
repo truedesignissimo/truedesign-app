@@ -25,7 +25,7 @@ describe("approvePendingRegistration", () => {
     const result = await approvePendingRegistration({
       userId: "user-1",
       approvedBy: null,
-      passwordSetupRedirect: "https://www.truedesign.app/imposta-password",
+      siteUrl: "https://www.truedesign.app",
       gateway,
       sendActivationEmail,
     });
@@ -33,7 +33,7 @@ describe("approvePendingRegistration", () => {
     expect(gateway.approveProfile).toHaveBeenCalledWith("user-1", null);
     expect(gateway.createPasswordSetupUrl).toHaveBeenCalledWith(
       "user-1",
-      "https://www.truedesign.app/imposta-password"
+      "https://www.truedesign.app"
     );
     expect(sendActivationEmail).toHaveBeenCalledWith({
       email: "mario@example.com",
@@ -53,7 +53,7 @@ describe("approvePendingRegistration", () => {
     const result = await approvePendingRegistration({
       userId: "user-1",
       approvedBy: null,
-      passwordSetupRedirect: "https://www.truedesign.app/imposta-password",
+      siteUrl: "https://www.truedesign.app",
       gateway,
       sendActivationEmail: vi.fn(),
     });
@@ -68,7 +68,7 @@ describe("approvePendingRegistration", () => {
     await expect(approvePendingRegistration({
       userId: "user-1",
       approvedBy: null,
-      passwordSetupRedirect: "https://www.truedesign.app/imposta-password",
+      siteUrl: "https://www.truedesign.app",
       gateway,
       sendActivationEmail: vi.fn(),
     })).rejects.toThrow("assegnare");
@@ -80,7 +80,7 @@ describe("approvePendingRegistration", () => {
     const result = await approvePendingRegistration({
       userId: "user-1",
       approvedBy: null,
-      passwordSetupRedirect: "https://www.truedesign.app/imposta-password",
+      siteUrl: "https://www.truedesign.app",
       gateway,
       sendActivationEmail: vi.fn().mockRejectedValue(new Error("email")),
     });

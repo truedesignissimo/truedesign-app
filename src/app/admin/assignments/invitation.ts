@@ -1,3 +1,5 @@
+import { generatePasswordSetupUrl } from "../../../lib/password-setup-url";
+
 type ManagedUser = {
   id: string;
   email?: string;
@@ -21,18 +23,21 @@ type AdminAuth = {
       }
     ): Promise<{ data: { user: unknown }; error: AuthError }>;
     deleteUser(userId: string): Promise<{ data: unknown; error: AuthError }>;
+    generateLink(input: {
+      type: "recovery";
+      email: string;
+    }): Promise<{
+      data: { properties: { hashed_token?: string } | null };
+      error: AuthError;
+    }>;
   };
-  resetPasswordForEmail(
-    email: string,
-    options: { redirectTo: string }
-  ): Promise<{ data: unknown; error: AuthError }>;
 };
 
 type ProvisionInput = {
   email: string;
   fullName: string;
   userType: "interno" | "cliente";
-  redirectTo: string;
+  siteUrl: string;
   existingUser: ManagedUser | null;
 };
 
@@ -65,14 +70,13 @@ export async function provisionAdminUser(auth: AdminAuth, input: ProvisionInput)
     }
   }
 
-  const emailResult = await auth.resetPasswordForEmail(input.email, {
-    redirectTo: input.redirectTo,
-  });
-
-  if (emailResult.error) {
+  let activationUrl: string;
+  try {
+    activationUrl = await generatePasswordSetupUrl(auth, input.email, input.siteUrl);
+  } catch {
     if (created) await auth.admin.deleteUser(user.id);
-    throw new Error("Non è stato possibile inviare l’email per scegliere la password.");
+    throw new Error("Non è stato possibile preparare l’email per scegliere la password.");
   }
 
-  return { user, created };
+  return { user, created, activationUrl };
 }

@@ -37,7 +37,9 @@ export function buildAccountActiveEmail(input: {
 }): MailMessage {
   const firstName = escapeHtml(input.firstName);
   const activationUrl = escapeHtml(input.activationUrl);
-  const appLabel = input.appCount === 1 ? "1 app" : `${input.appCount} app`;
+  const appLabel = input.appCount === 0
+    ? "app"
+    : input.appCount === 1 ? "1 app" : `${input.appCount} app`;
   return {
     to: [input.recipient],
     subject: "Il tuo spazio True è pronto",
@@ -52,7 +54,7 @@ export function buildAccountActiveEmail(input: {
 <p style="margin:0 0 14px;color:#1d1d1f;font-size:18px;line-height:1.55">Ciao ${firstName}, la tua richiesta True Design è stata approvata.</p>
 <p style="margin:0 0 30px;color:#6e6e73;font-size:16px;line-height:1.6">Scegli la password per verificare il tuo indirizzo e accedere alle ${appLabel} assegnate.</p>
 <a href="${activationUrl}" style="display:inline-block;padding:14px 24px;border-radius:999px;background:#1d1d1f;color:#fff;font-size:15px;font-weight:bold;text-decoration:none">Scegli la password</a>
-<p style="margin:30px 0 0;color:#6e6e73;font-size:12px;line-height:1.5">Se il pulsante non funziona, copia questo indirizzo:<br><a href="${activationUrl}" style="color:#795529">${activationUrl}</a></p>
+<p style="margin:30px 0 0;color:#6e6e73;font-size:12px;line-height:1.5">Se il pulsante non funziona, premi su <a href="${activationUrl}" style="color:#795529;text-decoration:underline">questo link</a>.</p>
 </td></tr></table></td></tr></table></body></html>`,
   };
 }

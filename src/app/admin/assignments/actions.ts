@@ -3,12 +3,13 @@
 import { createClient } from "@/lib/supabase-server";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { revalidatePath } from "next/cache";
-import { getAuthRedirect } from "@/lib/site-url";
+import { getSiteUrl } from "@/lib/site-url";
 import { provisionAdminUser } from "./invitation";
 import { approvePendingRegistration } from "@/lib/registration-approval";
 import { createSupabaseApprovalGateway } from "@/lib/supabase-registration-approval";
 import { buildAccountActiveEmail, sendResendEmail } from "@/lib/registration-email";
 import { deleteWorkspaceUser } from "@/lib/workspace-user-deletion";
+import { generatePasswordSetupUrl } from "@/lib/password-setup-url";
 
 async function assertIsAdmin() {
   const supabase = await createClient();
@@ -58,11 +59,11 @@ export async function inviteUser(
       (user) => user.email?.toLowerCase() === normalizedEmail
     ) ?? null;
     const alreadyExisted = Boolean(existingUser);
-    const { user: invitedUser } = await provisionAdminUser(admin.auth, {
+    const { user: invitedUser, created, activationUrl } = await provisionAdminUser(admin.auth, {
       email: normalizedEmail,
       fullName: normalizedName,
       userType,
-      redirectTo: getAuthRedirect("/imposta-password"),
+      siteUrl: getSiteUrl(),
       existingUser,
     });
 
@@ -78,6 +79,21 @@ export async function inviteUser(
     const { error: profileError } = await admin.from("profiles").upsert(profilePayload);
     if (profileError) {
       return { ok: false as const, error: `Profilo non aggiornato: ${profileError.message}` };
+    }
+    try {
+      await sendResendEmail(buildAccountActiveEmail({
+        recipient: normalizedEmail,
+        firstName: normalizedName.split(/\s+/)[0] || "Ciao",
+        appCount: 0,
+        activationUrl,
+      }), {
+        apiKey: process.env.RESEND_API_KEY ?? "",
+        from: process.env.REGISTRATION_FROM_EMAIL
+          || "True Design <accesso@truedesign.app>",
+      });
+    } catch (error) {
+      if (created) await admin.auth.admin.deleteUser(invitedUser.id, false);
+      throw error;
     }
 
     revalidatePath("/admin/assignments");
@@ -106,7 +122,7 @@ export async function setUserApproval(userId: string, approved: boolean) {
     const result = await approvePendingRegistration({
       userId,
       approvedBy: currentUser.id,
-      passwordSetupRedirect: getAuthRedirect("/imposta-password"),
+      siteUrl: getSiteUrl(),
       gateway: createSupabaseApprovalGateway(admin),
       sendActivationEmail: async ({ email, fullName, appCount, activationUrl }) => {
         await sendResendEmail(buildAccountActiveEmail({
@@ -163,7 +179,7 @@ export async function resendActivationEmail(userId: string) {
   }
   const fullName = profile.full_name || authData.user.email;
   const activationUrl = await createSupabaseApprovalGateway(admin)
-    .createPasswordSetupUrl(userId, getAuthRedirect("/imposta-password"));
+    .createPasswordSetupUrl(userId, getSiteUrl());
   await sendResendEmail(buildAccountActiveEmail({
     recipient: authData.user.email,
     firstName: fullName.trim().split(/\s+/)[0] || "Ciao",
@@ -212,10 +228,21 @@ export async function updateUserName(userId: string, fullName: string) {
 export async function sendPasswordReset(email: string) {
   await assertIsAdmin();
   const admin = createAdminClient();
-  const { error } = await admin.auth.resetPasswordForEmail(email, {
-    redirectTo: getAuthRedirect("/imposta-password"),
+  const activationUrl = await generatePasswordSetupUrl(
+    admin.auth,
+    email,
+    getSiteUrl()
+  );
+  await sendResendEmail(buildAccountActiveEmail({
+    recipient: email,
+    firstName: email.split("@")[0] || "Ciao",
+    appCount: 0,
+    activationUrl,
+  }), {
+    apiKey: process.env.RESEND_API_KEY ?? "",
+    from: process.env.REGISTRATION_FROM_EMAIL
+      || "True Design <accesso@truedesign.app>",
   });
-  if (error) throw new Error(error.message);
 }
 
 export async function deleteUser(userId: string) {

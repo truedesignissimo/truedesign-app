@@ -5,7 +5,7 @@ import { resolveApprovalSecret, verifyApprovalToken } from "@/lib/approval-token
 import { approvePendingRegistration } from "@/lib/registration-approval";
 import { createSupabaseApprovalGateway } from "@/lib/supabase-registration-approval";
 import { buildAccountActiveEmail, sendResendEmail } from "@/lib/registration-email";
-import { getAuthRedirect } from "@/lib/site-url";
+import { getSiteUrl } from "@/lib/site-url";
 
 export async function approveUserFromEmail(token: string) {
   const verified = verifyApprovalToken(token, resolveApprovalSecret());
@@ -15,7 +15,7 @@ export async function approveUserFromEmail(token: string) {
   const result = await approvePendingRegistration({
     userId: verified.userId,
     approvedBy: null,
-    passwordSetupRedirect: getAuthRedirect("/imposta-password"),
+    siteUrl: getSiteUrl(),
     gateway: createSupabaseApprovalGateway(),
     sendActivationEmail: async ({ email, fullName, appCount, activationUrl }) => {
       await sendResendEmail(buildAccountActiveEmail({

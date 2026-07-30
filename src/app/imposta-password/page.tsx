@@ -3,11 +3,18 @@ import { createClient } from "@/lib/supabase-server";
 import Brand from "../_components/brand";
 import PasswordForm from "./password-form";
 
-export default async function SetPasswordPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+export default async function SetPasswordPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ token_hash?: string }>;
+}) {
+  const { token_hash: tokenHash = "" } = await searchParams;
 
-  if (!user) redirect("/login?errore=link-non-valido");
+  if (!tokenHash) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) redirect("/login?errore=link-non-valido");
+  }
 
   return (
     <main className="registration-shell">
@@ -22,7 +29,7 @@ export default async function SetPasswordPage() {
       </section>
       <section className="registration-form-wrap">
         <div className="registration-card">
-          <PasswordForm />
+          <PasswordForm tokenHash={tokenHash || null} />
         </div>
       </section>
     </main>

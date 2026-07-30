@@ -10,14 +10,14 @@ export type ApprovalGateway = {
   listActiveAppIds(): Promise<string[]>;
   listAssignedAppIds(userId: string): Promise<string[]>;
   assignApps(userId: string, appIds: string[]): Promise<void>;
-  createPasswordSetupUrl(userId: string, redirectTo: string): Promise<string>;
+  createPasswordSetupUrl(userId: string, siteUrl: string): Promise<string>;
   approveProfile(userId: string, approvedBy: string | null): Promise<void>;
 };
 
 export async function approvePendingRegistration(input: {
   userId: string;
   approvedBy: string | null;
-  passwordSetupRedirect: string;
+  siteUrl: string;
   gateway: ApprovalGateway;
   sendActivationEmail: (input: {
     email: string;
@@ -46,7 +46,7 @@ export async function approvePendingRegistration(input: {
   try {
     const activationUrl = await input.gateway.createPasswordSetupUrl(
       input.userId,
-      input.passwordSetupRedirect
+      input.siteUrl
     );
     await input.sendActivationEmail({
       email: account.email,

@@ -10,8 +10,17 @@ function createAuth(overrides: Record<string, unknown> = {}) {
       }),
       updateUserById: vi.fn().mockResolvedValue({ data: { user: {} }, error: null }),
       deleteUser: vi.fn().mockResolvedValue({ data: {}, error: null }),
+      generateLink: vi.fn().mockResolvedValue({
+        data: {
+          properties: {
+            hashed_token: "hashed-token",
+            action_link: "https://supabase.test/auth/v1/verify",
+            verification_type: "recovery",
+          },
+        },
+        error: null,
+      }),
     },
-    resetPasswordForEmail: vi.fn().mockResolvedValue({ data: {}, error: null }),
     ...overrides,
   };
 }
@@ -24,7 +33,7 @@ describe("provisionAdminUser", () => {
       email: "nuovo@example.com",
       fullName: "Nuovo Utente",
       userType: "cliente",
-      redirectTo: "https://www.truedesign.app/auth/callback?next=%2Fimposta-password",
+      siteUrl: "https://www.truedesign.app",
       existingUser: null,
     });
 
@@ -33,10 +42,16 @@ describe("provisionAdminUser", () => {
       email_confirm: true,
       user_metadata: { full_name: "Nuovo Utente", user_type: "cliente" },
     });
-    expect(auth.resetPasswordForEmail).toHaveBeenCalledWith("nuovo@example.com", {
-      redirectTo: "https://www.truedesign.app/auth/callback?next=%2Fimposta-password",
+    expect(auth.admin.generateLink).toHaveBeenCalledWith({
+      type: "recovery",
+      email: "nuovo@example.com",
     });
-    expect(result).toMatchObject({ created: true, user: { id: "new-user" } });
+    expect(result).toMatchObject({
+      created: true,
+      user: { id: "new-user" },
+      activationUrl:
+        "https://www.truedesign.app/imposta-password?token_hash=hashed-token&type=recovery",
+    });
   });
 
   it("abilita un account importato non confermato prima di inviare il link", async () => {
@@ -46,7 +61,7 @@ describe("provisionAdminUser", () => {
       email: "esistente@example.com",
       fullName: "Utente Esistente",
       userType: "interno",
-      redirectTo: "https://www.truedesign.app/auth/callback?next=%2Fimposta-password",
+      siteUrl: "https://www.truedesign.app",
       existingUser: { id: "existing-user", email: "esistente@example.com", email_confirmed_at: null },
     });
 
@@ -55,15 +70,18 @@ describe("provisionAdminUser", () => {
       email_confirm: true,
       user_metadata: { full_name: "Utente Esistente", user_type: "interno" },
     });
-    expect(auth.resetPasswordForEmail).toHaveBeenCalledOnce();
+    expect(auth.admin.generateLink).toHaveBeenCalledOnce();
   });
 
   it("elimina il nuovo account se la mail non può essere inviata", async () => {
     const auth = createAuth({
-      resetPasswordForEmail: vi.fn().mockResolvedValue({
-        data: {},
-        error: { message: "SMTP error" },
-      }),
+      admin: {
+        ...createAuth().admin,
+        generateLink: vi.fn().mockResolvedValue({
+          data: { properties: null },
+          error: { message: "Link error" },
+        }),
+      },
     });
 
     await expect(
@@ -71,7 +89,7 @@ describe("provisionAdminUser", () => {
         email: "nuovo@example.com",
         fullName: "Nuovo Utente",
         userType: "cliente",
-        redirectTo: "https://www.truedesign.app/auth/callback?next=%2Fimposta-password",
+        siteUrl: "https://www.truedesign.app",
         existingUser: null,
       })
     ).rejects.toThrow("email");
