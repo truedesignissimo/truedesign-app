@@ -2,8 +2,10 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import {
+  assignAllApps,
   assignApp,
   deleteUser,
+  excludeAllApps,
   resendActivationEmail,
   sendPasswordReset,
   setUserApproval,
@@ -12,6 +14,7 @@ import {
   unassignApp,
   updateUserName,
 } from "./actions";
+import { replaceUserAssignments } from "./user-app-state";
 
 type User = {
   id: string;
@@ -158,7 +161,10 @@ export default function UserAppMatrix({
     setNotice(null);
     startTransition(async () => {
       try {
-        await setUserType(user.id, userType);
+        const assignedAppIds = await setUserType(user.id, userType);
+        setLocalUserApps((current) =>
+          replaceUserAssignments(current, user.id, assignedAppIds)
+        );
         setNotice({ type: "success", message: `Ruolo di ${user.full_name ?? user.email} aggiornato.` });
       } catch (error) {
         updateLocalUser(user.id, { user_type: previousType });
@@ -235,6 +241,47 @@ export default function UserAppMatrix({
         setNotice({ type: "success", message: `Email di recupero inviata a ${user.email}.` });
       } catch (error) {
         setNotice({ type: "error", message: error instanceof Error ? error.message : "Invio non riuscito." });
+      }
+    });
+  }
+
+  function handleBulkAssignments(
+    user: User,
+    mode: "all" | "none",
+    menu: HTMLDetailsElement | null
+  ) {
+    const previousAssignments = localUserApps
+      .filter((item) => item.user_id === user.id)
+      .map((item) => item.app_id);
+    const optimisticIds = mode === "all" ? apps.map((app) => app.id) : [];
+    setLocalUserApps((current) =>
+      replaceUserAssignments(current, user.id, optimisticIds)
+    );
+    setNotice(null);
+
+    startTransition(async () => {
+      try {
+        const assignedIds = mode === "all"
+          ? await assignAllApps(user.id)
+          : await excludeAllApps(user.id);
+        setLocalUserApps((current) =>
+          replaceUserAssignments(current, user.id, assignedIds)
+        );
+        if (menu) menu.open = false;
+        setNotice({
+          type: "success",
+          message: mode === "all"
+            ? `Tutte le app sono state assegnate a ${user.full_name ?? user.email}.`
+            : `Tutte le app sono state escluse per ${user.full_name ?? user.email}.`,
+        });
+      } catch (error) {
+        setLocalUserApps((current) =>
+          replaceUserAssignments(current, user.id, previousAssignments)
+        );
+        setNotice({
+          type: "error",
+          message: error instanceof Error ? error.message : "Assegnazione non riuscita.",
+        });
       }
     });
   }
@@ -370,7 +417,37 @@ export default function UserAppMatrix({
                     <details className="permissions-menu">
                       <summary>{assignedCount === 0 ? "Nessuna eccezione" : `${assignedCount} assegnate`}</summary>
                       <div className="permissions-list">
-                        <p className="muted">App aggiuntive oltre a quelle previste dal profilo.</p>
+                        <p className="muted">Scegli le app visibili per questo utente.</p>
+                        <div className="permissions-bulk-actions">
+                          <button
+                            className="btn btn-secondary"
+                            type="button"
+                            disabled={isPending || apps.length === 0}
+                            onClick={(event) =>
+                              handleBulkAssignments(
+                                user,
+                                "all",
+                                event.currentTarget.closest("details")
+                              )
+                            }
+                          >
+                            Assegna tutte
+                          </button>
+                          <button
+                            className="btn btn-secondary"
+                            type="button"
+                            disabled={isPending || assignedCount === 0}
+                            onClick={(event) =>
+                              handleBulkAssignments(
+                                user,
+                                "none",
+                                event.currentTarget.closest("details")
+                              )
+                            }
+                          >
+                            Escludi tutte
+                          </button>
+                        </div>
                         {apps.map((app) => (
                           <label key={app.id}>
                             <input

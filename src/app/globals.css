@@ -1749,6 +1749,19 @@ label.muted {
   margin-bottom: 12px;
 }
 
+.permissions-bulk-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.permissions-bulk-actions .btn {
+  min-height: 40px;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.7rem;
+}
+
 .permissions-list label {
   display: flex;
   align-items: center;
