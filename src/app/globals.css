@@ -717,6 +717,8 @@ label.muted {
 }
 
 .app-title-card h2 {
+  position: relative;
+  z-index: 1;
   max-width: 16ch;
   margin: 0;
   font-size: clamp(1.08rem, 1.55vw, 1.48rem);
@@ -726,21 +728,27 @@ label.muted {
 }
 
 .app-card-content {
+  position: relative;
   display: flex;
   width: 100%;
   min-width: 0;
   flex: 1;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: clamp(18px, 2.6vw, 30px);
 }
 
 .app-card-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
   display: block;
-  width: min(58%, 132px);
+  width: min(68%, 168px);
   height: auto;
-  margin: auto;
+  max-height: 46%;
   color: currentColor;
+  transform: translate(-50%, -50%);
+  transform-origin: center;
 }
 
 .app-title-card-disabled {

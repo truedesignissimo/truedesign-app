@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase-admin";
 import Brand from "../_components/brand";
 import SignOutButton from "./sign-out-button";
 import AppLink from "./app-link";
+import { firstName } from "@/lib/person-name";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -21,7 +22,7 @@ export default async function DashboardPage() {
     .from("profiles")
     .select("is_admin, full_name, user_type, approval_status")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
 
   if (profile?.approval_status === "pending" || profile?.approval_status === "rejected") {
     redirect("/in-attesa");
@@ -54,13 +55,13 @@ export default async function DashboardPage() {
     }
   }
 
-  let { data: userApps, error: assignedAppsError } = await supabase
+  let { data: userApps, error: assignedAppsError } = await admin
     .from("user_apps")
     .select("apps(id, name, description, url, is_active, is_featured, display_order)")
     .eq("user_id", user.id);
 
   if (assignedAppsError) {
-    const fallbackAssigned = await supabase
+    const fallbackAssigned = await admin
       .from("user_apps")
       .select("apps(id, name, description, url, is_active)")
       .eq("user_id", user.id);
@@ -82,6 +83,12 @@ export default async function DashboardPage() {
     (first.display_order ?? 0) - (second.display_order ?? 0) ||
     first.name.localeCompare(second.name, "it")
   );
+  const displayFirstName = firstName({
+    profileName: profile?.full_name,
+    metadataFirstName: user.user_metadata?.first_name,
+    metadataFullName: user.user_metadata?.full_name,
+    email: user.email,
+  });
 
   return (
     <main className="page-shell">
@@ -106,7 +113,7 @@ export default async function DashboardPage() {
                 {profile?.is_admin ? "Profilo amministratore" : "Extraordinary. Everyday."}
               </p>
               <h1 className="page-title">
-                {profile?.is_admin ? `Ciao${profile?.full_name ? `, ${profile.full_name.split(" ")[0]}` : ""}.` : "Le tue app."}
+                Ciao, {displayFirstName}.
               </h1>
               <p className="lead">
                 {profile?.is_admin
