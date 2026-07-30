@@ -743,9 +743,8 @@ label.muted {
   top: 50%;
   left: 50%;
   display: block;
-  width: min(68%, 168px);
+  width: min(82%, 176px);
   height: auto;
-  max-height: 46%;
   color: currentColor;
   transform: translate(-50%, -50%);
   transform-origin: center;
