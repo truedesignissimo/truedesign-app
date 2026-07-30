@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
 import { createAdminClient } from "@/lib/supabase-admin";
 import Brand from "../_components/brand";
+import { ADMIN_NAV_ITEMS } from "./navigation";
 
 const DEFAULT_OWNER_EMAIL = "dario.breggie@truedesign.it";
 
@@ -73,10 +74,15 @@ export default async function AdminLayout({
           </div>
 
           <nav className="admin-nav" aria-label="Navigazione amministrazione">
-            <a href="/admin" className="btn btn-secondary">Panoramica</a>
-            <a href="/admin/apps" className="btn btn-secondary">Applicazioni</a>
-            <a href="/admin/assignments" className="btn btn-secondary">Utenti</a>
-            <a href="/admin/usage" className="btn btn-secondary">Utilizzo</a>
+            {ADMIN_NAV_ITEMS.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className={`btn btn-secondary${"emphasis" in item && item.emphasis ? " admin-nav-highlight" : ""}`}
+              >
+                {item.label}
+              </a>
+            ))}
           </nav>
         </header>
 

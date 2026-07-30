@@ -884,6 +884,26 @@ label.muted {
   padding: 0.65rem 1rem;
 }
 
+.admin-nav .admin-nav-highlight {
+  border-color: color-mix(in srgb, var(--accent) 58%, var(--border));
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+}
+
+.admin-nav .admin-nav-highlight::before {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  content: "";
+}
+
+.admin-nav .admin-nav-highlight:hover {
+  border-color: var(--accent-dark);
+  background: var(--accent-dark);
+  color: var(--surface);
+}
+
 .admin-section-stack {
   display: grid;
   gap: 18px;
@@ -2248,6 +2268,10 @@ input[type="checkbox"] {
 
   .admin-nav .btn {
     padding-inline: 8px;
+  }
+
+  .admin-nav .admin-nav-highlight {
+    grid-column: 1 / -1;
   }
 
   .panel {
