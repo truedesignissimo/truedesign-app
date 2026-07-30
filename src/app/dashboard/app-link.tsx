@@ -1,3 +1,6 @@
+import AppIcon from "../_components/app-icon";
+import { getAppDisplayName } from "../_components/app-icon-model";
+
 export default function AppLink({
   name,
   url,
@@ -8,14 +11,19 @@ export default function AppLink({
   if (!url) {
     return (
       <div className="app-title-card app-title-card-disabled" aria-disabled="true">
-        <h2>{name}</h2>
+        <span className="app-card-content">
+          <h2>{getAppDisplayName(name, url)}</h2>
+        </span>
       </div>
     );
   }
 
   return (
     <a className="app-title-card" href={url}>
-      <h2>{name}</h2>
+      <span className="app-card-content">
+        <AppIcon className="app-card-icon" url={url} />
+        <h2>{getAppDisplayName(name, url)}</h2>
+      </span>
     </a>
   );
 }

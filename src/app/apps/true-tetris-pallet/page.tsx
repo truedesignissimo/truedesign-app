@@ -35,7 +35,7 @@ export default function TrueTetrisPalletPage() {
     >
       <iframe
         ref={iframeRef}
-        title="True Tetris Pallet"
+        title="Tetris Pallet"
         srcDoc={TRUE_TETRIS_DOCUMENT}
         style={{
           display: "block",

@@ -1,5 +1,7 @@
 import { createAdminClient } from "@/lib/supabase-admin";
 import Brand from "../_components/brand";
+import AppIcon from "../_components/app-icon";
+import { getAppDisplayName } from "../_components/app-icon-model";
 
 export const dynamic = "force-dynamic";
 
@@ -59,11 +61,16 @@ export default async function PubblicoPage() {
             {(apps ?? []).map((app) => (
               app.url ? (
                 <a key={app.id} className="app-title-card" href={app.url}>
-                  <h2>{app.name}</h2>
+                  <span className="app-card-content">
+                    <AppIcon className="app-card-icon" url={app.url} />
+                    <h2>{getAppDisplayName(app.name, app.url)}</h2>
+                  </span>
                 </a>
               ) : (
                 <div key={app.id} className="app-title-card app-title-card-disabled" aria-disabled="true">
-                  <h2>{app.name}</h2>
+                  <span className="app-card-content">
+                    <h2>{getAppDisplayName(app.name, app.url)}</h2>
+                  </span>
                 </div>
               )
             ))}
