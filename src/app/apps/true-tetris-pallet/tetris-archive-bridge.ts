@@ -2,7 +2,7 @@ import type { TetrisShipmentInput } from "./data/types";
 
 const CHANNEL = "true-tetris-archive";
 
-type ArchiveAction = "list" | "load" | "save" | "delete" | "downloadSource";
+type ArchiveAction = "list" | "load" | "save" | "delete" | "downloadSource" | "listPackagingRules" | "savePackagingRule";
 
 interface ArchiveRequest {
   channel: typeof CHANNEL;
@@ -18,6 +18,8 @@ interface ArchiveRepository {
   delete(id: string): Promise<void>;
   uploadSourceFile(shipmentId: string, file: File): Promise<unknown>;
   getSourceDownloadUrl(path: string): Promise<string>;
+  listPackagingRules(): Promise<unknown>;
+  savePackagingRule(rule: { code: string; length: number; width: number; height: number }): Promise<unknown>;
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === "object";
@@ -33,7 +35,7 @@ const isRequest = (value: unknown): value is ArchiveRequest => {
   if (!isRecord(value)) return false;
   return value.channel === CHANNEL
     && typeof value.requestId === "string"
-    && ["list", "load", "save", "delete", "downloadSource"].includes(String(value.action));
+    && ["list", "load", "save", "delete", "downloadSource", "listPackagingRules", "savePackagingRule"].includes(String(value.action));
 };
 
 const requiredString = (value: unknown, label: string): string => {
@@ -54,6 +56,21 @@ export function createArchiveMessageHandler({
     try {
       let data: unknown;
       if (action === "list") data = await repository.list();
+      if (action === "listPackagingRules") data = await repository.listPackagingRules();
+      if (action === "savePackagingRule") {
+        const rule = payload.rule;
+        if (!isRecord(rule)
+          || typeof rule.code !== "string"
+          || ![rule.length, rule.width, rule.height].every((value) => typeof value === "number" && value > 0)) {
+          throw new Error("Misure imballo non valide");
+        }
+        data = await repository.savePackagingRule({
+          code: rule.code,
+          length: rule.length as number,
+          width: rule.width as number,
+          height: rule.height as number,
+        });
+      }
       if (action === "load") data = await repository.load(requiredString(payload.id, "Identificativo piano"));
       if (action === "delete") {
         await repository.delete(requiredString(payload.id, "Identificativo piano"));

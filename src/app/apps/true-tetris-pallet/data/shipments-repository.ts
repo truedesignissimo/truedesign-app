@@ -10,6 +10,13 @@ import { creatorFirstName } from "./creator-name";
 export const TETRIS_BUCKET = "true-tetris-pallet-orders";
 const MAX_SOURCE_BYTES = 20 * 1024 * 1024;
 
+export interface TetrisPackagingRule {
+  code: string;
+  length: number;
+  width: number;
+  height: number;
+}
+
 const assertResult = <T>(result: { data: T; error: { message: string } | null }, operation: string): T => {
   if (result.error) throw new Error(`${operation}: ${result.error.message}`);
   return result.data;
@@ -66,6 +73,23 @@ const creatorNamesFor = async (supabase: SupabaseClient, rows: Record<string, un
 
 export function createTetrisShipmentsRepository(supabase: SupabaseClient) {
   return {
+    async listPackagingRules(): Promise<TetrisPackagingRule[]> {
+      const result = await supabase
+        .from("tetris_packaging_rules")
+        .select("code, length, width, height")
+        .order("code", { ascending: true });
+      return assertResult(result as never, "Elenco regole imballi") as TetrisPackagingRule[];
+    },
+
+    async savePackagingRule(rule: TetrisPackagingRule): Promise<TetrisPackagingRule> {
+      const result = await supabase
+        .from("tetris_packaging_rules")
+        .upsert({ ...rule, updated_at: new Date().toISOString() })
+        .select("code, length, width, height")
+        .single();
+      return assertResult(result as never, "Salvataggio regola imballo") as TetrisPackagingRule;
+    },
+
     async list(): Promise<TetrisShipmentListItem[]> {
       const result = await supabase
         .from("tetris_pallet_shipments")

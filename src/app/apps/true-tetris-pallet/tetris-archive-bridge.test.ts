@@ -29,4 +29,25 @@ describe("True Tetris archive bridge", () => {
       data: [{ id: "shipment-1" }],
     });
   });
+
+  it("saves a packaging rule shared by every True Tetris user", async () => {
+    const send = vi.fn();
+    const savePackagingRule = vi.fn().mockResolvedValue({ code: "2214", length: 100, width: 50, height: 40 });
+    const handler = createArchiveMessageHandler({
+      repository: { savePackagingRule } as never,
+      send,
+    });
+
+    await handler({
+      data: {
+        channel: "true-tetris-archive",
+        requestId: "rule-1",
+        action: "savePackagingRule",
+        payload: { rule: { code: "2214", length: 100, width: 50, height: 40 } },
+      },
+    } as MessageEvent);
+
+    expect(savePackagingRule).toHaveBeenCalledWith({ code: "2214", length: 100, width: 50, height: 40 });
+    expect(send).toHaveBeenCalledWith(expect.objectContaining({ requestId: "rule-1", ok: true }));
+  });
 });
