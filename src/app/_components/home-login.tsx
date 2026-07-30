@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
+import { recordWorkspaceAccess } from "../login/actions";
 
 export default function HomeLogin({ isAuthenticated }: { isAuthenticated: boolean }) {
   const router = useRouter();
@@ -30,8 +31,12 @@ export default function HomeLogin({ isAuthenticated }: { isAuthenticated: boolea
       .eq("id", data.user.id)
       .maybeSingle();
 
+    const isWaiting =
+      profile?.approval_status === "pending" ||
+      profile?.approval_status === "rejected";
+    if (!isWaiting) await recordWorkspaceAccess("homepage");
     setLoading(false);
-    router.push(profile?.approval_status === "pending" || profile?.approval_status === "rejected" ? "/in-attesa" : "/dashboard");
+    router.push(isWaiting ? "/in-attesa" : "/dashboard");
     router.refresh();
   }
 

@@ -333,7 +333,7 @@ export async function deleteUser(userId: string) {
       throw new Error(`Verifica eliminazione non riuscita: ${error.message}`);
     },
     async deleteResidualData(id) {
-      for (const table of ["user_apps", "usage_log", "profiles"] as const) {
+      for (const table of ["user_apps", "usage_log", "access_log", "profiles"] as const) {
         const column = table === "profiles" ? "id" : "user_id";
         const { error } = await admin.from(table).delete().eq(column, id);
         if (error) throw new Error(`Pulizia dati ${table} non riuscita: ${error.message}`);

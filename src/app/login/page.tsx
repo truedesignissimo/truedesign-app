@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
 import Brand from "../_components/brand";
+import { recordWorkspaceAccess } from "./actions";
 
 function LoginForm() {
   const router = useRouter();
@@ -59,6 +60,7 @@ function LoginForm() {
       return;
     }
 
+    await recordWorkspaceAccess("login");
     setLoading(false);
     router.push("/dashboard");
     router.refresh();
