@@ -19,9 +19,9 @@ export default async function ApprovalPage({
       title: "Utente già attivo.",
       text: "Non sono state create assegnazioni duplicate.",
     },
-    "approved-email-pending": {
-      title: "Utente approvato.",
-      text: "L'account è attivo, ma la mail non è partita. Puoi reinviarla dalla console.",
+    "email-failed": {
+      title: "Invio non riuscito.",
+      text: "L’utente non è stato attivato. Riprova l’approvazione dalla console.",
     },
     expired: { title: "Link scaduto.", text: "Questo link non può più approvare l'utente." },
     invalid: { title: "Link non valido.", text: "Controlla di aver aperto il link completo." },

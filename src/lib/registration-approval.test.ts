@@ -9,6 +9,8 @@ function createGateway(overrides: Partial<ApprovalGateway> = {}): ApprovalGatewa
       fullName: "Mario Rossi",
       userType: "cliente",
       status: "pending",
+      emailConfirmed: false,
+      hasSignedIn: false,
     }),
     listActiveApps: vi.fn().mockResolvedValue([
       { id: "app-1", url: "/apps/true-generatore-offerte" },
@@ -16,14 +18,16 @@ function createGateway(overrides: Partial<ApprovalGateway> = {}): ApprovalGatewa
     ]),
     listAssignedAppIds: vi.fn().mockResolvedValue([]),
     assignApps: vi.fn().mockResolvedValue(undefined),
+    unassignApps: vi.fn().mockResolvedValue(undefined),
     createPasswordSetupUrl: vi.fn().mockResolvedValue("https://supabase.test/recovery"),
     approveProfile: vi.fn().mockResolvedValue(undefined),
+    restoreProfileStatus: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
 }
 
 describe("approvePendingRegistration", () => {
-  it("assegna le app, approva e invia un link per scegliere la password", async () => {
+  it("assegna le app, approva e invia il link con una chiave idempotente stabile", async () => {
     const gateway = createGateway();
     const sendActivationEmail = vi.fn().mockResolvedValue(undefined);
     const result = await approvePendingRegistration({
@@ -44,7 +48,10 @@ describe("approvePendingRegistration", () => {
       fullName: "Mario Rossi",
       appCount: 1,
       activationUrl: "https://supabase.test/recovery",
+      idempotencyKey: "activation-approval/user-1",
     });
+    expect(vi.mocked(gateway.approveProfile).mock.invocationCallOrder[0])
+      .toBeLessThan(vi.mocked(sendActivationEmail).mock.invocationCallOrder[0]);
     expect(result).toEqual({ status: "approved", appCount: 1, emailSent: true });
   });
 
@@ -56,6 +63,8 @@ describe("approvePendingRegistration", () => {
         fullName: "Mario Rossi",
         userType: "interno",
         status: "pending",
+        emailConfirmed: false,
+        hasSignedIn: false,
       }),
     });
 
@@ -78,6 +87,8 @@ describe("approvePendingRegistration", () => {
         fullName: "Mario Rossi",
         userType: "cliente",
         status: "approved",
+        emailConfirmed: true,
+        hasSignedIn: true,
       }),
     });
     const result = await approvePendingRegistration({
@@ -89,6 +100,60 @@ describe("approvePendingRegistration", () => {
     });
     expect(gateway.assignApps).not.toHaveBeenCalled();
     expect(result.status).toBe("already-approved");
+  });
+
+  it("reinvia l'attivazione a un profilo approvato ma mai confermato", async () => {
+    const gateway = createGateway({
+      getAccount: vi.fn().mockResolvedValue({
+        id: "user-1",
+        email: "mario@example.com",
+        fullName: "Mario Rossi",
+        userType: "cliente",
+        status: "approved",
+        emailConfirmed: false,
+        hasSignedIn: false,
+      }),
+    });
+    const sendActivationEmail = vi.fn().mockResolvedValue(undefined);
+
+    const result = await approvePendingRegistration({
+      userId: "user-1",
+      approvedBy: null,
+      siteUrl: "https://www.truedesign.app",
+      gateway,
+      sendActivationEmail,
+    });
+
+    expect(sendActivationEmail).toHaveBeenCalledOnce();
+    expect(gateway.approveProfile).not.toHaveBeenCalled();
+    expect(gateway.restoreProfileStatus).not.toHaveBeenCalled();
+    expect(result.status).toBe("approved");
+  });
+
+  it("reinvia l'attivazione a un account legacy preconfermato ma mai usato", async () => {
+    const gateway = createGateway({
+      getAccount: vi.fn().mockResolvedValue({
+        id: "legacy-user",
+        email: "legacy@example.com",
+        fullName: "Legacy User",
+        userType: "cliente",
+        status: "approved",
+        emailConfirmed: true,
+        hasSignedIn: false,
+      }),
+    });
+    const sendActivationEmail = vi.fn().mockResolvedValue(undefined);
+
+    const result = await approvePendingRegistration({
+      userId: "legacy-user",
+      approvedBy: null,
+      siteUrl: "https://www.truedesign.app",
+      gateway,
+      sendActivationEmail,
+    });
+
+    expect(sendActivationEmail).toHaveBeenCalledOnce();
+    expect(result.status).toBe("approved");
   });
 
   it("non approva se l'assegnazione fallisce", async () => {
@@ -105,7 +170,7 @@ describe("approvePendingRegistration", () => {
     expect(gateway.approveProfile).not.toHaveBeenCalled();
   });
 
-  it("mantiene approvato l'account se fallisce solo la mail", async () => {
+  it("mantiene pending l'account se la mail di attivazione fallisce", async () => {
     const gateway = createGateway();
     const result = await approvePendingRegistration({
       userId: "user-1",
@@ -114,7 +179,23 @@ describe("approvePendingRegistration", () => {
       gateway,
       sendActivationEmail: vi.fn().mockRejectedValue(new Error("email")),
     });
-    expect(gateway.approveProfile).toHaveBeenCalled();
+    expect(gateway.approveProfile).toHaveBeenCalledWith("user-1", null);
+    expect(gateway.restoreProfileStatus).toHaveBeenCalledWith("user-1", "pending");
+    expect(gateway.unassignApps).toHaveBeenCalledWith("user-1", ["survey"]);
+    expect(result.status).toBe("activation-email-failed");
     expect(result.emailSent).toBe(false);
+  });
+
+  it("segnala un errore grave se non riesce a ripristinare lo stato", async () => {
+    const gateway = createGateway({
+      restoreProfileStatus: vi.fn().mockRejectedValue(new Error("rollback")),
+    });
+    await expect(approvePendingRegistration({
+      userId: "user-1",
+      approvedBy: null,
+      siteUrl: "https://www.truedesign.app",
+      gateway,
+      sendActivationEmail: vi.fn().mockRejectedValue(new Error("email")),
+    })).rejects.toThrow("ripristinare");
   });
 });

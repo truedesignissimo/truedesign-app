@@ -10,11 +10,13 @@ import { createSupabaseApprovalGateway } from "@/lib/supabase-registration-appro
 import { buildAccountActiveEmail, sendResendEmail } from "@/lib/registration-email";
 import { deleteWorkspaceUser } from "@/lib/workspace-user-deletion";
 import { generatePasswordSetupUrl } from "@/lib/password-setup-url";
+import { getApprovalActionResult } from "@/lib/approval-action-result";
 import {
   defaultAppIdsForRole,
   type UserRole,
 } from "@/lib/user-app-policy";
 import { syncUserApps } from "@/lib/user-app-sync";
+import { runAdminInvitationTransaction } from "@/lib/admin-invitation-transaction";
 
 async function assertIsAdmin() {
   const supabase = await createClient();
@@ -101,6 +103,21 @@ export async function inviteUser(
       (user) => user.email?.toLowerCase() === normalizedEmail
     ) ?? null;
     const alreadyExisted = Boolean(existingUser);
+    const syncGateway = createUserAppSyncGateway(admin);
+    const [{ data: previousProfile, error: previousProfileError }, previousAppIds] =
+      await Promise.all([
+        existingUser
+          ? admin
+            .from("profiles")
+            .select("full_name, user_type, approval_status, approved_at, approved_by, is_admin")
+            .eq("id", existingUser.id)
+            .maybeSingle()
+          : Promise.resolve({ data: null, error: null }),
+        existingUser ? syncGateway.list(existingUser.id) : Promise.resolve([]),
+      ]);
+    if (previousProfileError) {
+      return { ok: false as const, error: "Impossibile leggere lo stato attuale dell’utente." };
+    }
     const { user: invitedUser, created, activationUrl } = await provisionAdminUser(admin.auth, {
       email: normalizedEmail,
       fullName: normalizedName,
@@ -109,41 +126,66 @@ export async function inviteUser(
       existingUser,
     });
 
-    const profilePayload = {
+    const baseProfilePayload = {
       id: invitedUser.id,
       full_name: normalizedName,
       user_type: userType,
-      approval_status: "approved",
-      approved_at: new Date().toISOString(),
-      approved_by: currentUser.id,
       ...(!alreadyExisted ? { is_admin: false } : {}),
     };
-    const { error: profileError } = await admin.from("profiles").upsert(profilePayload);
-    if (profileError) {
-      return { ok: false as const, error: `Profilo non aggiornato: ${profileError.message}` };
-    }
     const activeApps = await listActiveApps(admin);
     const assignedAppIds = defaultAppIdsForRole(userType, activeApps);
-    await syncUserApps(
-      invitedUser.id,
-      assignedAppIds,
-      createUserAppSyncGateway(admin)
-    );
-    try {
-      await sendResendEmail(buildAccountActiveEmail({
-        recipient: normalizedEmail,
-        firstName: normalizedName.split(/\s+/)[0] || "Ciao",
-        appCount: assignedAppIds.length,
-        activationUrl,
-      }), {
-        apiKey: process.env.RESEND_API_KEY ?? "",
-        from: process.env.REGISTRATION_FROM_EMAIL
-          || "True Design <accesso@truedesign.app>",
-      });
-    } catch (error) {
-      if (created) await admin.auth.admin.deleteUser(invitedUser.id, false);
-      throw error;
-    }
+    await runAdminInvitationTransaction({
+      async prepare() {
+        const { error } = await admin.from("profiles").upsert({
+          ...baseProfilePayload,
+          approval_status: "pending",
+          approved_at: null,
+          approved_by: null,
+        });
+        if (error) throw new Error(`Profilo non aggiornato: ${error.message}`);
+        await syncUserApps(invitedUser.id, assignedAppIds, syncGateway);
+      },
+      async approve() {
+        const { error } = await admin.from("profiles").update({
+          approval_status: "approved",
+          approved_at: new Date().toISOString(),
+          approved_by: currentUser.id,
+        }).eq("id", invitedUser.id);
+        if (error) throw new Error(`Profilo non approvato: ${error.message}`);
+      },
+      async send() {
+        await sendResendEmail(buildAccountActiveEmail({
+          recipient: normalizedEmail,
+          firstName: normalizedName.split(/\s+/)[0] || "Ciao",
+          appCount: assignedAppIds.length,
+          activationUrl,
+        }), {
+          apiKey: process.env.RESEND_API_KEY ?? "",
+          from: process.env.REGISTRATION_FROM_EMAIL
+            || "True Design <accesso@truedesign.app>",
+        }, fetch, {
+          idempotencyKey: `activation-invite/${invitedUser.id}`,
+        });
+      },
+      async rollback() {
+        if (created) {
+          const { error } = await admin.auth.admin.deleteUser(invitedUser.id, false);
+          if (error) throw new Error(error.message);
+          return;
+        }
+        if (previousProfile) {
+          const { error } = await admin.from("profiles").upsert({
+            id: invitedUser.id,
+            ...previousProfile,
+          });
+          if (error) throw new Error(error.message);
+        } else {
+          const { error } = await admin.from("profiles").delete().eq("id", invitedUser.id);
+          if (error) throw new Error(error.message);
+        }
+        await syncUserApps(invitedUser.id, previousAppIds, syncGateway);
+      },
+    });
 
     revalidatePath("/admin/assignments");
     return {
@@ -173,7 +215,13 @@ export async function setUserApproval(userId: string, approved: boolean) {
       approvedBy: currentUser.id,
       siteUrl: getSiteUrl(),
       gateway: createSupabaseApprovalGateway(admin),
-      sendActivationEmail: async ({ email, fullName, appCount, activationUrl }) => {
+      sendActivationEmail: async ({
+        email,
+        fullName,
+        appCount,
+        activationUrl,
+        idempotencyKey,
+      }) => {
         await sendResendEmail(buildAccountActiveEmail({
           recipient: email,
           firstName: fullName.trim().split(/\s+/)[0] || "Ciao",
@@ -183,15 +231,15 @@ export async function setUserApproval(userId: string, approved: boolean) {
           apiKey: process.env.RESEND_API_KEY ?? "",
           from: process.env.REGISTRATION_FROM_EMAIL
             || "True Design <accesso@truedesign.app>",
-        });
+        }, fetch, { idempotencyKey });
       },
     });
     revalidatePath("/admin/assignments");
-    return {
-      message: result.emailSent
-        ? "Utente approvato, app assegnate e conferma inviata."
-        : "Utente approvato e app assegnate; conferma email da reinviare.",
-    };
+    return getApprovalActionResult(
+      result.status === "activation-email-failed"
+        ? "activation-email-failed"
+        : "approved"
+    );
   }
 
   const { error } = await admin
@@ -204,9 +252,7 @@ export async function setUserApproval(userId: string, approved: boolean) {
     .eq("id", userId);
   if (error) throw new Error(error.message);
   revalidatePath("/admin/assignments");
-  return {
-    message: "Accesso sospeso.",
-  };
+  return getApprovalActionResult("rejected");
 }
 
 export async function resendActivationEmail(userId: string) {

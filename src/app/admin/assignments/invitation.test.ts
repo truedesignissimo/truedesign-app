@@ -5,7 +5,7 @@ function createAuth(overrides: Record<string, unknown> = {}) {
   return {
     admin: {
       createUser: vi.fn().mockResolvedValue({
-        data: { user: { id: "new-user", email: "nuovo@example.com", email_confirmed_at: "now" } },
+        data: { user: { id: "new-user", email: "nuovo@example.com", email_confirmed_at: null } },
         error: null,
       }),
       updateUserById: vi.fn().mockResolvedValue({ data: { user: {} }, error: null }),
@@ -26,7 +26,7 @@ function createAuth(overrides: Record<string, unknown> = {}) {
 }
 
 describe("provisionAdminUser", () => {
-  it("crea un utente senza password e invia il link per sceglierla", async () => {
+  it("crea un utente non confermato e prepara il link per sceglierla", async () => {
     const auth = createAuth();
 
     const result = await provisionAdminUser(auth, {
@@ -39,7 +39,7 @@ describe("provisionAdminUser", () => {
 
     expect(auth.admin.createUser).toHaveBeenCalledWith({
       email: "nuovo@example.com",
-      email_confirm: true,
+      email_confirm: false,
       user_metadata: { full_name: "Nuovo Utente", user_type: "cliente" },
     });
     expect(auth.admin.generateLink).toHaveBeenCalledWith({
@@ -54,7 +54,7 @@ describe("provisionAdminUser", () => {
     });
   });
 
-  it("abilita un account importato non confermato prima di inviare il link", async () => {
+  it("aggiorna un account importato senza confermarne automaticamente l'email", async () => {
     const auth = createAuth();
 
     await provisionAdminUser(auth, {
@@ -67,7 +67,6 @@ describe("provisionAdminUser", () => {
 
     expect(auth.admin.createUser).not.toHaveBeenCalled();
     expect(auth.admin.updateUserById).toHaveBeenCalledWith("existing-user", {
-      email_confirm: true,
       user_metadata: { full_name: "Utente Esistente", user_type: "interno" },
     });
     expect(auth.admin.generateLink).toHaveBeenCalledOnce();

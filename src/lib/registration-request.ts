@@ -8,6 +8,8 @@ export type RegistrationIdentity = {
 export type RegistrationAccount = {
   id: string;
   status: "pending" | "approved" | "rejected";
+  emailConfirmed: boolean;
+  hasSignedIn: boolean;
 };
 
 export type RegistrationRequestGateway = {
@@ -21,6 +23,7 @@ export type RegistrationRequestResult = {
   status:
     | "created"
     | "recovered-pending"
+    | "awaiting-confirmation"
     | "already-active"
     | "notification-failed";
   userId: string;
@@ -31,7 +34,11 @@ export async function submitRegistrationRequest(
   gateway: RegistrationRequestGateway
 ): Promise<RegistrationRequestResult> {
   const existing = await gateway.findByEmail(identity.email);
-  if (existing?.status === "approved") {
+  if (
+    existing?.status === "approved" &&
+    existing.emailConfirmed &&
+    existing.hasSignedIn
+  ) {
     return { status: "already-active", userId: existing.id };
   }
 
@@ -39,7 +46,7 @@ export async function submitRegistrationRequest(
     ? existing.id
     : await gateway.createPendingAccount(identity);
 
-  if (existing) {
+  if (existing && existing.status !== "approved") {
     await gateway.refreshPendingAccount(userId, identity);
   }
 
@@ -50,7 +57,9 @@ export async function submitRegistrationRequest(
   }
 
   return {
-    status: existing ? "recovered-pending" : "created",
+    status: existing?.status === "approved"
+      ? "awaiting-confirmation"
+      : existing ? "recovered-pending" : "created",
     userId,
   };
 }

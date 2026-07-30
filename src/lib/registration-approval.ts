@@ -10,6 +10,8 @@ export type PendingAccount = {
   fullName: string;
   userType: UserRole;
   status: "pending" | "approved" | "rejected";
+  emailConfirmed: boolean;
+  hasSignedIn: boolean;
 };
 
 export type ApprovalGateway = {
@@ -17,8 +19,13 @@ export type ApprovalGateway = {
   listActiveApps(): Promise<AssignableApp[]>;
   listAssignedAppIds(userId: string): Promise<string[]>;
   assignApps(userId: string, appIds: string[]): Promise<void>;
+  unassignApps(userId: string, appIds: string[]): Promise<void>;
   createPasswordSetupUrl(userId: string, siteUrl: string): Promise<string>;
   approveProfile(userId: string, approvedBy: string | null): Promise<void>;
+  restoreProfileStatus(
+    userId: string,
+    status: PendingAccount["status"]
+  ): Promise<void>;
 };
 
 export async function approvePendingRegistration(input: {
@@ -31,11 +38,16 @@ export async function approvePendingRegistration(input: {
     fullName: string;
     appCount: number;
     activationUrl: string;
+    idempotencyKey: string;
   }) => Promise<void>;
 }) {
   const account = await input.gateway.getAccount(input.userId);
   if (!account) throw new Error("Account non disponibile.");
-  if (account.status === "approved") {
+  if (
+    account.status === "approved" &&
+    account.emailConfirmed &&
+    account.hasSignedIn
+  ) {
     return { status: "already-approved" as const, appCount: 0, emailSent: true };
   }
   const activeApps = await input.gateway.listActiveApps();
@@ -49,8 +61,10 @@ export async function approvePendingRegistration(input: {
       throw new Error("Non è stato possibile assegnare tutte le app.");
     }
   }
-  await input.gateway.approveProfile(input.userId, input.approvedBy);
-  let emailSent = true;
+  const changedApprovalStatus = account.status !== "approved";
+  if (changedApprovalStatus) {
+    await input.gateway.approveProfile(input.userId, input.approvedBy);
+  }
   try {
     const activationUrl = await input.gateway.createPasswordSetupUrl(
       input.userId,
@@ -61,13 +75,30 @@ export async function approvePendingRegistration(input: {
       fullName: account.fullName,
       appCount: defaultAppIds.length,
       activationUrl,
+      idempotencyKey: `activation-approval/${input.userId}`,
     });
   } catch {
-    emailSent = false;
+    try {
+      if (changedApprovalStatus) {
+        await input.gateway.restoreProfileStatus(input.userId, account.status);
+      }
+      if (missing.length) {
+        await input.gateway.unassignApps(input.userId, missing);
+      }
+    } catch {
+      throw new Error(
+        "Invio email fallito e non è stato possibile ripristinare lo stato dell’account."
+      );
+    }
+    return {
+      status: "activation-email-failed" as const,
+      appCount: defaultAppIds.length,
+      emailSent: false,
+    };
   }
   return {
     status: "approved" as const,
     appCount: defaultAppIds.length,
-    emailSent,
+    emailSent: true,
   };
 }

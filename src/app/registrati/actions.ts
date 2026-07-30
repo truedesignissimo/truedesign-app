@@ -77,6 +77,8 @@ export async function registerPendingUser(input: {
       return {
         id: authUser.id,
         status: profile?.approval_status ?? "pending",
+        emailConfirmed: Boolean(authUser.email_confirmed_at),
+        hasSignedIn: Boolean(authUser.last_sign_in_at),
       };
     },
     async createPendingAccount(accountIdentity) {

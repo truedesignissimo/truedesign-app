@@ -17,7 +17,13 @@ export async function approveUserFromEmail(token: string) {
     approvedBy: null,
     siteUrl: getSiteUrl(),
     gateway: createSupabaseApprovalGateway(),
-    sendActivationEmail: async ({ email, fullName, appCount, activationUrl }) => {
+    sendActivationEmail: async ({
+      email,
+      fullName,
+      appCount,
+      activationUrl,
+      idempotencyKey,
+    }) => {
       await sendResendEmail(buildAccountActiveEmail({
         recipient: email,
         firstName: fullName.trim().split(/\s+/)[0] || "Ciao",
@@ -27,11 +33,13 @@ export async function approveUserFromEmail(token: string) {
         apiKey: process.env.RESEND_API_KEY ?? "",
         from: process.env.REGISTRATION_FROM_EMAIL
           || "True Design <accesso@truedesign.app>",
-      });
+      }, fetch, { idempotencyKey });
     },
   });
   const status = result.status === "already-approved"
     ? "already-approved"
-    : result.emailSent ? "approved" : "approved-email-pending";
+    : result.status === "activation-email-failed"
+      ? "email-failed"
+      : "approved";
   redirect(`/approva-utente?status=${status}`);
 }

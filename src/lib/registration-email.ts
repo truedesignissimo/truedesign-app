@@ -1,5 +1,10 @@
 export type MailMessage = { to: string[]; subject: string; html: string };
 export type ResendConfig = { apiKey: string; from: string };
+export type ResendSendOptions = {
+  idempotencyKey?: string;
+  maxAttempts?: number;
+  sleep?: (milliseconds: number) => Promise<void>;
+};
 
 function escapeHtml(value: string) {
   return value.replace(/[&<>'"]/g, (character) => ({
@@ -62,24 +67,59 @@ export function buildAccountActiveEmail(input: {
 export async function sendResendEmail(
   message: MailMessage,
   config: ResendConfig,
-  fetcher: typeof fetch = fetch
+  fetcher: typeof fetch = fetch,
+  options: ResendSendOptions = {}
 ) {
   if (!config.apiKey || !config.from) throw new Error("Configurazione email mancante.");
-  const response = await fetcher("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${config.apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ from: config.from, ...message }),
-    cache: "no-store",
-  });
-  if (!response.ok) {
-    throw new Error(`Invio email non riuscito (HTTP ${response.status}).`);
+  const maxAttempts = Math.max(1, options.maxAttempts ?? 3);
+  const idempotencyKey = options.idempotencyKey ?? crypto.randomUUID();
+  const sleep = options.sleep ?? ((milliseconds: number) =>
+    new Promise((resolve) => setTimeout(resolve, milliseconds)));
+  let lastStatus: number | null = null;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      const response = await fetcher("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${config.apiKey}`,
+          "Content-Type": "application/json",
+          "Idempotency-Key": idempotencyKey,
+          "User-Agent": "truedesign.app/registration",
+        },
+        body: JSON.stringify({ from: config.from, ...message }),
+        cache: "no-store",
+      });
+      lastStatus = response.status;
+
+      if (response.ok) {
+        const payload = await response.json() as { id?: unknown };
+        if (typeof payload.id !== "string" || !payload.id) {
+          throw new Error("Invio email non confermato dal provider.");
+        }
+        return payload.id;
+      }
+
+      const retryable =
+        response.status === 408 ||
+        response.status === 409 ||
+        response.status === 429 ||
+        response.status >= 500;
+      if (!retryable || attempt === maxAttempts) {
+        throw new Error(`Invio email non riuscito (HTTP ${response.status}).`);
+      }
+    } catch (error) {
+      const isProviderError =
+        error instanceof Error && error.message.startsWith("Invio email non riuscito");
+      if (isProviderError || attempt === maxAttempts) throw error;
+    }
+
+    await sleep(Math.min(250 * 2 ** (attempt - 1), 2000));
   }
-  const payload = await response.json() as { id?: unknown };
-  if (typeof payload.id !== "string" || !payload.id) {
-    throw new Error("Invio email non confermato dal provider.");
-  }
-  return payload.id;
+
+  throw new Error(
+    lastStatus
+      ? `Invio email non riuscito (HTTP ${lastStatus}).`
+      : "Invio email non riuscito per un errore di rete."
+  );
 }

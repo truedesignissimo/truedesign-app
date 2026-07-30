@@ -15,6 +15,7 @@ import {
   updateUserName,
 } from "./actions";
 import { replaceUserAssignments } from "./user-app-state";
+import { getUserActivationStatus } from "@/lib/user-activation-status";
 
 type User = {
   id: string;
@@ -189,17 +190,16 @@ export default function UserAppMatrix({
 
   function handleApproval(user: User, approved: boolean) {
     const previousStatus = user.approval_status;
-    const nextStatus = approved ? "approved" : "rejected";
-    updateLocalUser(user.id, { approval_status: nextStatus });
     setNotice(null);
     startTransition(async () => {
       try {
         const result = await setUserApproval(user.id, approved);
+        updateLocalUser(user.id, { approval_status: result.approvalStatus });
         setNotice({
-          type: "success",
-          message: approved
+          type: result.ok ? "success" : "error",
+          message: approved && result.ok
             ? `${result.message} ${user.full_name ?? user.email} potrà usare le app assegnate dopo il clic sul link.`
-            : `Accesso di ${user.full_name ?? user.email} sospeso.`,
+            : result.message,
         });
       } catch (error) {
         updateLocalUser(user.id, { approval_status: previousStatus });
@@ -367,6 +367,11 @@ export default function UserAppMatrix({
             {filteredUsers.map((user) => {
               const assignedCount = apps.filter((app) => hasApp(user.id, app.id)).length;
               const isCurrentUser = user.id === currentUserId;
+              const activationStatus = getUserActivationStatus(
+                user.approval_status,
+                user.email_confirmed_at,
+                user.last_sign_in_at
+              );
 
               return (
                 <tr key={user.id}>
@@ -377,15 +382,8 @@ export default function UserAppMatrix({
                         <strong>{user.full_name ?? "Nome non impostato"}</strong>
                         <span className="muted">{user.email}</span>
                         <div className="user-badges">
-                          <span className={`status-badge ${user.email_confirmed_at ? "status-active" : "status-pending"}`}>
-                            {user.email_confirmed_at ? "Attivo" : "Invito in attesa"}
-                          </span>
-                          <span className={`status-badge ${user.approval_status === "approved" ? "status-active" : "status-pending"}`}>
-                            {user.approval_status === "approved"
-                              ? "Approvato"
-                              : user.approval_status === "pending"
-                                ? "Da approvare"
-                                : "Sospeso"}
+                          <span className={`status-badge status-${activationStatus.tone}`}>
+                            {activationStatus.label}
                           </span>
                           {isCurrentUser && <span className="status-badge">Tu</span>}
                         </div>

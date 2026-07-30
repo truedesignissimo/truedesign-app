@@ -23,6 +23,8 @@ export function createSupabaseApprovalGateway(
         fullName: profile.full_name || authData.user.email.split("@")[0],
         userType: profile.user_type === "interno" ? "interno" : "cliente",
         status: profile.approval_status,
+        emailConfirmed: Boolean(authData.user.email_confirmed_at),
+        hasSignedIn: Boolean(authData.user.last_sign_in_at),
       };
     },
     async listActiveApps() {
@@ -45,6 +47,15 @@ export function createSupabaseApprovalGateway(
       );
       if (error) throw new Error("Impossibile creare le assegnazioni.");
     },
+    async unassignApps(userId, appIds) {
+      if (!appIds.length) return;
+      const { error } = await admin
+        .from("user_apps")
+        .delete()
+        .eq("user_id", userId)
+        .in("app_id", appIds);
+      if (error) throw new Error("Impossibile ripristinare le assegnazioni.");
+    },
     async createPasswordSetupUrl(userId, siteUrl) {
       const { data: authData, error: authError } = await admin.auth.admin.getUserById(userId);
       if (authError || !authData.user?.email) {
@@ -59,6 +70,14 @@ export function createSupabaseApprovalGateway(
         approved_by: approvedBy,
       }).eq("id", userId);
       if (error) throw new Error("Impossibile approvare il profilo.");
+    },
+    async restoreProfileStatus(userId, status) {
+      const { error } = await admin.from("profiles").update({
+        approval_status: status,
+        approved_at: status === "approved" ? new Date().toISOString() : null,
+        approved_by: null,
+      }).eq("id", userId);
+      if (error) throw new Error("Impossibile ripristinare il profilo.");
     },
   };
 }

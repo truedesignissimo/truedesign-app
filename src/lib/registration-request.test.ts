@@ -37,6 +37,8 @@ describe("submitRegistrationRequest", () => {
     vi.mocked(gateway.findByEmail).mockResolvedValue({
       id: "pending-user",
       status: "pending",
+      emailConfirmed: false,
+      hasSignedIn: false,
     });
 
     const result = await submitRegistrationRequest(identity, gateway);
@@ -52,6 +54,8 @@ describe("submitRegistrationRequest", () => {
     vi.mocked(gateway.findByEmail).mockResolvedValue({
       id: "rejected-user",
       status: "rejected",
+      emailConfirmed: false,
+      hasSignedIn: false,
     });
 
     const result = await submitRegistrationRequest(identity, gateway);
@@ -65,6 +69,8 @@ describe("submitRegistrationRequest", () => {
     vi.mocked(gateway.findByEmail).mockResolvedValue({
       id: "active-user",
       status: "approved",
+      emailConfirmed: true,
+      hasSignedIn: true,
     });
 
     const result = await submitRegistrationRequest(identity, gateway);
@@ -72,6 +78,38 @@ describe("submitRegistrationRequest", () => {
     expect(gateway.refreshPendingAccount).not.toHaveBeenCalled();
     expect(gateway.notifyOwner).not.toHaveBeenCalled();
     expect(result).toEqual({ status: "already-active", userId: "active-user" });
+  });
+
+  it("non retrocede un profilo approvato se l'email non è mai stata confermata", async () => {
+    const gateway = createGateway();
+    vi.mocked(gateway.findByEmail).mockResolvedValue({
+      id: "unconfirmed-user",
+      status: "approved",
+      emailConfirmed: false,
+      hasSignedIn: false,
+    });
+
+    const result = await submitRegistrationRequest(identity, gateway);
+
+    expect(gateway.refreshPendingAccount).not.toHaveBeenCalled();
+    expect(gateway.notifyOwner).toHaveBeenCalledWith("unconfirmed-user", identity);
+    expect(result).toEqual({ status: "awaiting-confirmation", userId: "unconfirmed-user" });
+  });
+
+  it("non retrocede un account preconfermato che non ha mai effettuato accesso", async () => {
+    const gateway = createGateway();
+    vi.mocked(gateway.findByEmail).mockResolvedValue({
+      id: "legacy-user",
+      status: "approved",
+      emailConfirmed: true,
+      hasSignedIn: false,
+    });
+
+    const result = await submitRegistrationRequest(identity, gateway);
+
+    expect(gateway.refreshPendingAccount).not.toHaveBeenCalled();
+    expect(gateway.notifyOwner).toHaveBeenCalledWith("legacy-user", identity);
+    expect(result.status).toBe("awaiting-confirmation");
   });
 
   it("mantiene la richiesta e segnala il fallimento della notifica", async () => {

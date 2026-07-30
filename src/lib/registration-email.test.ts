@@ -65,4 +65,34 @@ describe("registration emails", () => {
       fetcher as typeof fetch
     )).rejects.toThrow("HTTP 403");
   });
+
+  it("ritenta gli errori temporanei usando la stessa chiave idempotente", async () => {
+    const fetcher = vi.fn()
+      .mockResolvedValueOnce(new Response("rate limited", { status: 429 }))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ id: "email-after-retry" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        })
+      );
+    const sleep = vi.fn().mockResolvedValue(undefined);
+
+    const result = await sendResendEmail(
+      { to: ["mario@example.com"], subject: "Oggetto", html: "<p>Test</p>" },
+      { apiKey: "resend-secret", from: "True Design <accesso@truedesign.app>" },
+      fetcher as typeof fetch,
+      { idempotencyKey: "activation-user-1", sleep }
+    );
+
+    expect(result).toBe("email-after-retry");
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(fetcher.mock.calls[0][1]?.headers).toMatchObject({
+      "Idempotency-Key": "activation-user-1",
+      "User-Agent": "truedesign.app/registration",
+    });
+    expect(fetcher.mock.calls[1][1]?.headers).toMatchObject({
+      "Idempotency-Key": "activation-user-1",
+    });
+    expect(sleep).toHaveBeenCalledOnce();
+  });
 });

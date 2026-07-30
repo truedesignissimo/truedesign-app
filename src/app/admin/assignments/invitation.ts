@@ -18,7 +18,6 @@ type AdminAuth = {
     updateUserById(
       userId: string,
       input: {
-        email_confirm: boolean;
         user_metadata: { full_name: string; user_type: "interno" | "cliente" };
       }
     ): Promise<{ data: { user: unknown }; error: AuthError }>;
@@ -49,7 +48,7 @@ export async function provisionAdminUser(auth: AdminAuth, input: ProvisionInput)
   if (!user) {
     const result = await auth.admin.createUser({
       email: input.email,
-      email_confirm: true,
+      email_confirm: false,
       user_metadata: metadata,
     });
 
@@ -61,7 +60,6 @@ export async function provisionAdminUser(auth: AdminAuth, input: ProvisionInput)
     created = true;
   } else if (!user.email_confirmed_at) {
     const result = await auth.admin.updateUserById(user.id, {
-      email_confirm: true,
       user_metadata: metadata,
     });
 
