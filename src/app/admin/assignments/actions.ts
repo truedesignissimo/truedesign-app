@@ -10,6 +10,11 @@ import { createSupabaseApprovalGateway } from "@/lib/supabase-registration-appro
 import { buildAccountActiveEmail, sendResendEmail } from "@/lib/registration-email";
 import { deleteWorkspaceUser } from "@/lib/workspace-user-deletion";
 import { generatePasswordSetupUrl } from "@/lib/password-setup-url";
+import {
+  defaultAppIdsForRole,
+  type UserRole,
+} from "@/lib/user-app-policy";
+import { syncUserApps } from "@/lib/user-app-sync";
 
 async function assertIsAdmin() {
   const supabase = await createClient();
@@ -29,6 +34,43 @@ async function assertIsAdmin() {
   if (error || !profile?.is_admin) throw new Error("Non autorizzato");
 
   return user;
+}
+
+function createUserAppSyncGateway(admin: ReturnType<typeof createAdminClient>) {
+  return {
+    async list(userId: string) {
+      const { data, error } = await admin
+        .from("user_apps")
+        .select("app_id")
+        .eq("user_id", userId);
+      if (error) throw new Error("Impossibile leggere le assegnazioni attuali.");
+      return (data ?? []).map((row) => row.app_id);
+    },
+    async add(userId: string, appIds: string[]) {
+      const { error } = await admin.from("user_apps").upsert(
+        appIds.map((appId) => ({ user_id: userId, app_id: appId })),
+        { onConflict: "user_id,app_id", ignoreDuplicates: true }
+      );
+      if (error) throw new Error("Impossibile aggiungere le applicazioni.");
+    },
+    async remove(userId: string, appIds: string[]) {
+      const { error } = await admin
+        .from("user_apps")
+        .delete()
+        .eq("user_id", userId)
+        .in("app_id", appIds);
+      if (error) throw new Error("Impossibile rimuovere le applicazioni.");
+    },
+  };
+}
+
+async function listActiveApps(admin: ReturnType<typeof createAdminClient>) {
+  const { data, error } = await admin
+    .from("apps")
+    .select("id, url")
+    .eq("is_active", true);
+  if (error) throw new Error("Impossibile leggere il catalogo applicazioni.");
+  return data ?? [];
 }
 
 export async function inviteUser(
@@ -80,11 +122,18 @@ export async function inviteUser(
     if (profileError) {
       return { ok: false as const, error: `Profilo non aggiornato: ${profileError.message}` };
     }
+    const activeApps = await listActiveApps(admin);
+    const assignedAppIds = defaultAppIdsForRole(userType, activeApps);
+    await syncUserApps(
+      invitedUser.id,
+      assignedAppIds,
+      createUserAppSyncGateway(admin)
+    );
     try {
       await sendResendEmail(buildAccountActiveEmail({
         recipient: normalizedEmail,
         firstName: normalizedName.split(/\s+/)[0] || "Ciao",
-        appCount: 0,
+        appCount: assignedAppIds.length,
         activationUrl,
       }), {
         apiKey: process.env.RESEND_API_KEY ?? "",
@@ -203,12 +252,32 @@ export async function toggleUserAdmin(userId: string, isAdmin: boolean) {
   revalidatePath("/admin/assignments");
 }
 
-export async function setUserType(userId: string, userType: "interno" | "cliente") {
+export async function setUserType(userId: string, userType: UserRole) {
   await assertIsAdmin();
   const admin = createAdminClient();
-  const { error } = await admin.from("profiles").update({ user_type: userType }).eq("id", userId);
-  if (error) throw new Error(error.message);
+  const gateway = createUserAppSyncGateway(admin);
+  const previousAppIds = await gateway.list(userId);
+  const activeApps = await listActiveApps(admin);
+  const desiredAppIds = defaultAppIdsForRole(userType, activeApps);
+
+  try {
+    await syncUserApps(userId, desiredAppIds, gateway);
+    const { error } = await admin
+      .from("profiles")
+      .update({ user_type: userType })
+      .eq("id", userId);
+    if (error) throw new Error("Impossibile aggiornare il profilo utente.");
+  } catch (error) {
+    try {
+      await syncUserApps(userId, previousAppIds, gateway);
+    } catch {
+      console.error("[admin/assignments] rollback assegnazioni non riuscito", userId);
+    }
+    throw error;
+  }
   revalidatePath("/admin/assignments");
+  revalidatePath("/dashboard");
+  return desiredAppIds;
 }
 
 export async function updateUserName(userId: string, fullName: string) {
@@ -277,9 +346,13 @@ export async function deleteUser(userId: string) {
 export async function assignApp(userId: string, appId: string) {
   await assertIsAdmin();
   const admin = createAdminClient();
-  const { error } = await admin.from("user_apps").insert({ user_id: userId, app_id: appId });
+  const { error } = await admin.from("user_apps").upsert(
+    { user_id: userId, app_id: appId },
+    { onConflict: "user_id,app_id", ignoreDuplicates: true }
+  );
   if (error) throw new Error(error.message);
   revalidatePath("/admin/assignments");
+  revalidatePath("/dashboard");
 }
 
 export async function unassignApp(userId: string, appId: string) {
@@ -292,4 +365,25 @@ export async function unassignApp(userId: string, appId: string) {
     .eq("app_id", appId);
   if (error) throw new Error(error.message);
   revalidatePath("/admin/assignments");
+  revalidatePath("/dashboard");
+}
+
+export async function assignAllApps(userId: string) {
+  await assertIsAdmin();
+  const admin = createAdminClient();
+  const activeApps = await listActiveApps(admin);
+  const desiredIds = activeApps.map((app) => app.id);
+  await syncUserApps(userId, desiredIds, createUserAppSyncGateway(admin));
+  revalidatePath("/admin/assignments");
+  revalidatePath("/dashboard");
+  return desiredIds;
+}
+
+export async function excludeAllApps(userId: string) {
+  await assertIsAdmin();
+  const admin = createAdminClient();
+  await syncUserApps(userId, [], createUserAppSyncGateway(admin));
+  revalidatePath("/admin/assignments");
+  revalidatePath("/dashboard");
+  return [] as string[];
 }

@@ -1,13 +1,20 @@
+import {
+  defaultAppIdsForRole,
+  type AssignableApp,
+  type UserRole,
+} from "./user-app-policy";
+
 export type PendingAccount = {
   id: string;
   email: string;
   fullName: string;
+  userType: UserRole;
   status: "pending" | "approved" | "rejected";
 };
 
 export type ApprovalGateway = {
   getAccount(userId: string): Promise<PendingAccount | null>;
-  listActiveAppIds(): Promise<string[]>;
+  listActiveApps(): Promise<AssignableApp[]>;
   listAssignedAppIds(userId: string): Promise<string[]>;
   assignApps(userId: string, appIds: string[]): Promise<void>;
   createPasswordSetupUrl(userId: string, siteUrl: string): Promise<string>;
@@ -31,9 +38,10 @@ export async function approvePendingRegistration(input: {
   if (account.status === "approved") {
     return { status: "already-approved" as const, appCount: 0, emailSent: true };
   }
-  const activeAppIds = await input.gateway.listActiveAppIds();
+  const activeApps = await input.gateway.listActiveApps();
+  const defaultAppIds = defaultAppIdsForRole(account.userType, activeApps);
   const assigned = new Set(await input.gateway.listAssignedAppIds(input.userId));
-  const missing = activeAppIds.filter((appId) => !assigned.has(appId));
+  const missing = defaultAppIds.filter((appId) => !assigned.has(appId));
   if (missing.length) {
     try {
       await input.gateway.assignApps(input.userId, missing);
@@ -51,7 +59,7 @@ export async function approvePendingRegistration(input: {
     await input.sendActivationEmail({
       email: account.email,
       fullName: account.fullName,
-      appCount: activeAppIds.length,
+      appCount: defaultAppIds.length,
       activationUrl,
     });
   } catch {
@@ -59,7 +67,7 @@ export async function approvePendingRegistration(input: {
   }
   return {
     status: "approved" as const,
-    appCount: activeAppIds.length,
+    appCount: defaultAppIds.length,
     emailSent,
   };
 }

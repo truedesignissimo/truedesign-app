@@ -7,10 +7,14 @@ function createGateway(overrides: Partial<ApprovalGateway> = {}): ApprovalGatewa
       id: "user-1",
       email: "mario@example.com",
       fullName: "Mario Rossi",
+      userType: "cliente",
       status: "pending",
     }),
-    listActiveAppIds: vi.fn().mockResolvedValue(["app-1", "app-2"]),
-    listAssignedAppIds: vi.fn().mockResolvedValue(["app-1"]),
+    listActiveApps: vi.fn().mockResolvedValue([
+      { id: "app-1", url: "/apps/true-generatore-offerte" },
+      { id: "survey", url: "/apps/true-sondaggio-iconici" },
+    ]),
+    listAssignedAppIds: vi.fn().mockResolvedValue([]),
     assignApps: vi.fn().mockResolvedValue(undefined),
     createPasswordSetupUrl: vi.fn().mockResolvedValue("https://supabase.test/recovery"),
     approveProfile: vi.fn().mockResolvedValue(undefined),
@@ -29,7 +33,7 @@ describe("approvePendingRegistration", () => {
       gateway,
       sendActivationEmail,
     });
-    expect(gateway.assignApps).toHaveBeenCalledWith("user-1", ["app-2"]);
+    expect(gateway.assignApps).toHaveBeenCalledWith("user-1", ["survey"]);
     expect(gateway.approveProfile).toHaveBeenCalledWith("user-1", null);
     expect(gateway.createPasswordSetupUrl).toHaveBeenCalledWith(
       "user-1",
@@ -38,16 +42,42 @@ describe("approvePendingRegistration", () => {
     expect(sendActivationEmail).toHaveBeenCalledWith({
       email: "mario@example.com",
       fullName: "Mario Rossi",
-      appCount: 2,
+      appCount: 1,
       activationUrl: "https://supabase.test/recovery",
     });
-    expect(result).toEqual({ status: "approved", appCount: 2, emailSent: true });
+    expect(result).toEqual({ status: "approved", appCount: 1, emailSent: true });
+  });
+
+  it("assegna tutte le app attive al team interno", async () => {
+    const gateway = createGateway({
+      getAccount: vi.fn().mockResolvedValue({
+        id: "user-1",
+        email: "mario@truedesign.it",
+        fullName: "Mario Rossi",
+        userType: "interno",
+        status: "pending",
+      }),
+    });
+
+    await approvePendingRegistration({
+      userId: "user-1",
+      approvedBy: null,
+      siteUrl: "https://www.truedesign.app",
+      gateway,
+      sendActivationEmail: vi.fn(),
+    });
+
+    expect(gateway.assignApps).toHaveBeenCalledWith("user-1", ["app-1", "survey"]);
   });
 
   it("è idempotente per un account già approvato", async () => {
     const gateway = createGateway({
       getAccount: vi.fn().mockResolvedValue({
-        id: "user-1", email: "mario@example.com", fullName: "Mario Rossi", status: "approved",
+        id: "user-1",
+        email: "mario@example.com",
+        fullName: "Mario Rossi",
+        userType: "cliente",
+        status: "approved",
       }),
     });
     const result = await approvePendingRegistration({

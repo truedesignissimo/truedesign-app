@@ -10,20 +10,28 @@ export function createSupabaseApprovalGateway(
       const [{ data: authData, error: authError }, { data: profile, error: profileError }] =
         await Promise.all([
           admin.auth.admin.getUserById(userId),
-          admin.from("profiles").select("full_name, approval_status").eq("id", userId).maybeSingle(),
+          admin
+            .from("profiles")
+            .select("full_name, user_type, approval_status")
+            .eq("id", userId)
+            .maybeSingle(),
         ]);
       if (authError || profileError || !authData.user?.email || !profile) return null;
       return {
         id: userId,
         email: authData.user.email,
         fullName: profile.full_name || authData.user.email.split("@")[0],
+        userType: profile.user_type === "interno" ? "interno" : "cliente",
         status: profile.approval_status,
       };
     },
-    async listActiveAppIds() {
-      const { data, error } = await admin.from("apps").select("id").eq("is_active", true);
+    async listActiveApps() {
+      const { data, error } = await admin
+        .from("apps")
+        .select("id, url")
+        .eq("is_active", true);
       if (error) throw new Error("Impossibile leggere le app attive.");
-      return (data ?? []).map((app) => app.id);
+      return data ?? [];
     },
     async listAssignedAppIds(userId) {
       const { data, error } = await admin.from("user_apps").select("app_id").eq("user_id", userId);
