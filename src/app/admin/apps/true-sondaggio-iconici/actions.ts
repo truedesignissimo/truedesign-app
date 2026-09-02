@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase-admin";
-import { createClient } from "@/lib/supabase-server";
+import { requireSurveyAdmin } from "./admin-auth";
 import {
   runArchiveAndReset,
   runDeleteArchive,
@@ -10,22 +10,6 @@ import {
   type SurveyArchiveActionResult,
   type SurveyArchiveGateway,
 } from "./archive-service";
-
-async function requireAdmin() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("session_missing");
-
-  const admin = createAdminClient();
-  const { data: profile, error } = await admin
-    .from("profiles")
-    .select("is_admin")
-    .eq("id", user.id)
-    .single();
-
-  if (error || !profile?.is_admin) throw new Error("admin_required");
-  return { user, admin };
-}
 
 function createArchiveGateway(admin: ReturnType<typeof createAdminClient>): SurveyArchiveGateway {
   return {
@@ -67,7 +51,7 @@ function refreshSurveyPages() {
 
 export async function archiveAndResetSurvey(confirmation: string): Promise<SurveyArchiveActionResult> {
   try {
-    const { user, admin } = await requireAdmin();
+    const { user, admin } = await requireSurveyAdmin();
     const result = await runArchiveAndReset(confirmation, user.id, createArchiveGateway(admin));
     if (result.ok) refreshSurveyPages();
     return result;
@@ -81,7 +65,7 @@ export async function restoreSurveyArchive(
   confirmation: string,
 ): Promise<SurveyArchiveActionResult> {
   try {
-    const { user, admin } = await requireAdmin();
+    const { user, admin } = await requireSurveyAdmin();
     const result = await runRestoreArchive(archiveId, confirmation, user.id, createArchiveGateway(admin));
     if (result.ok) refreshSurveyPages();
     return result;
@@ -95,7 +79,7 @@ export async function deleteSurveyArchive(
   confirmation: string,
 ): Promise<SurveyArchiveActionResult> {
   try {
-    const { admin } = await requireAdmin();
+    const { admin } = await requireSurveyAdmin();
     const result = await runDeleteArchive(archiveId, confirmation, createArchiveGateway(admin));
     if (result.ok) refreshSurveyPages();
     return result;
