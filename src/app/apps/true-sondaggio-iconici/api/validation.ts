@@ -11,13 +11,15 @@ export function isTrueDesignProductUrl(value: string) {
   }
 }
 
+export const SURVEY_SELECTION_COUNT = 10;
+
 export function isValidSurveySubmission(name: string, choices: string[], links: string[]) {
   return Boolean(
     name &&
     name.length <= 120 &&
-    choices.length === 5 &&
+    choices.length === SURVEY_SELECTION_COUNT &&
     choices.every((choice) => choice.length <= 180) &&
-    links.length === 5 &&
+    links.length === SURVEY_SELECTION_COUNT &&
     links.every(isTrueDesignProductUrl)
   );
 }

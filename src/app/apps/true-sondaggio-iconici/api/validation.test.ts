@@ -8,12 +8,16 @@ describe("survey submission validation", () => {
     expect(isTrueDesignProductUrl("https://example.com/it/prodotti/abisko/")).toBe(false);
   });
 
-  it("requires exactly five valid choices and links", () => {
-    const choices = ["1. A", "2. B", "3. C", "4. D", "5. E"];
+  it("requires exactly ten valid choices and links", () => {
+    const choices = Array.from(
+      { length: 10 },
+      (_, index) => `${index + 1}. Prodotto ${index + 1}`,
+    );
     const links = choices.map((_, index) => `https://www.truedesign.it/it/prodotti/prodotto-${index}/`);
 
     expect(isValidSurveySubmission("Mario Rossi", choices, links)).toBe(true);
-    expect(isValidSurveySubmission("Mario Rossi", choices, [...links.slice(0, 4), "https://example.com/"])).toBe(false);
-    expect(isValidSurveySubmission("Mario Rossi", choices.slice(0, 4), links.slice(0, 4))).toBe(false);
+    expect(isValidSurveySubmission("Mario Rossi", choices, [...links.slice(0, 9), "https://example.com/"])).toBe(false);
+    expect(isValidSurveySubmission("Mario Rossi", choices.slice(0, 9), links.slice(0, 9))).toBe(false);
+    expect(isValidSurveySubmission("Mario Rossi", [...choices, "11. Extra"], [...links, links[0]])).toBe(false);
   });
 });

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import styles from "./survey.module.css";
+import { SURVEY_SELECTION_COUNT } from "./api/validation";
 
 export type Product = {
   name: string;
@@ -13,8 +14,6 @@ type SurveyProps = {
   products: Product[];
 };
 
-const MAX_SELECTIONS = 5;
-
 export default function Survey({ products }: SurveyProps) {
   const [selected, setSelected] = useState<number[]>([]);
   const [name, setName] = useState("");
@@ -22,7 +21,7 @@ export default function Survey({ products }: SurveyProps) {
   const [error, setError] = useState("");
 
   const selectedSet = useMemo(() => new Set(selected), [selected]);
-  const isFull = selected.length === MAX_SELECTIONS;
+  const isFull = selected.length === SURVEY_SELECTION_COUNT;
   const canSubmit = isFull && name.trim().length > 0 && status !== "sending";
 
   function toggleProduct(index: number) {
@@ -30,7 +29,7 @@ export default function Survey({ products }: SurveyProps) {
       if (current.includes(index)) {
         return current.filter((item) => item !== index);
       }
-      if (current.length >= MAX_SELECTIONS) {
+      if (current.length >= SURVEY_SELECTION_COUNT) {
         return current;
       }
       return [...current, index];
@@ -79,15 +78,15 @@ export default function Survey({ products }: SurveyProps) {
           <span className={styles.successMark}>✓</span>
           <p className={styles.kicker}>Risposta registrata</p>
           <h1>Grazie, {name.trim()}!</h1>
-          <p>Le tue cinque scelte sono state inviate correttamente.</p>
+          <p>Le tue dieci scelte sono state inviate correttamente.</p>
         </section>
       </main>
     );
   }
 
   const hint =
-    selected.length < MAX_SELECTIONS
-      ? `Scegli ancora ${MAX_SELECTIONS - selected.length} ${MAX_SELECTIONS - selected.length === 1 ? "prodotto" : "prodotti"}.`
+    selected.length < SURVEY_SELECTION_COUNT
+      ? `Scegli ancora ${SURVEY_SELECTION_COUNT - selected.length} ${SURVEY_SELECTION_COUNT - selected.length === 1 ? "prodotto" : "prodotti"}.`
       : name.trim()
         ? "Tutto pronto: puoi inviare la tua selezione."
         : "Inserisci il tuo nome per inviare.";
@@ -100,7 +99,7 @@ export default function Survey({ products }: SurveyProps) {
           <h1>Quali sono i prodotti iconici di True?</h1>
           <p className={styles.intro}>
             Aiutaci a identificare i prodotti che meglio rappresentano l&apos;identità di True. Seleziona le
-            cinque collezioni che ritieni più iconiche e riconoscibili.
+            dieci collezioni che ritieni più iconiche e riconoscibili.
           </p>
         </div>
         <img className={styles.logo} src="/Assets/Logo%20True.png" alt="True" />
@@ -133,7 +132,7 @@ export default function Survey({ products }: SurveyProps) {
         <div className={styles.actionInner}>
           <div className={styles.progress}>
             <span className={styles.counter}>{selected.length}</span>
-            <span>di {MAX_SELECTIONS} selezionati</span>
+            <span>di {SURVEY_SELECTION_COUNT} selezionati</span>
           </div>
           <div className={styles.controls}>
             <label className={styles.nameField}>
