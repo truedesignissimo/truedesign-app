@@ -1309,7 +1309,7 @@ label.muted {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--accent), #ff9d72);
+  background: var(--accent);
 }
 
 .survey-ranking-score {
@@ -1361,6 +1361,141 @@ label.muted {
   background: var(--surface-soft);
   font-size: 0.7rem;
   text-decoration: none;
+}
+
+.survey-admin-actions-wrap {
+  display: grid;
+  justify-items: end;
+  gap: 10px;
+}
+
+.survey-admin-actions,
+.survey-archive-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.btn-danger-outline {
+  border-color: color-mix(in srgb, var(--danger) 45%, var(--border));
+  background: transparent;
+  color: var(--danger);
+}
+
+.btn-danger-outline:hover:not(:disabled) {
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
+}
+
+.btn.is-disabled {
+  pointer-events: none;
+  opacity: 0.42;
+}
+
+.survey-participant-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 28px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.survey-participant-list li {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  border-top: 1px solid var(--border);
+}
+
+.survey-participant-list li > span,
+.survey-participant-list time {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.survey-participant-list strong {
+  overflow: hidden;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.survey-archive-list {
+  border-top: 1px solid var(--border);
+}
+
+.survey-archive-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 24px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.survey-archive-row > div:first-child {
+  display: grid;
+  gap: 5px;
+}
+
+.survey-archive-row strong {
+  font-size: 0.9rem;
+}
+
+.survey-archive-row small,
+.survey-archive-date {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.survey-confirm-dialog {
+  width: min(100% - 32px, 560px);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  box-shadow: 0 24px 80px rgba(48, 37, 21, 0.24);
+}
+
+.survey-confirm-dialog::backdrop {
+  background: rgba(48, 37, 21, 0.5);
+}
+
+.survey-confirm-dialog-panel {
+  display: grid;
+  gap: 20px;
+  padding: 32px;
+  border: 1px solid var(--border);
+  border-radius: inherit;
+  background: var(--surface);
+}
+
+.survey-confirm-dialog-panel h2,
+.survey-confirm-dialog-panel p {
+  margin: 0;
+}
+
+.survey-confirm-dialog-panel h2 {
+  font-size: clamp(1.55rem, 4vw, 2.25rem);
+  letter-spacing: -0.035em;
+}
+
+.survey-confirm-dialog-panel label {
+  display: grid;
+  gap: 8px;
+  font-size: 0.78rem;
+}
+
+.survey-confirm-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .survey-choice-list a:hover {
@@ -2066,6 +2201,18 @@ input[type="checkbox"] {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .survey-participant-list {
+    grid-template-columns: 1fr;
+  }
+
+  .survey-archive-row {
+    grid-template-columns: 1fr;
+  }
+
+  .survey-archive-actions {
+    justify-content: flex-start;
+  }
+
   .hero,
   .login-shell,
   .registration-shell {
@@ -2168,6 +2315,42 @@ input[type="checkbox"] {
   .survey-ranking-list li {
     grid-template-columns: 30px minmax(0, 1fr) 54px;
     gap: 10px;
+  }
+
+  .survey-admin-actions-wrap {
+    width: 100%;
+    justify-items: stretch;
+  }
+
+  .survey-admin-actions,
+  .survey-archive-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .survey-admin-actions .btn,
+  .survey-archive-actions .btn {
+    width: 100%;
+  }
+
+  .survey-participant-list li {
+    grid-template-columns: 30px minmax(0, 1fr);
+  }
+
+  .survey-participant-list time {
+    grid-column: 2;
+  }
+
+  .survey-confirm-dialog-panel {
+    padding: 24px;
+  }
+
+  .survey-confirm-dialog-actions {
+    flex-direction: column-reverse;
+  }
+
+  .survey-confirm-dialog-actions .btn {
+    width: 100%;
   }
 
   .container {
