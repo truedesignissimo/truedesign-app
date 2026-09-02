@@ -5,7 +5,7 @@ import Survey, { type Product } from "./survey";
 
 export const metadata: Metadata = {
   title: "Sondaggio Prodotti Iconici",
-  description: "Scegli le cinque collezioni che rappresentano meglio l'identità di True.",
+  description: "Scegli le dieci collezioni che rappresentano meglio l'identità di True.",
 };
 
 export const dynamic = "force-static";
