@@ -16,6 +16,20 @@ export type RankedProduct = {
   votes: number;
 };
 
+export type SurveyParticipant = {
+  id: string;
+  name: string;
+  submittedAt: string;
+};
+
+export type SurveySummary = {
+  responses: number;
+  preferences: number;
+  products: number;
+  firstResponseAt: string | null;
+  lastResponseAt: string | null;
+};
+
 function normalizeProductUrl(value: unknown) {
   if (typeof value !== "string" || !value.trim()) return null;
 
@@ -69,4 +83,32 @@ export function rankSurveyProducts(responses: SurveyResponse[]): RankedProduct[]
   return Array.from(products.values()).sort(
     (left, right) => right.votes - left.votes || left.name.localeCompare(right.name, "it-IT"),
   );
+}
+
+export function listSurveyParticipants(responses: SurveyResponse[]): SurveyParticipant[] {
+  return [...responses]
+    .sort((left, right) => Date.parse(right.submitted_at) - Date.parse(left.submitted_at))
+    .map((response) => ({
+      id: response.id,
+      name: response.participant_name,
+      submittedAt: response.submitted_at,
+    }));
+}
+
+export function buildSurveySummary(responses: SurveyResponse[]): SurveySummary {
+  const submittedAt = responses
+    .map((response) => response.submitted_at)
+    .filter((value) => Number.isFinite(Date.parse(value)))
+    .sort((left, right) => Date.parse(left) - Date.parse(right));
+
+  return {
+    responses: responses.length,
+    preferences: responses.reduce(
+      (total, response) => total + normalizeSurveyChoices(response.choices).length,
+      0,
+    ),
+    products: rankSurveyProducts(responses).length,
+    firstResponseAt: submittedAt[0] ?? null,
+    lastResponseAt: submittedAt.at(-1) ?? null,
+  };
 }
