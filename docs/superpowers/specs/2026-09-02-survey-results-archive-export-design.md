@@ -2,13 +2,23 @@
 
 ## Obiettivo
 
-Estendere la pagina amministrativa `/admin/apps/true-sondaggio-iconici` con tre capacità:
+Estendere il Sondaggio Prodotti Iconici e la pagina amministrativa `/admin/apps/true-sondaggio-iconici` con quattro capacità:
 
-1. mostrare subito le persone che hanno partecipato, prima della classifica;
-2. esportare i risultati correnti o archiviati in un file Excel `.xlsx`;
-3. azzerare i risultati correnti senza perderli, creando prima un archivio datato che possa essere consultato, esportato, ripristinato o eliminato definitivamente.
+1. richiedere a ogni nuovo partecipante di scegliere esattamente 10 prodotti, invece di 5;
+2. mostrare subito le persone che hanno partecipato, prima della classifica;
+3. esportare i risultati correnti o archiviati in un file Excel `.xlsx`;
+4. azzerare i risultati correnti senza perderli, creando prima un archivio datato che possa essere consultato, esportato, ripristinato o eliminato definitivamente.
 
 Tutte le superfici e tutte le operazioni restano accessibili esclusivamente agli amministratori già autorizzati dal layout `/admin`.
+
+## Selezione dei prodotti
+
+Il catalogo dei prodotti disponibili rimane quello completo già caricato dal progetto originale. Cambia il numero di preferenze richieste per completare una nuova risposta:
+
+- il partecipante deve selezionare **esattamente 10 prodotti**;
+- contatore, istruzioni, stato disabled delle schede e messaggio finale mostrano il nuovo limite;
+- la validazione server accetta solo 10 scelte e 10 URL True Design validi;
+- le risposte storiche già registrate con 5 preferenze restano valide, visibili, archiviabili ed esportabili senza essere modificate.
 
 ## Esperienza amministratore
 
@@ -121,6 +131,8 @@ Le funzioni restituiscono solo identificativi e conteggi necessari all'interfacc
 
 ### Test automatici
 
+- selezione e validazione server richiedono esattamente 10 prodotti;
+- le risposte storiche da 5 prodotti restano leggibili nelle statistiche e negli archivi;
 - partecipanti ordinati correttamente;
 - riepilogo e classifica coerenti;
 - righe Excel e neutralizzazione delle formule;
