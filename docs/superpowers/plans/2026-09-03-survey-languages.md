@@ -53,4 +53,5 @@ Interfaces: `deleteSurveyResponse(responseId,confirmation)` server action, `runD
 ## Progress
 
 - Base synchronized, old work preserved, 171/171 baseline tests and typecheck passed.
-- Tasks 1–3 pending. Written scope follows user's approved handoff prompt; no additional design approval needed.
+- Tasks 1–3 completed on 2026-09-03. Code published on main in commit 6287571; Vercel deployment succeeded. The checklist above preserves the original implementation plan; completed verification and its explicit limitations are recorded in `../specs/2026-09-03-survey-verification.md`.
+- Final verification: 235 tests, typecheck and production build passed; isolated database fixtures passed and rolled back; migration applied with all 11 real responses unchanged; public languages, admin guard, catalog and assignment UI checked live.

@@ -27,4 +27,13 @@ La sessione principale usa `codex/sondaggio-multilingua`, allineata a `origin/ma
 - Non è stato eseguito un reset dei voti reali per collaudo. L'invariante di concorrenza è coperto da revisione dei lock e test strutturali; non è stato simulato un carico concorrente a due connessioni sul database di produzione.
 - Nessuna nuova libreria, piano a pagamento o servizio esterno aggiunto.
 
-Pubblicazione e riscontro live da completare dopo il push selettivo.
+## Pubblicazione verificata
+
+- Codice pubblicato su `main` nel commit `6287571`; Vercel segnala `Deployment has completed` con stato `success`.
+- Build finale Next.js 15.5.22 passata. Il sondaggio pubblico risponde e il cambio lingua IT/EN/FR è stato verificato anche in produzione senza inviare voti reali.
+- `/admin/apps/true-sondaggio-iconici` mostra 11 risposte, partecipanti prima della classifica, azioni individuali e archivio vuoto. Le conferme di eliminazione singola e azzeramento sono state aperte e annullate; nessuna cancellazione reale eseguita. Ricevuto l'evento di download Excel, senza una nuova ispezione manuale del file scaricato.
+- Catalogo `/admin/apps`: URL interno, stato Online, visibilità Pubblica e collegamento ai risultati. In `/admin/assignments` la casella del sondaggio è visibile fra le app assegnabili.
+- Richiesta HTTP senza sessione alla pagina amministrativa: `307` verso `/login`.
+- Server simulato locale arrestato. Modifiche delle altre app e lavoro di automazione conservati, non inclusi nel push.
+
+Riferimenti: https://www.truedesign.app/apps/true-sondaggio-iconici e https://www.truedesign.app/admin/apps/true-sondaggio-iconici.
