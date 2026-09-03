@@ -14,11 +14,32 @@ export type SurveyArchiveGateway = {
   delete(archiveId: string): Promise<void>;
 };
 
+export type SurveyResponseGateway = {
+  deleteResponse(responseId: string): Promise<boolean>;
+};
+
 export type SurveyArchiveActionResult =
   | ({ ok: true } & Partial<ArchiveAndResetResult & RestoreArchiveResult>)
   | { ok: false; error: string };
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export async function runDeleteResponse(
+  responseId: string,
+  confirmation: string,
+  gateway: SurveyResponseGateway,
+): Promise<SurveyArchiveActionResult> {
+  if (!UUID_PATTERN.test(responseId)) {
+    return { ok: false, error: "Risposta non valida." };
+  }
+  if (confirmation !== "ELIMINA") {
+    return { ok: false, error: "Scrivi ELIMINA per confermare." };
+  }
+  if (!await gateway.deleteResponse(responseId)) {
+    return { ok: false, error: "Risposta non trovata o già eliminata. Aggiorna la pagina." };
+  }
+  return { ok: true };
+}
 
 export async function runArchiveAndReset(
   confirmation: string,

@@ -12,7 +12,9 @@ export default function SurveyAdminActions({ hasResponses }: { hasResponses: boo
   const [pending, startTransition] = useTransition();
 
   function reset(confirmation: string) {
+    setMessage(null);
     startTransition(async () => {
+      try {
       const result = await archiveAndResetSurvey(confirmation);
       if (!result.ok) {
         setMessage({ type: "error", text: result.error });
@@ -21,6 +23,9 @@ export default function SurveyAdminActions({ hasResponses }: { hasResponses: boo
       setOpen(false);
       setMessage({ type: "success", text: `${result.count ?? 0} risposte archiviate. Il sondaggio è pronto per una nuova rilevazione.` });
       router.refresh();
+      } catch {
+        setMessage({ type: "error", text: "Operazione non riuscita. Riprova tra poco." });
+      }
     });
   }
 
@@ -34,7 +39,7 @@ export default function SurveyAdminActions({ hasResponses }: { hasResponses: boo
         >
           Scarica Excel
         </a>
-        <button className="btn btn-danger-outline" type="button" onClick={() => setOpen(true)} disabled={!hasResponses}>
+        <button className="btn btn-danger-outline" type="button" onClick={() => { setMessage(null); setOpen(true); }} disabled={!hasResponses || pending}>
           Azzera risultati
         </button>
         <a className="btn" href="/apps/true-sondaggio-iconici" target="_blank" rel="noreferrer">
@@ -53,6 +58,7 @@ export default function SurveyAdminActions({ hasResponses }: { hasResponses: boo
         confirmWord="AZZERA"
         confirmLabel="Archivia e azzera"
         pending={pending}
+        error={message?.type === "error" ? message.text : null}
         onCancel={() => setOpen(false)}
         onConfirm={reset}
       />

@@ -6,6 +6,7 @@ import { requireSurveyAdmin } from "./admin-auth";
 import {
   runArchiveAndReset,
   runDeleteArchive,
+  runDeleteResponse,
   runRestoreArchive,
   type SurveyArchiveActionResult,
   type SurveyArchiveGateway,
@@ -17,8 +18,10 @@ function createArchiveGateway(admin: ReturnType<typeof createAdminClient>): Surv
       const { data, error } = await admin.rpc("archive_and_reset_iconic_survey", { actor: actorId });
       if (error) throw new Error(error.message);
       const result = Array.isArray(data) ? data[0] : data;
-      if (!result?.archive_id) throw new Error("archive_result_missing");
-      return { archiveId: result.archive_id, count: result.response_count ?? 0 };
+      if (typeof result?.archive_id !== "string" || !Number.isInteger(result.response_count) || result.response_count <= 0) {
+        throw new Error("archive_result_missing");
+      }
+      return { archiveId: result.archive_id, count: result.response_count };
     },
     async restore(archiveId, actorId) {
       const { data, error } = await admin.rpc("restore_iconic_survey_archive", {
@@ -27,8 +30,11 @@ function createArchiveGateway(admin: ReturnType<typeof createAdminClient>): Surv
       });
       if (error) throw new Error(error.message);
       const result = Array.isArray(data) ? data[0] : data;
+      if (!Number.isInteger(result?.restored_count) || result.restored_count <= 0) {
+        throw new Error("restore_result_missing");
+      }
       return {
-        restoredCount: result?.restored_count ?? 0,
+        restoredCount: result.restored_count,
         safetyArchiveId: result?.safety_archive_id ?? null,
       };
     },
@@ -46,7 +52,33 @@ function actionFailure(error: unknown, operation: string): SurveyArchiveActionRe
 
 function refreshSurveyPages() {
   revalidatePath("/admin/apps/true-sondaggio-iconici");
+  revalidatePath("/admin/apps/true-sondaggio-iconici/export");
   revalidatePath("/admin/apps/true-sondaggio-iconici/archive", "layout");
+}
+
+export async function deleteSurveyResponse(
+  responseId: string,
+  confirmation: string,
+): Promise<SurveyArchiveActionResult> {
+  try {
+    const { admin } = await requireSurveyAdmin();
+    const result = await runDeleteResponse(responseId, confirmation, {
+      async deleteResponse(id) {
+        const { data, error } = await admin
+          .from("survey_iconic_responses")
+          .delete()
+          .eq("id", id)
+          .select("id")
+          .maybeSingle();
+        if (error) throw new Error(error.message);
+        return typeof data?.id === "string" && data.id.toLowerCase() === id.toLowerCase();
+      },
+    });
+    if (result.ok) refreshSurveyPages();
+    return result;
+  } catch (error) {
+    return actionFailure(error, "delete-response");
+  }
 }
 
 export async function archiveAndResetSurvey(confirmation: string): Promise<SurveyArchiveActionResult> {

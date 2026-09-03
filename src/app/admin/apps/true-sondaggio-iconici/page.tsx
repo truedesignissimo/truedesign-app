@@ -91,7 +91,7 @@ export default async function SurveyResultsPage() {
         </article>
       </section>
 
-      <SurveyDatasetSections responses={responses} />
+      <SurveyDatasetSections responses={responses} allowResponseDeletion />
 
       <section className="card panel">
         <div className="admin-section-heading">

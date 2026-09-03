@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 type SurveyConfirmDialogProps = {
   open: boolean;
@@ -9,6 +9,7 @@ type SurveyConfirmDialogProps = {
   confirmWord: string;
   confirmLabel: string;
   pending: boolean;
+  error?: string | null;
   onCancel: () => void;
   onConfirm: (confirmation: string) => void;
 };
@@ -20,10 +21,13 @@ export default function SurveyConfirmDialog({
   confirmWord,
   confirmLabel,
   pending,
+  error,
   onCancel,
   onConfirm,
 }: SurveyConfirmDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
+  const descriptionId = useId();
   const [confirmation, setConfirmation] = useState("");
 
   useEffect(() => {
@@ -38,6 +42,8 @@ export default function SurveyConfirmDialog({
     <dialog
       ref={dialogRef}
       className="survey-confirm-dialog"
+      aria-labelledby={titleId}
+      aria-describedby={descriptionId}
       onCancel={(event) => {
         if (pending) event.preventDefault();
         else onCancel();
@@ -51,8 +57,8 @@ export default function SurveyConfirmDialog({
     >
       <div className="survey-confirm-dialog-panel">
         <p className="eyebrow">Conferma operazione</p>
-        <h2>{title}</h2>
-        <p className="muted">{description}</p>
+        <h2 id={titleId}>{title}</h2>
+        <p id={descriptionId} className="muted">{description}</p>
         <label>
           <span>Scrivi <strong>{confirmWord}</strong> per continuare</span>
           <input
@@ -64,6 +70,7 @@ export default function SurveyConfirmDialog({
             disabled={pending}
           />
         </label>
+        {error && <p className="error" role="alert">{error}</p>}
         <div className="survey-confirm-dialog-actions">
           <button className="btn btn-secondary" type="button" onClick={onCancel} disabled={pending}>
             Annulla

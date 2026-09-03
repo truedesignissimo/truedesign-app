@@ -4,6 +4,7 @@ import {
   rankSurveyProducts,
   type SurveyResponse,
 } from "./survey-results";
+import SurveyResponseDelete from "./survey-response-delete";
 
 export function formatSurveyDate(value: string) {
   return new Intl.DateTimeFormat("it-IT", {
@@ -13,7 +14,10 @@ export function formatSurveyDate(value: string) {
   }).format(new Date(value));
 }
 
-export default function SurveyDatasetSections({ responses }: { responses: SurveyResponse[] }) {
+export default function SurveyDatasetSections({ responses, allowResponseDeletion = false }: {
+  responses: SurveyResponse[];
+  allowResponseDeletion?: boolean;
+}) {
   const participants = listSurveyParticipants(responses);
   const ranking = rankSurveyProducts(responses);
   const maxVotes = ranking[0]?.votes ?? 0;
@@ -103,7 +107,7 @@ export default function SurveyDatasetSections({ responses }: { responses: Survey
           <div className="table-wrap survey-response-table">
             <table>
               <thead>
-                <tr><th>Data e ora</th><th>Partecipante</th><th>Scelte</th></tr>
+                <tr><th>Data e ora</th><th>Partecipante</th><th>Scelte</th>{allowResponseDeletion && <th>Azioni</th>}</tr>
               </thead>
               <tbody>
                 {responses.map((response) => (
@@ -123,6 +127,15 @@ export default function SurveyDatasetSections({ responses }: { responses: Survey
                         ))}
                       </div>
                     </td>
+                    {allowResponseDeletion && (
+                      <td>
+                        <SurveyResponseDelete
+                          responseId={response.id}
+                          participantName={response.participant_name}
+                          submittedAtLabel={formatSurveyDate(response.submitted_at)}
+                        />
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

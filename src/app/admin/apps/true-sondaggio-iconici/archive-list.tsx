@@ -35,7 +35,9 @@ export default function ArchiveList({ archives }: { archives: SurveyArchiveListI
 
   function confirm(value: string) {
     if (!operation) return;
+    setMessage(null);
     startTransition(async () => {
+      try {
       const result = operation.type === "restore"
         ? await restoreSurveyArchive(operation.archive.id, value)
         : await deleteSurveyArchive(operation.archive.id, value);
@@ -51,6 +53,9 @@ export default function ArchiveList({ archives }: { archives: SurveyArchiveListI
       });
       setOperation(null);
       router.refresh();
+      } catch {
+        setMessage({ type: "error", text: "Operazione non riuscita. Riprova tra poco." });
+      }
     });
   }
 
@@ -80,8 +85,8 @@ export default function ArchiveList({ archives }: { archives: SurveyArchiveListI
             <div className="survey-archive-actions">
               <a className="btn btn-secondary" href={`/admin/apps/true-sondaggio-iconici/archive/${archive.id}`}>Consulta</a>
               <a className="btn btn-secondary" href={`/admin/apps/true-sondaggio-iconici/export?archive=${archive.id}`}>Excel</a>
-              <button className="btn btn-secondary" type="button" onClick={() => setOperation({ type: "restore", archive })}>Ripristina</button>
-              <button className="btn btn-danger-outline" type="button" onClick={() => setOperation({ type: "delete", archive })}>Elimina</button>
+              <button className="btn btn-secondary" type="button" disabled={pending} onClick={() => { setMessage(null); setOperation({ type: "restore", archive }); }}>Ripristina</button>
+              <button className="btn btn-danger-outline" type="button" disabled={pending} onClick={() => { setMessage(null); setOperation({ type: "delete", archive }); }}>Elimina</button>
             </div>
           </article>
         ))}
@@ -95,6 +100,7 @@ export default function ArchiveList({ archives }: { archives: SurveyArchiveListI
         confirmWord={operation?.type === "restore" ? "RIPRISTINA" : "ELIMINA"}
         confirmLabel={operation?.type === "restore" ? "Ripristina archivio" : "Elimina definitivamente"}
         pending={pending}
+        error={message?.type === "error" ? message.text : null}
         onCancel={() => setOperation(null)}
         onConfirm={confirm}
       />
