@@ -26,11 +26,11 @@
 }
 
 .homeLink { display: inline-flex; align-items: center; min-height: 44px; flex-shrink: 0; }
-.languages { display: flex; gap: 4px; padding: 4px; border: 1px solid var(--survey-line); border-radius: 16px; }
-.languages button { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; padding: 8px 12px; border: 0; border-radius: 11px; background: transparent; color: var(--survey-muted); cursor: pointer; font: inherit; font-size: 13px; transition: color 160ms, background 160ms; }
-.languages button[aria-pressed="true"] { background: var(--survey-ink); color: #f8e6ac; }
-.languages button:hover:not([aria-pressed="true"]) { background: var(--survey-accent-soft); color: var(--survey-ink); }
-.languages button span:first-child { font-size: 19px; }
+.languages { display: flex; flex-shrink: 0; gap: 4px; }
+.languages button { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex-shrink: 0; padding: 4px; border: 1px solid transparent; border-radius: 50%; background: transparent; cursor: pointer; transition: border-color 160ms, background 160ms; }
+.languages button[aria-pressed="true"] { border-color: var(--survey-ink); }
+.languages button:hover { background: var(--survey-accent-soft); }
+.languageFlag { display: block; width: 32px; height: 32px; border-radius: 50%; overflow: hidden; }
 .languages button:focus-visible,
 .homeLink:focus-visible,
 .backHome:focus-visible,
@@ -346,7 +346,6 @@
 @media (max-width: 720px) {
   .page { padding-top: 20px; padding-bottom: 270px; }
   .masthead { gap: 12px; margin-bottom: 36px; }
-  .languages button { padding: 7px 9px; }
   .header { gap: 20px; }
   .logo { width: 76px; }
   .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
@@ -358,9 +357,6 @@
 }
 
 @media (max-width: 480px) {
-  .masthead { align-items: flex-start; flex-direction: column; gap: 18px; }
-  .languages { width: 100%; }
-  .languages button { flex: 1; justify-content: center; padding: 6px; }
   .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .controls { align-items: stretch; flex-direction: column; }
   .submit { width: 100%; }

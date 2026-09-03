@@ -61,8 +61,21 @@ export default function Survey({ products }: SurveyProps) {
     <div className={styles.languages} role="group" aria-label={copy.languageLabel}>
       {surveyLanguages.map((language) => (
         <button key={language.locale} type="button" lang={language.locale}
+          aria-label={language.label}
           aria-pressed={locale === language.locale} onClick={() => changeLocale(language.locale)}>
-          <span aria-hidden="true">{language.flag}</span><span>{language.label}</span>
+          <svg className={styles.languageFlag} viewBox="0 0 60 60" aria-hidden="true" focusable="false">
+            {language.locale === "en" ? <>
+              <path fill="#012169" d="M0 0h60v60H0z" />
+              <path stroke="#fff" strokeWidth="12" d="m0 0 60 60M60 0 0 60" />
+              <path stroke="#c8102e" strokeWidth="4" d="m0 0 60 60M60 0 0 60" />
+              <path stroke="#fff" strokeWidth="20" d="M30 0v60M0 30h60" />
+              <path stroke="#c8102e" strokeWidth="12" d="M30 0v60M0 30h60" />
+            </> : <>
+              <path fill={language.locale === "it" ? "#009246" : "#002654"} d="M0 0h20v60H0z" />
+              <path fill="#fff" d="M20 0h20v60H20z" />
+              <path fill={language.locale === "it" ? "#ce2b37" : "#ed2939"} d="M40 0h20v60H40z" />
+            </>}
+          </svg>
         </button>
       ))}
     </div>

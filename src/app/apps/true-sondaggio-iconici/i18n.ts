@@ -1,9 +1,9 @@
 export type SurveyLocale = "it" | "en" | "fr";
 export const SURVEY_LOCALE_STORAGE_KEY = "true-iconic-survey-language";
 export const surveyLanguages = [
-  { locale: "it", flag: "🇮🇹", label: "Italiano" },
-  { locale: "en", flag: "🇬🇧", label: "English" },
-  { locale: "fr", flag: "🇫🇷", label: "Français" },
+  { locale: "it", label: "Italiano" },
+  { locale: "en", label: "English" },
+  { locale: "fr", label: "Français" },
 ] as const;
 
 function isSurveyLocale(value: unknown): value is SurveyLocale {
