@@ -11,24 +11,28 @@ const ROOMS = [
     id: 1, name: 'Sala 1', floor: 'ground', color: 'room_red',
     x: 44.4, y: 5.7, width: 34.0, height: 41.7,
     capacity: 12,
+    image: '/Assets/sale-riunioni/sala-1.jpg',
     description: 'Testo segnaposto: descrizione della sala, utilizzo consigliato e dotazioni.',
   },
   {
     id: 2, name: 'Sala 2', floor: 'ground', color: 'room_blue',
     x: 78.1, y: 5.8, width: 20.6, height: 93.1,
     capacity: 8,
+    image: '/Assets/sale-riunioni/sala-2.jpg',
     description: 'Testo segnaposto: descrizione della sala, utilizzo consigliato e dotazioni.',
   },
   {
     id: 3, name: 'Sala 3', floor: 'first', color: 'room_green',
     x: 21.3, y: 53.7, width: 12.1, height: 45.7,
     capacity: 8,
+    image: '/Assets/sale-riunioni/sala-3.jpg',
     description: 'Testo segnaposto: descrizione della sala, utilizzo consigliato e dotazioni.',
   },
   {
     id: 4, name: 'Sala 4', floor: 'first', color: 'room_orange',
     x: 33.6, y: 53.7, width: 12.6, height: 45.7,
     capacity: 6,
+    image: '/Assets/sale-riunioni/sala-4.jpg',
     description: 'Testo segnaposto: descrizione della sala, utilizzo consigliato e dotazioni.',
   },
 ]
@@ -95,22 +99,6 @@ function Header({ logo }: { logo: string }) {
   )
 }
 
-// --- Room Photo Placeholder ---
-function RoomPhotoPlaceholder({ color }: { color: string }) {
-  return (
-    <div
-      className="absolute inset-0 flex items-center justify-center"
-      style={{ backgroundColor: `${color}14` }}
-    >
-      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" style={{ color, opacity: 0.55 }}>
-        <rect x="2.5" y="4.5" width="19" height="15" rx="2" stroke="currentColor" strokeWidth="1.3" />
-        <circle cx="8" cy="10" r="2" stroke="currentColor" strokeWidth="1.3" />
-        <path d="M4 17.5l5-5 3.5 3.5L17 11l3.5 4.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    </div>
-  )
-}
-
 // --- Room Card ---
 interface RoomCardProps {
   room: typeof ROOMS[0]
@@ -134,7 +122,11 @@ function RoomCard({ room, count, hovered, onEnter, onLeave, onSelect }: RoomCard
       style={hovered ? { boxShadow: `0 8px 24px -8px ${color}55` } : undefined}
     >
       <div className="relative aspect-[4/3] overflow-hidden">
-        <RoomPhotoPlaceholder color={color} />
+        <img
+          src={room.image}
+          alt={`${room.name}, sala riunioni True Design`}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
         <div
           className="absolute left-0 top-0 h-full w-1 transition-all"
           style={{ backgroundColor: color, opacity: hovered ? 1 : 0.6 }}
