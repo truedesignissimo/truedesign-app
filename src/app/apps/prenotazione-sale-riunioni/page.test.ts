@@ -12,4 +12,10 @@ describe('Prenotazione Sale Riunioni', () => {
     expect(pageSource).toContain('src={room.image}')
     expect(pageSource).toContain('object-cover')
   })
+
+  it('reads shared bookings and subscribes to their live changes', () => {
+    expect(pageSource).toContain('createRoomBookingsRepository')
+    expect(pageSource).toContain("postgres_changes")
+    expect(pageSource).not.toContain('bookings_prenotazione')
+  })
 })
