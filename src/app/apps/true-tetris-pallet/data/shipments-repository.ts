@@ -4,6 +4,7 @@ import type {
   TetrisShipmentInput,
   TetrisShipmentListItem,
   TetrisSourceFile,
+  TetrisJson,
 } from "./types";
 import { creatorFirstName } from "./creator-name";
 
@@ -45,6 +46,7 @@ const shipmentFromRow = (row: Record<string, unknown>): TetrisShipment => {
   return {
     id: String(row.id),
     title: String(row.title),
+    favorite: Boolean(payload.favorite),
     metadata: payload.metadata || {
       orderNumber: String(row.order_number || ""),
       orderSeries: String(row.order_series || ""),
@@ -102,6 +104,7 @@ export function createTetrisShipmentsRepository(supabase: SupabaseClient) {
         return {
           id: shipment.id,
           title: shipment.title,
+          favorite: shipment.favorite,
           metadata: shipment.metadata,
           summary: shipment.summary,
           sourceFile: shipment.sourceFile,
@@ -123,6 +126,23 @@ export function createTetrisShipmentsRepository(supabase: SupabaseClient) {
       const shipment = shipmentFromRow(row);
       if (!shipment.createdByName) shipment.createdByName = (await creatorNamesFor(supabase, [row])).get(shipment.createdBy || "") || "";
       return shipment;
+    },
+
+    async setFavorite(id: string, favorite: boolean): Promise<TetrisShipment> {
+      const current = await supabase
+        .from("tetris_pallet_shipments")
+        .select("*")
+        .eq("id", id)
+        .single();
+      const row = assertResult(current as never, "Apertura piano") as Record<string, unknown>;
+      const payload = { ...((row.payload || {}) as TetrisJson), favorite };
+      const result = await supabase
+        .from("tetris_pallet_shipments")
+        .update({ payload, updated_at: new Date().toISOString() })
+        .eq("id", id)
+        .select("*")
+        .single();
+      return shipmentFromRow(assertResult(result as never, "Aggiornamento preferito") as Record<string, unknown>);
     },
 
     async save(input: TetrisShipmentInput): Promise<TetrisShipment> {

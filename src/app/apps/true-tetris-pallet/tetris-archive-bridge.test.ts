@@ -50,4 +50,17 @@ describe("True Tetris archive bridge", () => {
     expect(savePackagingRule).toHaveBeenCalledWith({ code: "2214", length: 100, width: 50, height: 40 });
     expect(send).toHaveBeenCalledWith(expect.objectContaining({ requestId: "rule-1", ok: true }));
   });
+
+  it("saves the preferred state on the shared shipment", async () => {
+    const send = vi.fn();
+    const setFavorite = vi.fn().mockResolvedValue({ id: "shipment-1", favorite: true });
+    const handler = createArchiveMessageHandler({ repository: { setFavorite } as never, send });
+
+    await handler({
+      data: { channel: "true-tetris-archive", requestId: "favorite-1", action: "setFavorite", payload: { id: "shipment-1", favorite: true } },
+    } as MessageEvent);
+
+    expect(setFavorite).toHaveBeenCalledWith("shipment-1", true);
+    expect(send).toHaveBeenCalledWith(expect.objectContaining({ requestId: "favorite-1", ok: true }));
+  });
 });

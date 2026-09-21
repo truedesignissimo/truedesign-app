@@ -18,6 +18,7 @@ export interface TetrisSourceFile {
 export interface TetrisShipment {
   id: string;
   title: string;
+  favorite?: boolean;
   metadata: TetrisOrderMetadata;
   settings: TetrisJson;
   plan: TetrisJson;
@@ -34,6 +35,7 @@ export type TetrisShipmentInput = Omit<TetrisShipment, "createdAt" | "updatedAt"
 export interface TetrisShipmentListItem {
   id: string;
   title: string;
+  favorite?: boolean;
   metadata: TetrisOrderMetadata;
   summary: TetrisJson;
   sourceFile?: Pick<TetrisSourceFile, "name" | "path" | "type" | "size"> | null;

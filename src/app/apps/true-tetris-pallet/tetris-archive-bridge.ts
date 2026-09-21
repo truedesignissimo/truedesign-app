@@ -2,7 +2,7 @@ import type { TetrisShipmentInput } from "./data/types";
 
 const CHANNEL = "true-tetris-archive";
 
-type ArchiveAction = "list" | "load" | "save" | "delete" | "downloadSource" | "listPackagingRules" | "savePackagingRule";
+type ArchiveAction = "list" | "load" | "save" | "delete" | "setFavorite" | "downloadSource" | "listPackagingRules" | "savePackagingRule";
 
 interface ArchiveRequest {
   channel: typeof CHANNEL;
@@ -15,6 +15,7 @@ interface ArchiveRepository {
   list(): Promise<unknown>;
   load(id: string): Promise<unknown>;
   save(input: TetrisShipmentInput): Promise<unknown>;
+  setFavorite(id: string, favorite: boolean): Promise<unknown>;
   delete(id: string): Promise<void>;
   uploadSourceFile(shipmentId: string, file: File): Promise<unknown>;
   getSourceDownloadUrl(path: string): Promise<string>;
@@ -35,7 +36,7 @@ const isRequest = (value: unknown): value is ArchiveRequest => {
   if (!isRecord(value)) return false;
   return value.channel === CHANNEL
     && typeof value.requestId === "string"
-    && ["list", "load", "save", "delete", "downloadSource", "listPackagingRules", "savePackagingRule"].includes(String(value.action));
+    && ["list", "load", "save", "delete", "setFavorite", "downloadSource", "listPackagingRules", "savePackagingRule"].includes(String(value.action));
 };
 
 const requiredString = (value: unknown, label: string): string => {
@@ -75,6 +76,10 @@ export function createArchiveMessageHandler({
       if (action === "delete") {
         await repository.delete(requiredString(payload.id, "Identificativo piano"));
         data = null;
+      }
+      if (action === "setFavorite") {
+        if (typeof payload.favorite !== "boolean") throw new Error("Stato preferito non valido");
+        data = await repository.setFavorite(requiredString(payload.id, "Identificativo piano"), payload.favorite);
       }
       if (action === "downloadSource") data = await repository.getSourceDownloadUrl(requiredString(payload.path, "Percorso file"));
       if (action === "save") {
