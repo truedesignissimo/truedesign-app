@@ -1,5 +1,9 @@
 'use client'
 
+// Questa pagina inizializza Supabase nel componente client: non può essere
+// prerenderizzata senza le variabili pubbliche dell'ambiente di deploy.
+export const dynamic = 'force-dynamic'
+
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import { createRoomBookingsRepository, type RoomBooking, type RoomBookingDraft } from './data/room-bookings-repository'

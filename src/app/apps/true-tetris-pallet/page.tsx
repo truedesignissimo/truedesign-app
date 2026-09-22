@@ -1,5 +1,9 @@
 "use client";
 
+// L'archivio condiviso viene collegato nel browser: evita che il prerender
+// locale inizializzi Supabase senza le variabili dell'ambiente Vercel.
+export const dynamic = "force-dynamic";
+
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import { TRUE_TETRIS_DOCUMENT } from "./app-document";
