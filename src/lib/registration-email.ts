@@ -64,6 +64,33 @@ export function buildAccountActiveEmail(input: {
   };
 }
 
+export function buildPasswordRecoveryEmail(input: {
+  recipient: string;
+  firstName: string;
+  recoveryUrl: string;
+}): MailMessage {
+  const firstName = escapeHtml(input.firstName);
+  const recoveryUrl = escapeHtml(input.recoveryUrl);
+  return {
+    to: [input.recipient],
+    subject: "Reimposta la tua password True Design",
+    html: `<!doctype html>
+<html lang="it"><body style="margin:0;background:#f8f4ed;color:#1d1d1f;font-family:Arial,Helvetica,sans-serif">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f8f4ed;padding:32px 16px">
+<tr><td align="center"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#fcfcfb;border:1px solid #dedcd6;border-radius:24px;overflow:hidden">
+<tr><td style="padding:34px 38px 10px"><img src="https://www.truedesign.app/Assets/Logo%20True.png" width="96" alt="True Design" style="display:block;max-width:96px;height:auto"></td></tr>
+<tr><td style="padding:28px 38px 42px">
+<p style="margin:0 0 20px;color:#795529;font-size:12px;font-weight:bold;letter-spacing:2px;text-transform:uppercase">Extraordinary. Everyday.</p>
+<h1 style="margin:0 0 22px;font-size:42px;line-height:1.02;letter-spacing:-1.8px">Reimposta la password</h1>
+<p style="margin:0 0 14px;color:#1d1d1f;font-size:18px;line-height:1.55">Ciao ${firstName}, abbiamo ricevuto una richiesta per scegliere una nuova password.</p>
+<p style="margin:0 0 30px;color:#6e6e73;font-size:16px;line-height:1.6">Usa il pulsante qui sotto per continuare. Il link è personale e può essere usato una sola volta.</p>
+<a href="${recoveryUrl}" style="display:inline-block;padding:14px 24px;border-radius:999px;background:#1d1d1f;color:#fff;font-size:15px;font-weight:bold;text-decoration:none">Reimposta la password</a>
+<p style="margin:30px 0 0;color:#6e6e73;font-size:12px;line-height:1.5">Se il pulsante non funziona, premi su <a href="${recoveryUrl}" style="color:#795529;text-decoration:underline">questo link</a>.</p>
+<p style="margin:16px 0 0;color:#6e6e73;font-size:12px;line-height:1.5">Se non hai richiesto questa modifica, puoi ignorare l'email.</p>
+</td></tr></table></td></tr></table></body></html>`,
+  };
+}
+
 export async function sendResendEmail(
   message: MailMessage,
   config: ResendConfig,

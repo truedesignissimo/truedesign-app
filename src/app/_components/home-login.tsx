@@ -82,7 +82,7 @@ export default function HomeLogin({ isAuthenticated }: { isAuthenticated: boolea
       </button>
       <div className="home-login-meta">
         <a href="/registrati">Crea un account</a>
-        <a href="/login">Problemi di accesso?</a>
+        <a href="/recupera-password">Hai dimenticato la password?</a>
       </div>
     </form>
   );

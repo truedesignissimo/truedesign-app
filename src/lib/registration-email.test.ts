@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   buildAccountActiveEmail,
   buildAdminApprovalEmail,
+  buildPasswordRecoveryEmail,
   sendResendEmail,
 } from "./registration-email";
 
@@ -35,6 +36,23 @@ describe("registration emails", () => {
     expect(message.html).toContain("Se il pulsante non funziona, premi su");
     expect(message.html).toContain(">questo link</a>");
     expect(message.html).not.toContain(">https://supabase.test/recovery</a>");
+  });
+
+  it("crea una mail grafica per reimpostare la password", () => {
+    const message = buildPasswordRecoveryEmail({
+      recipient: "mario@example.com",
+      firstName: "Mario",
+      recoveryUrl: "https://www.truedesign.app/imposta-password?token_hash=hashed-token&type=recovery",
+    });
+
+    expect(message.to).toEqual(["mario@example.com"]);
+    expect(message.subject).toBe("Reimposta la tua password True Design");
+    expect(message.html).toContain("Ciao Mario");
+    expect(message.html).toContain("Reimposta la password");
+    expect(message.html).toContain("token_hash=hashed-token");
+    expect(message.html).toContain("Se il pulsante non funziona, premi su");
+    expect(message.html).toContain(">questo link</a>");
+    expect(message.html).not.toContain(">https://www.truedesign.app/imposta-password");
   });
 
   it("invia tramite Resend e restituisce l'id del messaggio", async () => {

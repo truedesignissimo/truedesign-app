@@ -132,6 +132,7 @@ function LoginForm() {
             </button>
           </form>
 
+          <a href="/recupera-password" className="login-back">Hai dimenticato la password?</a>
           <a href="/" className="login-back">← Torna alla scelta dell’area</a>
           {tipo === "cliente" && (
             <p className="registration-login-link">
