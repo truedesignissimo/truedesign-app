@@ -21,17 +21,21 @@ Quando l'utente chiede di pubblicare, aggiornare, o mettere online le
 modifiche, esegui:
 
 ```bash
-./scripts/pubblica.sh "breve descrizione della modifica"
+./scripts/pubblica.sh "breve descrizione della modifica" -- percorso/dei/file-modificati
 ```
 
-Questo fa commit di tutto ciò che è stato modificato e lo pusha su `main`.
+Questo crea un commit selettivo dei soli file dichiarati, aggiorna il branch
+con l'ultimo `origin/main`, esegue test e typecheck e invia a `main`
+esattamente l'HEAD appena verificato. Non usa mai il `main` locale come fonte
+di una pubblicazione e non raccoglie automaticamente altre modifiche presenti
+nel worktree.
 **Non chiedere conferma prima di eseguirlo** se l'utente ha esplicitamente
 detto "pubblica" — è il comportamento atteso. Vercel fa il deploy
 automaticamente al push, di solito pronto in 1-2 minuti.
 
-Se nel repository sono presenti modifiche di altre sessioni o progetti non
-pertinenti, non includerle: esegui commit e push selettivi dei soli file
-dell'app richiesta.
+La pubblicazione deve avvenire da un worktree/branch di attività isolato,
+mai dal branch `main`. Se sono presenti modifiche non pertinenti, lo script si
+ferma prima del commit: non includerle e non aggirare il controllo.
 
 ### Definizione obbligatoria di "pubblicata"
 
