@@ -108,6 +108,22 @@ export function uniqueValues(pcs: PcRecord[], key: "area" | "tipologia") {
   );
 }
 
+export function groupPcsByArea(pcs: readonly PcRecord[]) {
+  const areaOrder = ["Ufficio Tecnico", "Commerciale", "Marketing", "Logistica", "Amministrazione", "Produzione"];
+  const groups = new Map<string, PcRecord[]>();
+  for (const pc of pcs) {
+    const area = pc.area.trim() || "Da assegnare";
+    const group = groups.get(area) ?? [];
+    group.push(pc);
+    groups.set(area, group);
+  }
+  const extraAreas = [...groups.keys()].filter((area) => !areaOrder.includes(area) && area !== "Da assegnare")
+    .toSorted((a, b) => a.localeCompare(b, "it"));
+  return [...areaOrder, ...extraAreas, "Da assegnare"]
+    .filter((area) => groups.has(area))
+    .map((area) => ({ area, pcs: groups.get(area)! }));
+}
+
 export function summarizePcs(pcs: PcRecord[]) {
   return {
     total: pcs.length,

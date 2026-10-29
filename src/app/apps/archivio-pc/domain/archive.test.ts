@@ -1,11 +1,30 @@
 import { describe, expect, it } from "vitest";
 import pcsData from "../data/pcs.json";
-import { filterPcs, summarizePcs, uniqueValues, type PcRecord } from "./archive";
+import { filterPcs, groupPcsByArea, summarizePcs, uniqueValues, type PcRecord } from "./archive";
 import { assessPerformance } from "./performance";
 
 const pcs = pcsData as PcRecord[];
 
 describe("Archivio PC", () => {
+  it("raggruppa nell’ordine dei reparti con i PC da assegnare in fondo", () => {
+    const input = Object.freeze([...pcs]);
+    const groups = groupPcsByArea(input);
+    expect(groups.map((group) => group.area)).toEqual([
+      "Ufficio Tecnico", "Commerciale", "Marketing", "Logistica", "Amministrazione", "Produzione", "Da assegnare",
+    ]);
+    expect(groups.at(-1)?.pcs.map((pc) => pc.id)).toEqual([34, 35]);
+    expect(groups.flatMap((group) => group.pcs)).toHaveLength(pcs.length);
+    expect(input).toEqual(pcs);
+  });
+
+  it("omette i gruppi vuoti e conserva l’ordine dei risultati nel reparto", () => {
+    const filtered = [pcs[6], pcs[3], { ...pcs[0], area: "  " }];
+    const groups = groupPcsByArea(filtered);
+    expect(groups.map((group) => group.area)).toEqual(["Ufficio Tecnico", "Da assegnare"]);
+    expect(groups[0].pcs.map((pc) => pc.id)).toEqual([7, 4]);
+    expect(groupPcsByArea([])).toEqual([]);
+  });
+
   it("filtra per profilo insieme agli altri filtri", () => {
     const result = filterPcs(pcs, { query: "", area: "Ufficio Tecnico", type: "", profile: "Render", sort: "assignee" });
     expect(result.length).toBeGreaterThan(0);
