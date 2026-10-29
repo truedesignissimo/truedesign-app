@@ -149,52 +149,67 @@
 .printButton svg { width: 17px; fill: none; stroke: currentColor; stroke-width: 1.6; }
 .printButton:hover:not(:disabled), .emptyState button:hover { transform: translateY(-1px); }
 .printButton:disabled { opacity: 0.34; cursor: not-allowed; }
-.printButton:focus-visible, .emptyState button:focus-visible, .selectButton:focus-visible, .cardOpen:focus-visible, .closeButton:focus-visible, .brand:focus-visible { outline: 3px solid rgba(77, 91, 72, 0.35); outline-offset: 3px; }
+.printButton:focus-visible, .emptyState button:focus-visible, .selectButton:focus-visible, .cardOpen:focus-visible, .closeButton:focus-visible, .brand:focus-visible, .powerBadge:focus-visible { outline: 3px solid rgba(77, 91, 72, 0.5); outline-offset: 3px; }
 
-.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
-.card { position: relative; overflow: hidden; border: 1px solid transparent; border-radius: 20px; background: var(--surface); transition: border-color 180ms ease, transform 180ms ease; }
+.departments { display: grid; gap: 48px; padding-top: 24px; }
+.department { min-width: 0; }
+.departmentHeading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.departmentHeading h2 { margin: 0; font-size: clamp(28px, 3vw, 40px); font-weight: 500; letter-spacing: -0.035em; line-height: 1.1; }
+.departmentHeading > span { flex-shrink: 0; color: var(--muted); font-size: 13px; }
+.grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 16px; }
+.card { position: relative; min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 20px; background: #fff; transition: border-color 180ms ease, transform 180ms ease; }
 .card:hover { transform: translateY(-2px); }
 .cardSelected { border-color: var(--accent); }
-.cardOpen { display: block; width: 100%; border: 0; padding: 0; color: inherit; background: transparent; font: inherit; text-align: left; cursor: pointer; }
+.cardOpen { display: flex; flex-direction: column; width: 100%; height: 100%; min-height: 536px; border: 0; border-radius: inherit; padding: 0; color: inherit; background: transparent; font: inherit; text-align: left; cursor: pointer; }
+.cardOpen:focus-visible { outline-offset: -4px; }
+.powerBadge { position: absolute; z-index: 2; top: 16px; right: 16px; display: inline-flex; align-items: center; gap: 8px; min-height: 28px; border: 1px solid #d7ddd4; border-radius: 8px; padding: 4px 8px; color: #354330; background: #edf1ea; font-size: 11px; line-height: 1; cursor: help; }
+.powerBadge strong { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
 
 .selectButton {
   position: absolute;
   z-index: 2;
-  top: 14px;
-  right: 14px;
+  top: 8px;
+  left: 8px;
   display: grid;
   width: 44px;
   height: 44px;
   place-items: center;
-  border: 1px solid rgba(32, 33, 31, 0.22);
-  border-radius: 50%;
-  color: white;
-  background: rgba(244, 242, 236, 0.86);
+  border: 0;
+  border-radius: 12px;
+  color: var(--accent);
+  background: transparent;
   cursor: pointer;
-  backdrop-filter: blur(8px);
 }
 
-.selectButton span { display: grid; width: 22px; height: 22px; place-items: center; border: 1px solid rgba(32, 33, 31, 0.4); border-radius: 50%; color: white; font-size: 13px; }
+.selectButton span { display: grid; width: 16px; height: 16px; place-items: center; border: 1px solid rgba(32, 33, 31, 0.35); border-radius: 4px; color: white; font-size: 12px; }
+.selectButton:hover { background: var(--surface); }
 .selectButton[aria-pressed="true"] { background: var(--accent); }
 .selectButton[aria-pressed="true"] span { border-color: transparent; }
 
-.imageWrap { position: relative; display: grid; overflow: hidden; aspect-ratio: 1.5; place-items: center; background: #dedbd2; }
-.deviceImage { width: 100%; height: 100%; object-fit: cover; transition: transform 280ms ease; }
+.imageWrap { position: relative; display: grid; flex-shrink: 0; width: 100%; height: 176px; padding: 52px 24px 8px; overflow: hidden; place-items: center; background: #fff; }
+.deviceImage { width: 180px; max-width: 100%; height: 116px; object-fit: contain; transition: transform 280ms ease; }
 .card:hover .deviceImage { transform: scale(1.015); }
-.imageFallback { display: grid; width: 100%; height: 100%; place-content: center; gap: 7px; padding: 28px; color: #efeee9; background: var(--accent); text-align: center; }
+.imageFallback { display: grid; width: 180px; max-width: 100%; height: 116px; place-content: center; gap: 7px; border: 1px solid var(--line); border-radius: 12px; padding: 16px; color: var(--muted); background: var(--paper); text-align: center; }
 .imageFallback span { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; }
-.imageFallback strong { max-width: 260px; font-size: 21px; font-weight: 500; letter-spacing: -0.025em; }
+.imageFallback strong { max-width: 150px; font-size: 13px; font-weight: 500; letter-spacing: -0.025em; }
 
-.cardBody { padding: 24px 24px 26px; }
+.cardBody { display: flex; flex: 1; flex-direction: column; width: 100%; padding: 16px 20px 20px; }
 .cardBody, .dialogContent { min-width: 0; overflow-wrap: anywhere; }
-.area { color: var(--accent); font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
-.card h2 { margin: 15px 0 5px; font-size: clamp(22px, 2.2vw, 31px); font-weight: 500; letter-spacing: -0.035em; line-height: 1.05; }
-.model { min-height: 40px; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.4; }
-.quickSpecs { display: grid; gap: 7px; margin: 24px 0 0; padding-top: 18px; border-top: 1px solid var(--line); }
-.quickSpecs div { display: grid; grid-template-columns: 36px 1fr; gap: 12px; font-size: 12px; line-height: 1.35; }
-.quickSpecs dt { color: var(--muted); }
-.quickSpecs dd { margin: 0; }
-.detailsLink { display: inline-flex; margin-top: 26px; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
+.deviceType { color: var(--muted); font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+.card h3 { margin: 6px 0; font-size: 22px; font-weight: 500; letter-spacing: -0.035em; line-height: 1.12; }
+.model { min-height: 36px; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.4; }
+.quickSpecs { display: grid; gap: 14px; margin: 16px 0 20px; padding-top: 16px; border-top: 1px solid var(--line); }
+.quickSpecs > div { display: grid; grid-template-columns: 60px minmax(0, 1fr); align-items: start; gap: 8px; font-size: 12px; line-height: 1.4; }
+.quickSpecs dt { display: flex; align-items: center; gap: 5px; color: var(--muted); font-size: 10px; }
+.quickSpecs dd { min-width: 0; margin: 0; font-weight: 500; }
+.hardwareIcon { flex-shrink: 0; width: 18px; height: 18px; }
+.quickSpecs .cpuSpec { grid-template-columns: 24px minmax(0, 1fr); }
+.cpuSpec > dt { padding-top: 3px; }
+.cpuSpec dd { display: flex; align-items: center; gap: 9px; min-height: 44px; font-size: 11px; font-weight: 400; }
+.cpuFamily { display: grid; flex-shrink: 0; min-width: 44px; height: 44px; place-items: center; border: 1px solid var(--line); border-radius: 9px; padding: 0 5px; color: var(--accent); background: var(--paper); font-size: 17px; font-weight: 600; letter-spacing: -0.035em; }
+.quickSpecs .ramSpec { align-items: center; }
+.ramSpec dd { font-size: 19px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.15; }
+.detailsLink { display: inline-flex; margin-top: auto; align-items: center; gap: 8px; color: var(--accent); font-size: 11px; font-weight: 500; }
 
 .performanceSummary { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 16px; }
 .performanceHeading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
@@ -274,7 +289,7 @@
   .resultsBar { align-items: flex-start; flex-direction: column; padding: 12px 0 20px; }
   .printButton { width: 100%; justify-content: center; }
   .grid { grid-template-columns: 1fr; }
-  .card h2 { font-size: 28px; }
+  .card h3 { font-size: 26px; }
   .dialog { max-height: calc(100vh - 16px); }
   .dialogPanel { display: block; max-height: calc(100vh - 16px); overflow-y: auto; }
   .dialogVisual { min-height: 280px; height: 34vh; }
@@ -288,7 +303,7 @@
 
 @media print {
   .page { padding: 0; background: white; }
-  .header, .hero, .stats, .controls, .resultsBar, .grid, .emptyState, .dialog { display: none !important; }
+  .header, .hero, .stats, .controls, .resultsBar, .departments, .emptyState, .dialog { display: none !important; }
   .printSheet { display: block; color: #111; font-family: "Suisse Archive", Arial, sans-serif; }
   .printSheet header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-bottom: 14px; border-bottom: 1px solid #999; }
   .printSheet header img { width: 90px; height: auto; }

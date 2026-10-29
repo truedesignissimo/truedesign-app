@@ -6,6 +6,7 @@ import logo from "./assets/logo_true.svg";
 import styles from "./archive-pc.module.css";
 import {
   filterPcs,
+  groupPcsByArea,
   summarizePcs,
   uniqueValues,
   type PcFilters,
@@ -44,17 +45,11 @@ const DETAIL_FIELDS: Array<[keyof PcRecord, string]> = [
 ];
 
 export function PerformanceSummary({ assessment }: { assessment: PerformanceAssessment }) {
+  const tooltip = `${assessment.band} · Profilo ${assessment.profile} · Attendibilità ${assessment.confidence.toLocaleLowerCase("it")}${assessment.provisional ? " · voto provvisorio" : ""}`;
   return (
-    <div className={styles.performanceSummary}>
-      <div className={styles.performanceHeading}>
-        <span>Profilo {assessment.profile}</span>
-        <strong>{assessment.score ?? "—"}<small>/100</small></strong>
-      </div>
-      <div className={styles.performanceMeta}>
-        <span>{assessment.band}{assessment.provisional ? " · voto provvisorio" : ""}</span>
-        <span>Attendibilità {assessment.confidence.toLocaleLowerCase("it")}</span>
-      </div>
-    </div>
+    <span className={styles.powerBadge} tabIndex={0} title={tooltip} aria-label={`Potenza ${assessment.score ?? "non disponibile"} su 100 · ${tooltip}`}>
+      Potenza <strong>{assessment.score ?? "—"}</strong>
+    </span>
   );
 }
 
@@ -62,7 +57,16 @@ export function PerformanceDetail({ assessment }: { assessment: PerformanceAsses
   return (
     <section className={styles.performanceDetail} aria-label="Valutazione prestazionale">
       <h3>Valutazione prestazionale</h3>
-      <PerformanceSummary assessment={assessment} />
+      <div className={styles.performanceSummary}>
+        <div className={styles.performanceHeading}>
+          <span>Profilo {assessment.profile}</span>
+          <strong>{assessment.score ?? "—"}<small>/100</small></strong>
+        </div>
+        <div className={styles.performanceMeta}>
+          <span>{assessment.band}{assessment.provisional ? " · voto provvisorio" : ""}</span>
+          <span>Attendibilità {assessment.confidence.toLocaleLowerCase("it")}</span>
+        </div>
+      </div>
       <p className={styles.performanceNote}>Profilo assegnato provvisoriamente · benchmark di riferimento, non misurati su questo PC.</p>
       <div className={styles.recommendation}>
         <span>Indicazione operativa{assessment.recommendationProvisional ? " · provvisoria" : ""}</span>
@@ -115,6 +119,35 @@ function PrintIcon() {
   );
 }
 
+function HardwareIcon({ kind }: { kind: "cpu" | "ram" | "gpu" | "screen" }) {
+  return (
+    <svg className={styles.hardwareIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {kind === "cpu" && <><rect x="6" y="6" width="12" height="12" rx="2" /><path d="M9 2v4m6-4v4M9 18v4m6-4v4M2 9h4m-4 6h4m12-6h4m-4 6h4" /></>}
+      {kind === "ram" && <><rect x="3" y="6" width="18" height="11" rx="2" /><path d="M6 10h3v3H6zm6 0h3v3h-3zm6 0v3M6 17v3m4-3v3m4-3v3m4-3v3" /></>}
+      {kind === "gpu" && <><rect x="3" y="5" width="18" height="13" rx="2" /><circle cx="13" cy="11.5" r="3.5" /><path d="M6 9v5m1 4v3m4-3v3m4-3v3M2 5v14" /></>}
+      {kind === "screen" && <><rect x="3" y="4" width="18" height="13" rx="2" /><path d="M12 17v4m-4 0h8" /></>}
+    </svg>
+  );
+}
+
+function cpuFamily(processor: string) {
+  return processor.match(/\b(i[3579]|M\d+|Xeon|Ryzen|Ultra)\b/i)?.[1] ?? "CPU";
+}
+
+function HardwareSpecs({ pc }: { pc: PcRecord }) {
+  return (
+    <dl className={styles.quickSpecs}>
+      {pc.processore && <div className={styles.cpuSpec}>
+        <dt><HardwareIcon kind="cpu" /><span className={styles.srOnly}>CPU</span></dt>
+        <dd><span className={styles.cpuFamily}>{cpuFamily(pc.processore)}</span><span>{pc.processore}</span></dd>
+      </div>}
+      {pc.ram && <div className={styles.ramSpec}><dt><HardwareIcon kind="ram" />RAM</dt><dd>{pc.ram}</dd></div>}
+      {pc.gpu && <div><dt><HardwareIcon kind="gpu" />GPU</dt><dd>{pc.gpu}</dd></div>}
+      {pc.schermo && <div><dt><HardwareIcon kind="screen" />Schermo</dt><dd>{pc.schermo}</dd></div>}
+    </dl>
+  );
+}
+
 function PcVisual({ pc, priority = false }: { pc: PcRecord; priority?: boolean }) {
   const image = pcImages[pc.foto];
   if (!image) {
@@ -131,7 +164,7 @@ function PcVisual({ pc, priority = false }: { pc: PcRecord; priority?: boolean }
       src={image}
       alt={`${pc.marca} ${pc.modello}`}
       className={styles.deviceImage}
-      sizes="(max-width: 720px) 100vw, (max-width: 1100px) 50vw, 33vw"
+      sizes="180px"
       priority={priority}
     />
   );
@@ -147,6 +180,7 @@ export function ArchivioPc({ pcs }: { pcs: PcRecord[] }) {
   const areas = useMemo(() => uniqueValues(pcs, "area"), [pcs]);
   const types = useMemo(() => uniqueValues(pcs, "tipologia"), [pcs]);
   const visiblePcs = useMemo(() => filterPcs(pcs, filters), [pcs, filters]);
+  const groups = useMemo(() => groupPcsByArea(visiblePcs), [visiblePcs]);
   const selectedPcs = useMemo(() => pcs.filter((pc) => selectedIds.has(pc.id)), [pcs, selectedIds]);
   const assessments = useMemo(() => new Map(pcs.map((pc) => [pc.id, assessPerformance(pc)])), [pcs]);
 
@@ -258,37 +292,41 @@ export function ArchivioPc({ pcs }: { pcs: PcRecord[] }) {
       </div>
 
       {visiblePcs.length > 0 ? (
-        <section className={styles.grid} aria-label="Computer aziendali">
-          {visiblePcs.map((pc, index) => {
-            const selected = selectedIds.has(pc.id);
-            return (
-              <article className={`${styles.card} ${selected ? styles.cardSelected : ""}`} key={pc.id}>
-                <button
-                  type="button"
-                  className={styles.selectButton}
-                  aria-pressed={selected}
-                  aria-label={`${selected ? "Deseleziona" : "Seleziona"} ${pc.assegnatario}`}
-                  onClick={() => toggleSelection(pc.id)}
-                >
-                  <span aria-hidden="true">{selected ? "✓" : ""}</span>
-                </button>
-                <button type="button" className={styles.cardOpen} onClick={() => setActivePc(pc)}>
-                  <div className={styles.imageWrap}><PcVisual pc={pc} priority={index < 3} /></div>
-                  <div className={styles.cardBody}>
-                    <span className={styles.area}>{pc.area || "Area da assegnare"}</span>
-                    <h2>{pc.assegnatario}</h2>
-                    <p className={styles.model}>{pc.marca} · {pc.modello}</p>
-                    <PerformanceSummary assessment={assessments.get(pc.id)!} />
-                    <dl className={styles.quickSpecs}>
-                      {pc.processore && <div><dt>CPU</dt><dd>{pc.processore}</dd></div>}
-                      {pc.ram && <div><dt>RAM</dt><dd>{pc.ram}</dd></div>}
-                    </dl>
-                    <span className={styles.detailsLink}>Consulta scheda <span aria-hidden="true">↗</span></span>
-                  </div>
-                </button>
-              </article>
-            );
-          })}
+        <section className={styles.departments} aria-label="Computer aziendali">
+          {groups.map((group, groupIndex) => (
+            <section className={styles.department} key={group.area} aria-label={group.area}>
+              <header className={styles.departmentHeading}><h2>{group.area}</h2><span>{group.pcs.length} PC</span></header>
+              <div className={styles.grid}>
+                {group.pcs.map((pc, index) => {
+                  const selected = selectedIds.has(pc.id);
+                  return (
+                    <article className={`${styles.card} ${selected ? styles.cardSelected : ""}`} key={pc.id}>
+                      <PerformanceSummary assessment={assessments.get(pc.id)!} />
+                      <button
+                        type="button"
+                        className={styles.selectButton}
+                        aria-pressed={selected}
+                        aria-label={`${selected ? "Deseleziona" : "Seleziona"} ${pc.assegnatario}`}
+                        onClick={() => toggleSelection(pc.id)}
+                      >
+                        <span aria-hidden="true">{selected ? "✓" : ""}</span>
+                      </button>
+                      <button type="button" className={styles.cardOpen} onClick={() => setActivePc(pc)}>
+                        <div className={styles.imageWrap}><PcVisual pc={pc} priority={groupIndex === 0 && index < 4} /></div>
+                        <div className={styles.cardBody}>
+                          <span className={styles.deviceType}>{pc.tipologia}</span>
+                          <h3>{pc.assegnatario}</h3>
+                          <p className={styles.model}>{pc.marca} · {pc.modello}</p>
+                          <HardwareSpecs pc={pc} />
+                          <span className={styles.detailsLink}>Consulta scheda <span aria-hidden="true">↗</span></span>
+                        </div>
+                      </button>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
         </section>
       ) : (
         <section className={styles.emptyState}>
