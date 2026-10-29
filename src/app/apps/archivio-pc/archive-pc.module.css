@@ -102,7 +102,7 @@
 
 .controls {
   display: grid;
-  grid-template-columns: minmax(280px, 1.5fr) repeat(3, minmax(170px, 0.6fr));
+  grid-template-columns: minmax(220px, 1.5fr) repeat(4, minmax(140px, 0.7fr));
   gap: 10px;
   padding: 40px 0 20px;
 }
@@ -186,6 +186,7 @@
 .imageFallback strong { max-width: 260px; font-size: 21px; font-weight: 500; letter-spacing: -0.025em; }
 
 .cardBody { padding: 24px 24px 26px; }
+.cardBody, .dialogContent { min-width: 0; overflow-wrap: anywhere; }
 .area { color: var(--accent); font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
 .card h2 { margin: 15px 0 5px; font-size: clamp(22px, 2.2vw, 31px); font-weight: 500; letter-spacing: -0.035em; line-height: 1.05; }
 .model { min-height: 40px; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.4; }
@@ -194,6 +195,35 @@
 .quickSpecs dt { color: var(--muted); }
 .quickSpecs dd { margin: 0; }
 .detailsLink { display: inline-flex; margin-top: 26px; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
+
+.performanceSummary { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 16px; }
+.performanceHeading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.performanceHeading > span { color: var(--accent); font-size: 13px; font-weight: 500; }
+.performanceHeading strong { font-size: 32px; font-weight: 500; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+.performanceHeading small, .profileScores small { margin-left: 3px; color: var(--muted); font-size: 12px; font-weight: 400; letter-spacing: 0; }
+.performanceMeta { display: grid; gap: 5px; margin-top: 12px; color: #595c53; font-size: 12px; line-height: 1.45; }
+.performanceMeta > span:first-child { font-weight: 500; }
+.performanceDetail { margin: 0 0 36px; }
+.performanceDetail h3 { margin: 0; font-size: 20px; font-weight: 500; letter-spacing: -0.025em; }
+.performanceDetail h4 { margin: 28px 0 12px; font-size: 13px; font-weight: 600; }
+.performanceNote { max-width: 65ch; margin: 12px 0 0; color: #595c53; font-size: 12px; line-height: 1.6; }
+.recommendation { display: grid; gap: 8px; margin-top: 24px; border-left: 3px solid var(--accent); padding: 4px 0 4px 16px; }
+.recommendation > span { color: #595c53; font-size: 12px; }
+.recommendation strong { font-size: 20px; font-weight: 500; letter-spacing: -0.025em; }
+.recommendation p { margin: 0; font-size: 12px; line-height: 1.5; }
+.storageWarning { margin: 20px 0 0; border: 1px solid #c6b59d; border-radius: 12px; padding: 14px 16px; color: #63482f; background: #ece3d7; font-size: 13px; line-height: 1.5; }
+.componentScores { margin: 0; }
+.componentScores > div { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; border-top: 1px solid var(--line); padding: 10px 0; font-size: 12px; line-height: 1.5; }
+.componentScores dt { color: #595c53; }
+.componentScores dd { flex-shrink: 0; margin: 0; font-weight: 500; font-variant-numeric: tabular-nums; text-align: right; }
+.profileScores { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.profileScores > div { border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+.profileScores .assignedProfile { border-color: var(--accent); background: var(--surface); }
+.profileScores dt { display: grid; min-height: 37px; gap: 4px; font-size: 13px; }
+.profileScores dt span { color: var(--accent); font-size: 10px; }
+.profileScores dd { margin: 12px 0 0; font-size: 25px; line-height: 1; font-variant-numeric: tabular-nums; }
+.missingData { margin: 0; padding-left: 18px; color: #595c53; font-size: 12px; line-height: 1.6; }
+.missingData li + li { margin-top: 6px; }
 
 .emptyState { display: grid; min-height: 360px; place-content: center; justify-items: center; border-top: 1px solid var(--line); text-align: center; }
 .emptyState h2 { margin: 0 0 28px; font-size: 32px; font-weight: 500; letter-spacing: -0.035em; }
@@ -220,6 +250,11 @@
   .searchField { grid-column: 1 / -1; }
   .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .dialogPanel { grid-template-columns: 0.75fr 1.25fr; }
+}
+
+@media (min-width: 1051px) and (max-width: 1250px) {
+  .controls { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .searchField { grid-column: 1 / -1; }
 }
 
 @media (max-width: 720px) {

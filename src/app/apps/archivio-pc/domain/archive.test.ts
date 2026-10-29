@@ -1,10 +1,29 @@
 import { describe, expect, it } from "vitest";
 import pcsData from "../data/pcs.json";
 import { filterPcs, summarizePcs, uniqueValues, type PcRecord } from "./archive";
+import { assessPerformance } from "./performance";
 
 const pcs = pcsData as PcRecord[];
 
 describe("Archivio PC", () => {
+  it("filtra per profilo insieme agli altri filtri", () => {
+    const result = filterPcs(pcs, { query: "", area: "Ufficio Tecnico", type: "", profile: "Render", sort: "assignee" });
+    expect(result.length).toBeGreaterThan(0);
+    expect(result.every((pc) => pc.profilo === "Render" && pc.area === "Ufficio Tecnico")).toBe(true);
+    expect(filterPcs(pcs, { query: "", area: "", type: "", profile: "Grafica", sort: "assignee" }).map((pc) => pc.id)).toEqual([3, 1]);
+  });
+
+  it("ordina dal voto prestazionale più basso con dati non valutabili in fondo", () => {
+    const unscored = { ...pcs[0], id: 100, processore: "", ram: "", gpu: "", archiviazione: "" };
+    const tied = { ...pcs[0], id: 101 };
+    const input = [unscored, tied, ...pcs];
+    const result = filterPcs(input, { query: "", area: "", type: "", profile: "", sort: "performance" });
+    const scores = result.map((pc) => assessPerformance(pc).score ?? Infinity);
+    expect(scores).toEqual([...scores].sort((a, b) => a - b));
+    expect(result.at(-1)?.id).toBe(100);
+    expect(result.indexOf(pcs[0])).toBeLessThan(result.indexOf(tied));
+    expect(input[0]).toBe(unscored);
+  });
   it("contiene 35 record e non duplica il notebook del cantiere", () => {
     expect(pcs).toHaveLength(35);
     expect(pcs.filter((pc) => pc.processore.includes("i7-1255U"))).toHaveLength(1);
@@ -29,12 +48,13 @@ describe("Archivio PC", () => {
   });
 
   it("cerca anche il nome dispositivo confermato", () => {
-    expect(filterPcs(pcs, { query: "nbgaiab", area: "", type: "", sort: "assignee" }).map((pc) => pc.id)).toEqual([35]);
+    expect(filterPcs(pcs, { query: "nbgaiab", area: "", type: "", profile: "", sort: "assignee" }).map((pc) => pc.id)).toEqual([35]);
   });
 
   it("cerca senza distinguere maiuscole e accenti in tutti i campi principali", () => {
     const result = filterPcs(pcs, {
       query: "Uffício Técnico 21ks0004ix",
+      profile: "",
       area: "",
       type: "",
       sort: "assignee",
@@ -46,6 +66,7 @@ describe("Archivio PC", () => {
   it("combina i filtri e ordina per assegnatario", () => {
     const result = filterPcs(pcs, {
       query: "",
+      profile: "",
       area: "Ufficio Tecnico",
       type: "Notebook",
       sort: "assignee",
@@ -59,7 +80,7 @@ describe("Archivio PC", () => {
   });
 
   it("ordina per aggiornamento più recente e produce riepiloghi", () => {
-    const result = filterPcs(pcs, { query: "", area: "", type: "", sort: "updated" });
+    const result = filterPcs(pcs, { query: "", area: "", type: "", profile: "", sort: "updated" });
     const summary = summarizePcs(pcs);
 
     expect(result[0].aggiornata).toBe("29/10/2026");

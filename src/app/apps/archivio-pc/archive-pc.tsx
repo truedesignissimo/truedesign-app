@@ -13,14 +13,21 @@ import {
   type PcSort,
 } from "./domain/archive";
 import { pcImages } from "./image-map";
+import { assessPerformance, PROFILE_WEIGHTS, type PerformanceAssessment, type PerformanceComponents, type PerformanceProfile } from "./domain/performance";
 
-const EMPTY_FILTERS: PcFilters = { query: "", area: "", type: "", sort: "assignee" };
+const EMPTY_FILTERS: PcFilters = { query: "", area: "", type: "", profile: "", sort: "assignee" };
+const PROFILES = Object.keys(PROFILE_WEIGHTS) as PerformanceProfile[];
+const COMPONENT_LABELS: Array<[keyof PerformanceComponents, string]> = [
+  ["singleCore", "CPU single-core"], ["multiCore", "CPU multi-core"], ["gpu", "GPU"],
+  ["ram", "RAM"], ["storage", "Archiviazione"], ["graphicsMemory", "Memoria grafica / unificata"],
+];
 
 const DETAIL_FIELDS: Array<[keyof PcRecord, string]> = [
   ["area", "Area"],
   ["tipologia", "Tipologia"],
   ["marca", "Marca"],
   ["modello", "Modello"],
+  ["nome_dispositivo", "Nome dispositivo"],
   ["anno", "Anno"],
   ["numero_serie", "Numero di serie"],
   ["processore", "Processore"],
@@ -35,6 +42,60 @@ const DETAIL_FIELDS: Array<[keyof PcRecord, string]> = [
   ["aggiornata", "Ultimo aggiornamento"],
   ["note", "Note"],
 ];
+
+export function PerformanceSummary({ assessment }: { assessment: PerformanceAssessment }) {
+  return (
+    <div className={styles.performanceSummary}>
+      <div className={styles.performanceHeading}>
+        <span>Profilo {assessment.profile}</span>
+        <strong>{assessment.score ?? "—"}<small>/100</small></strong>
+      </div>
+      <div className={styles.performanceMeta}>
+        <span>{assessment.band}{assessment.provisional ? " · voto provvisorio" : ""}</span>
+        <span>Attendibilità {assessment.confidence.toLocaleLowerCase("it")}</span>
+      </div>
+    </div>
+  );
+}
+
+export function PerformanceDetail({ assessment }: { assessment: PerformanceAssessment }) {
+  return (
+    <section className={styles.performanceDetail} aria-label="Valutazione prestazionale">
+      <h3>Valutazione prestazionale</h3>
+      <PerformanceSummary assessment={assessment} />
+      <p className={styles.performanceNote}>Profilo assegnato provvisoriamente · benchmark di riferimento, non misurati su questo PC.</p>
+      <div className={styles.recommendation}>
+        <span>Indicazione operativa{assessment.recommendationProvisional ? " · provvisoria" : ""}</span>
+        <strong>{assessment.recommendation}</strong>
+        <p>Sistema operativo: {assessment.osSupport}</p>
+      </div>
+      {assessment.storageWarning && <p className={styles.storageWarning}>{assessment.storageWarning}</p>}
+      <h4>Componenti · punteggi su 100</h4>
+      <dl className={styles.componentScores}>
+        {COMPONENT_LABELS.map(([key, label]) => (
+          <div key={key}>
+            <dt>{label}</dt>
+            <dd>{assessment.components[key] === null ? "Non disponibile" : Math.round(assessment.components[key]!)}</dd>
+          </div>
+        ))}
+      </dl>
+      <h4>Idoneità nei quattro profili</h4>
+      <dl className={styles.profileScores}>
+        {PROFILES.map((profile) => (
+          <div key={profile} className={profile === assessment.profile ? styles.assignedProfile : undefined}>
+            <dt>{profile}{profile === assessment.profile && <span>Assegnato</span>}</dt>
+            <dd>{assessment.scoresByProfile[profile] ?? "—"}<small>/100</small></dd>
+          </div>
+        ))}
+      </dl>
+      <p className={styles.performanceNote}>I dati non disponibili sono esclusi dal voto; possono modificare la valutazione una volta completati.</p>
+      <h4>Dati da completare</h4>
+      {assessment.missingData.length > 0
+        ? <ul className={styles.missingData}>{assessment.missingData.map((item) => <li key={item}>{item}</li>)}</ul>
+        : <p className={styles.performanceNote}>Dati prestazionali completi.</p>}
+    </section>
+  );
+}
 
 function SearchIcon() {
   return (
@@ -87,6 +148,7 @@ export function ArchivioPc({ pcs }: { pcs: PcRecord[] }) {
   const types = useMemo(() => uniqueValues(pcs, "tipologia"), [pcs]);
   const visiblePcs = useMemo(() => filterPcs(pcs, filters), [pcs, filters]);
   const selectedPcs = useMemo(() => pcs.filter((pc) => selectedIds.has(pc.id)), [pcs, selectedIds]);
+  const assessments = useMemo(() => new Map(pcs.map((pc) => [pc.id, assessPerformance(pc)])), [pcs]);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -122,7 +184,7 @@ export function ArchivioPc({ pcs }: { pcs: PcRecord[] }) {
           <p className={styles.eyebrow}>Asset digitali</p>
           <h1 id="archive-title">Archivio PC</h1>
           <p className={styles.intro}>
-            Una vista chiara e condivisibile del parco macchine aziendale, aggiornata al 28 ottobre 2026.
+            Una vista chiara e condivisibile del parco macchine aziendale, aggiornata al 29 ottobre 2026.
           </p>
         </div>
         <div className={styles.heroIndex} aria-label={`${summary.total} computer censiti`}>
@@ -164,12 +226,20 @@ export function ArchivioPc({ pcs }: { pcs: PcRecord[] }) {
           </select>
         </label>
         <label>
+          <span className={styles.srOnly}>Filtra per profilo</span>
+          <select value={filters.profile} onChange={(event) => updateFilter("profile", event.target.value as PcFilters["profile"])}>
+            <option value="">Tutti i profili</option>
+            {PROFILES.map((profile) => <option key={profile}>{profile}</option>)}
+          </select>
+        </label>
+        <label>
           <span className={styles.srOnly}>Ordina archivio</span>
           <select value={filters.sort} onChange={(event) => updateFilter("sort", event.target.value as PcSort)}>
             <option value="assignee">Ordina per assegnatario</option>
             <option value="area">Ordina per area</option>
             <option value="model">Ordina per modello</option>
             <option value="updated">Più recenti</option>
+            <option value="performance">Performance crescente</option>
           </select>
         </label>
       </section>
@@ -205,9 +275,10 @@ export function ArchivioPc({ pcs }: { pcs: PcRecord[] }) {
                 <button type="button" className={styles.cardOpen} onClick={() => setActivePc(pc)}>
                   <div className={styles.imageWrap}><PcVisual pc={pc} priority={index < 3} /></div>
                   <div className={styles.cardBody}>
-                    <span className={styles.area}>{pc.area}</span>
+                    <span className={styles.area}>{pc.area || "Area da assegnare"}</span>
                     <h2>{pc.assegnatario}</h2>
                     <p className={styles.model}>{pc.marca} · {pc.modello}</p>
+                    <PerformanceSummary assessment={assessments.get(pc.id)!} />
                     <dl className={styles.quickSpecs}>
                       {pc.processore && <div><dt>CPU</dt><dd>{pc.processore}</dd></div>}
                       {pc.ram && <div><dt>RAM</dt><dd>{pc.ram}</dd></div>}
@@ -230,6 +301,7 @@ export function ArchivioPc({ pcs }: { pcs: PcRecord[] }) {
       <dialog
         ref={dialogRef}
         className={styles.dialog}
+        aria-labelledby="pc-detail-title"
         onClose={() => setActivePc(null)}
         onClick={(event) => {
           if (event.target === event.currentTarget) setActivePc(null);
@@ -240,9 +312,10 @@ export function ArchivioPc({ pcs }: { pcs: PcRecord[] }) {
             <button type="button" className={styles.closeButton} onClick={() => setActivePc(null)} aria-label="Chiudi scheda">×</button>
             <div className={styles.dialogVisual}><PcVisual pc={activePc} /></div>
             <div className={styles.dialogContent}>
-              <p className={styles.eyebrow}>{activePc.area}</p>
-              <h2>{activePc.assegnatario}</h2>
+              <p className={styles.eyebrow}>{activePc.area || "Area da assegnare"}</p>
+              <h2 id="pc-detail-title">{activePc.assegnatario}</h2>
               <p className={styles.dialogModel}>{activePc.marca} · {activePc.modello}</p>
+              <PerformanceDetail assessment={assessments.get(activePc.id)!} />
               <dl className={styles.detailList}>
                 {DETAIL_FIELDS.map(([key, label]) => {
                   const value = activePc[key];
@@ -256,7 +329,7 @@ export function ArchivioPc({ pcs }: { pcs: PcRecord[] }) {
       </dialog>
 
       <section className={styles.printSheet} aria-hidden="true">
-        <header><Image src={logo} alt="True Design" /><p>Archivio PC · 28 ottobre 2026</p></header>
+        <header><Image src={logo} alt="True Design" /><p>Archivio PC · 29 ottobre 2026</p></header>
         {selectedPcs.map((pc) => (
           <article key={pc.id}>
             <h2>{pc.assegnatario}</h2>

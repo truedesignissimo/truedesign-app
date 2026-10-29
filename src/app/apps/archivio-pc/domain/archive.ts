@@ -1,4 +1,4 @@
-import type { PerformanceProfile } from "./performance";
+import { assessPerformance, type PerformanceProfile } from "./performance";
 
 export type PcRecord = {
   id: number;
@@ -26,12 +26,13 @@ export type PcRecord = {
   foto: string;
 };
 
-export type PcSort = "assignee" | "area" | "model" | "updated";
+export type PcSort = "assignee" | "area" | "model" | "updated" | "performance";
 
 export type PcFilters = {
   query: string;
   area: string;
   type: string;
+  profile: PerformanceProfile | "";
   sort: PcSort;
 };
 
@@ -74,11 +75,17 @@ export function filterPcs(pcs: PcRecord[], filters: PcFilters) {
     return (
       (!filters.area || pc.area === filters.area) &&
       (!filters.type || pc.tipologia === filters.type) &&
+      (!filters.profile || pc.profilo === filters.profile) &&
       tokens.every((token) => haystack.includes(token))
     );
   });
 
+  const scores = filters.sort === "performance"
+    ? new Map(filtered.map((pc) => [pc.id, assessPerformance(pc).score ?? Infinity]))
+    : null;
+
   return filtered.toSorted((a, b) => {
+    if (scores) return scores.get(a.id)! - scores.get(b.id)! || a.id - b.id;
     if (filters.sort === "updated") {
       return parseItalianDate(b.aggiornata) - parseItalianDate(a.aggiornata) || a.id - b.id;
     }
