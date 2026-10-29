@@ -1,6 +1,8 @@
 [
  {
   "id": 1,
+  "profilo": "Grafica",
+  "nome_dispositivo": "",
   "assegnatario": "Stefano Baldin",
   "tipologia": "Workstation",
   "marca": "SiComputer",
@@ -23,6 +25,8 @@
  },
  {
   "id": 2,
+  "profilo": "Ufficio",
+  "nome_dispositivo": "",
   "assegnatario": "Giulia Pinzi",
   "tipologia": "Notebook",
   "marca": "Apple",
@@ -45,6 +49,8 @@
  },
  {
   "id": 3,
+  "profilo": "Grafica",
+  "nome_dispositivo": "",
   "assegnatario": "Dario Breggiè",
   "tipologia": "Notebook",
   "marca": "Apple",
@@ -67,6 +73,8 @@
  },
  {
   "id": 4,
+  "profilo": "Render",
+  "nome_dispositivo": "",
   "assegnatario": "Luca Bonfanti",
   "tipologia": "Desktop",
   "marca": "SiComputer",
@@ -89,6 +97,8 @@
  },
  {
   "id": 5,
+  "profilo": "Tecnico",
+  "nome_dispositivo": "",
   "assegnatario": "Lorenzo Zerbetto",
   "tipologia": "Desktop",
   "marca": "SiComputer",
@@ -111,6 +121,8 @@
  },
  {
   "id": 6,
+  "profilo": "Render",
+  "nome_dispositivo": "",
   "assegnatario": "Luca Favato",
   "tipologia": "Desktop",
   "marca": "SiComputer",
@@ -133,6 +145,8 @@
  },
  {
   "id": 7,
+  "profilo": "Render",
+  "nome_dispositivo": "",
   "assegnatario": "Walter Masetto",
   "tipologia": "Workstation",
   "marca": "HP",
@@ -155,6 +169,8 @@
  },
  {
   "id": 8,
+  "profilo": "Tecnico",
+  "nome_dispositivo": "",
   "assegnatario": "Alessandro Callegaro",
   "tipologia": "Desktop",
   "marca": "SiComputer",
@@ -177,6 +193,8 @@
  },
  {
   "id": 9,
+  "profilo": "Tecnico",
+  "nome_dispositivo": "",
   "assegnatario": "Marco Zecchin",
   "tipologia": "Desktop",
   "marca": "SiComputer",
@@ -199,6 +217,8 @@
  },
  {
   "id": 10,
+  "profilo": "Tecnico",
+  "nome_dispositivo": "",
   "assegnatario": "Marta Chiapperin",
   "tipologia": "Notebook",
   "marca": "HP",
@@ -221,6 +241,8 @@
  },
  {
   "id": 11,
+  "profilo": "Render",
+  "nome_dispositivo": "",
   "assegnatario": "Alessandra Merrina",
   "tipologia": "Desktop",
   "marca": "SiComputer",
@@ -243,6 +265,8 @@
  },
  {
   "id": 12,
+  "profilo": "Tecnico",
+  "nome_dispositivo": "",
   "assegnatario": "Stefano Callegaro",
   "tipologia": "Desktop",
   "marca": "HP",
@@ -265,6 +289,8 @@
  },
  {
   "id": 13,
+  "profilo": "Tecnico",
+  "nome_dispositivo": "",
   "assegnatario": "Alessandra Benetti",
   "tipologia": "Workstation portatile",
   "marca": "HP",
@@ -287,6 +313,8 @@
  },
  {
   "id": 14,
+  "profilo": "Render",
+  "nome_dispositivo": "",
   "assegnatario": "Martina Carraro",
   "tipologia": "Workstation",
   "marca": "HP",
@@ -309,6 +337,8 @@
  },
  {
   "id": 15,
+  "profilo": "Ufficio",
+  "nome_dispositivo": "",
   "assegnatario": "Maddalena Tezzon",
   "tipologia": "Desktop",
   "marca": "",
@@ -331,6 +361,8 @@
  },
  {
   "id": 16,
+  "profilo": "Ufficio",
+  "nome_dispositivo": "",
   "assegnatario": "Notebook Cantiere",
   "tipologia": "Notebook",
   "marca": "Lenovo",
@@ -353,6 +385,8 @@
  },
  {
   "id": 17,
+  "profilo": "Ufficio",
+  "nome_dispositivo": "",
   "assegnatario": "Alice Barin",
   "tipologia": "Workstation portatile",
   "marca": "HP",
@@ -375,6 +409,8 @@
  },
  {
   "id": 18,
+  "profilo": "Ufficio",
+  "nome_dispositivo": "",
   "assegnatario": "Jessica Sasso",
   "tipologia": "Desktop",
   "marca": "HP",
@@ -397,6 +433,8 @@
  },
  {
   "id": 19,
+  "profilo": "Ufficio",
+  "nome_dispositivo": "",
   "assegnatario": "Cristina Crema",
   "tipologia": "Notebook",
   "marca": "HP",
@@ -419,6 +457,8 @@
  },
  {
   "id": 20,
+  "profilo": "Ufficio",
+  "nome_dispositivo": "",
   "assegnatario": "Gaia Bittante",
   "tipologia": "Notebook",
   "marca": "HP",
@@ -441,6 +481,8 @@
  },
  {
   "id": 21,
+  "profilo": "Ufficio",
+  "nome_dispositivo": "",
   "assegnatario": "Mara Ruggieri",
   "tipologia": "Notebook",
   "marca": "Dell",
@@ -463,6 +505,8 @@
  },
  {
   "id": 22,
+  "profilo": "Ufficio",
+  "nome_dispositivo": "",
   "assegnatario": "Francesca Minotto",
   "tipologia": "Notebook",
   "marca": "HP",
@@ -485,6 +529,8 @@
  },
  {
   "id": 23,
+  "profilo": "Ufficio",
+  "nome_dispositivo": "",
   "assegnatario": "Hillary Bellin",
   "tipologia": "Mini PC",
   "marca": "HP",
@@ -507,6 +553,8 @@
  },
  {
   "id": 24,
+  "profilo": "Ufficio",
+  "nome_dispositivo": "",
   "assegnatario": "Francesco Maniero",
   "tipologia": "Notebook",
   "marca": "Apple",
@@ -529,6 +577,8 @@
  },
  {
   "id": 25,
+  "profilo": "Ufficio",
+  "nome_dispositivo": "",
   "assegnatario": "Simone Garbinato",
   "tipologia": "Notebook",
   "marca": "Lenovo",
@@ -551,6 +601,8 @@
  },
  {
   "id": 26,
+  "profilo": "Ufficio",
+  "nome_dispositivo": "",
   "assegnatario": "Marco Russo",
   "tipologia": "Desktop",
   "marca": "SiComputer",
@@ -573,6 +625,8 @@
  },
  {
   "id": 27,
+  "profilo": "Ufficio",
+  "nome_dispositivo": "",
   "assegnatario": "Alessandro Michelin",
   "tipologia": "Notebook",
   "marca": "Dell",
@@ -595,6 +649,8 @@
  },
  {
   "id": 28,
+  "profilo": "Ufficio",
+  "nome_dispositivo": "",
   "assegnatario": "Notebook EX Alberto",
   "tipologia": "Notebook",
   "marca": "HP",
@@ -617,6 +673,8 @@
  },
  {
   "id": 29,
+  "profilo": "Ufficio",
+  "nome_dispositivo": "",
   "assegnatario": "Antonio Bianchi",
   "tipologia": "Desktop",
   "marca": "SiComputer",
@@ -639,6 +697,8 @@
  },
  {
   "id": 30,
+  "profilo": "Ufficio",
+  "nome_dispositivo": "",
   "assegnatario": "Mac Alessandro Maniero",
   "tipologia": "Notebook",
   "marca": "Apple",
@@ -661,6 +721,8 @@
  },
  {
   "id": 31,
+  "profilo": "Ufficio",
+  "nome_dispositivo": "",
   "assegnatario": "PC Alessandro Maniero",
   "tipologia": "Notebook",
   "marca": "HP",
@@ -683,6 +745,8 @@
  },
  {
   "id": 32,
+  "profilo": "Render",
+  "nome_dispositivo": "",
   "assegnatario": "Beatrice B.",
   "tipologia": "Workstation",
   "marca": "HP",
@@ -705,6 +769,8 @@
  },
  {
   "id": 33,
+  "profilo": "Tecnico",
+  "nome_dispositivo": "NbUfficioT2",
   "assegnatario": "NbUfficioT2",
   "tipologia": "Notebook",
   "marca": "Lenovo",
@@ -723,6 +789,54 @@
   "aggiornata": "28/10/2026",
   "note": "Nome dispositivo: NbUfficioT2.",
   "area": "Ufficio Tecnico",
+  "foto": ""
+ },
+ {
+  "id": 34,
+  "profilo": "Ufficio",
+  "nome_dispositivo": "NbCristinaC",
+  "assegnatario": "Ex Notebook Cristina",
+  "tipologia": "Notebook",
+  "marca": "HP",
+  "modello": "HP ProBook 455 15.6 G10",
+  "anno": "",
+  "numero_serie": "",
+  "processore": "AMD Ryzen 5 7530U",
+  "ram": "16 GB",
+  "gpu": "AMD Radeon Graphics (integrata)",
+  "schermo": "",
+  "archiviazione": "477 GB con 157 GB usati",
+  "sistema_operativo": "Windows 11 Pro",
+  "versione_os": "25H2, build 26200.9457",
+  "data_installazione_os": "05/12/2025",
+  "data_acquisto": "",
+  "aggiornata": "29/10/2026",
+  "note": "",
+  "area": "",
+  "foto": ""
+ },
+ {
+  "id": 35,
+  "profilo": "Ufficio",
+  "nome_dispositivo": "NbGaiaB",
+  "assegnatario": "Ex Notebook Gaia",
+  "tipologia": "Notebook",
+  "marca": "HP",
+  "modello": "HP EliteBook 630 13.3 G10",
+  "anno": "",
+  "numero_serie": "5CD337LZ66",
+  "processore": "Intel Core i5-1335U",
+  "ram": "8 GB",
+  "gpu": "Intel UHD Graphics (integrata)",
+  "schermo": "",
+  "archiviazione": "238 GB con 220 GB usati",
+  "sistema_operativo": "Windows 11 Pro",
+  "versione_os": "25H2, build 26200.9457",
+  "data_installazione_os": "18/02/2025",
+  "data_acquisto": "",
+  "aggiornata": "29/10/2026",
+  "note": "Spazio di archiviazione quasi esaurito: 18 GB liberi su 238 GB.",
+  "area": "",
   "foto": ""
  }
 ]

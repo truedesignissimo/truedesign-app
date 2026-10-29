@@ -1,6 +1,11 @@
+import type { PerformanceProfile } from "./performance";
+
 export type PcRecord = {
   id: number;
   assegnatario: string;
+  /** Assegnazione provvisoria, correggibile senza cambiare l'algoritmo. */
+  profilo: PerformanceProfile;
+  nome_dispositivo: string;
   tipologia: string;
   marca: string;
   modello: string;
@@ -41,6 +46,7 @@ const searchableText = (pc: PcRecord) =>
   normalize(
     [
       pc.assegnatario,
+      pc.nome_dispositivo,
       pc.tipologia,
       pc.marca,
       pc.modello,
