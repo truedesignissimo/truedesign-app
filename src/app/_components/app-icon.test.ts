@@ -8,6 +8,7 @@ describe("app icon mapping", () => {
     ["/apps/true-generatore-offerte", "calculator"],
     ["/apps/prenotazione-sale-riunioni", "conversation"],
     ["/apps/true-sondaggio-iconici", "checklist"],
+    ["/apps/archivio-pc", "computer"],
   ] as const)("maps %s to %s", (url, icon) => {
     expect(getAppIconKey(url)).toBe(icon);
   });
