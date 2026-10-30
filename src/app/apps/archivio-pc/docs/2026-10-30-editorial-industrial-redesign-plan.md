@@ -1,6 +1,8 @@
 # Archivio PC Editorial Industrial Redesign Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+>
+> Stato: implementazione e verifica di produzione completate il 30 ottobre 2026; pubblicazione in corso.
 
 **Goal:** Ridisegnare Archivio PC con palette grafite e blu tecnici, Suisse Int’l e loghi riconoscibili delle famiglie di processori, mantenendo invariati dati e funzioni.
 
