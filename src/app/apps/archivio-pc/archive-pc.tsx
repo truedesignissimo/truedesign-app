@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import logo from "./assets/logo_true.svg";
 import styles from "./archive-pc.module.css";
+import { CpuBrand } from "./cpu-brand";
 import {
   filterPcs,
   groupPcsByArea,
@@ -62,12 +63,8 @@ export function PerformanceDetail({ assessment }: { assessment: PerformanceAsses
           <span>Profilo {assessment.profile}</span>
           <strong>{assessment.score ?? "—"}<small>/100</small></strong>
         </div>
-        <div className={styles.performanceMeta}>
-          <span>{assessment.band}{assessment.provisional ? " · voto provvisorio" : ""}</span>
-          <span>Attendibilità {assessment.confidence.toLocaleLowerCase("it")}</span>
-        </div>
+        <div className={styles.performanceMeta}><span>{assessment.band}</span></div>
       </div>
-      <p className={styles.performanceNote}>Profilo assegnato provvisoriamente · benchmark di riferimento, non misurati su questo PC.</p>
       <div className={styles.recommendation}>
         <span>Indicazione operativa{assessment.recommendationProvisional ? " · provvisoria" : ""}</span>
         <strong>{assessment.recommendation}</strong>
@@ -130,16 +127,12 @@ function HardwareIcon({ kind }: { kind: "cpu" | "ram" | "gpu" | "screen" }) {
   );
 }
 
-function cpuFamily(processor: string) {
-  return processor.match(/\b(i[3579]|M\d+|Xeon|Ryzen|Ultra)\b/i)?.[1] ?? "CPU";
-}
-
 function HardwareSpecs({ pc }: { pc: PcRecord }) {
   return (
     <dl className={styles.quickSpecs}>
       {pc.processore && <div className={styles.cpuSpec}>
         <dt><HardwareIcon kind="cpu" /><span className={styles.srOnly}>CPU</span></dt>
-        <dd><span className={styles.cpuFamily}>{cpuFamily(pc.processore)}</span><span>{pc.processore}</span></dd>
+        <dd><CpuBrand processor={pc.processore} /><span>{pc.processore}</span></dd>
       </div>}
       {pc.ram && <div className={styles.ramSpec}><dt><HardwareIcon kind="ram" />RAM</dt><dd>{pc.ram}</dd></div>}
       {pc.gpu && <div><dt><HardwareIcon kind="gpu" />GPU</dt><dd>{pc.gpu}</dd></div>}
@@ -295,7 +288,11 @@ export function ArchivioPc({ pcs }: { pcs: PcRecord[] }) {
         <section className={styles.departments} aria-label="Computer aziendali">
           {groups.map((group, groupIndex) => (
             <section className={styles.department} key={group.area} aria-label={group.area}>
-              <header className={styles.departmentHeading}><h2>{group.area}</h2><span>{group.pcs.length} PC</span></header>
+              <header className={styles.departmentHeading}>
+                <span className={styles.departmentIndex}>{String(groupIndex + 1).padStart(2, "0")}</span>
+                <h2>{group.area}</h2>
+                <span className={styles.departmentCount}>{group.pcs.length} PC</span>
+              </header>
               <div className={styles.grid}>
                 {group.pcs.map((pc, index) => {
                   const selected = selectedIds.has(pc.id);

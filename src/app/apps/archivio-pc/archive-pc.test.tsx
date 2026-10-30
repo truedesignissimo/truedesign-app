@@ -28,12 +28,14 @@ describe("Valutazione prestazionale nell'interfaccia", () => {
     expect(text).not.toMatch(/Profilo|Ufficio|Attendibilità|provvisorio/);
   });
 
-  it("mostra componenti, quattro profili, raccomandazione, warning e dati mancanti", () => {
+  it("mostra componenti, quattro profili, raccomandazione, warning e dati mancanti senza ripetere l'attendibilità", () => {
     const assessment = assessPerformance(gaia);
     const html = renderToStaticMarkup(<PerformanceDetail assessment={assessment} />);
-    for (const value of ["CPU single-core", "CPU multi-core", "GPU", "RAM", "Archiviazione", "Memoria grafica", "Ufficio", "Tecnico", "Grafica", "Render", "Attendibilità", assessment.confidence.toLowerCase(), assessment.recommendation, assessment.storageWarning!, ...assessment.missingData]) {
+    for (const value of ["CPU single-core", "CPU multi-core", "GPU", "RAM", "Archiviazione", "Memoria grafica", "Ufficio", "Tecnico", "Grafica", "Render", assessment.recommendation, assessment.storageWarning!, ...assessment.missingData]) {
       expect(html).toContain(value);
     }
+    expect(html).not.toContain("Attendibilità");
+    expect(html).not.toContain("voto provvisorio");
     expect(html).toContain("Non disponibile");
     expect(html).toContain("Supportato");
   });
@@ -52,6 +54,7 @@ describe("Card per reparto", () => {
     const html = renderToStaticMarkup(<ArchivioPc pcs={[gaia, pcsData[0], pcsData[3]] as PcRecord[]} />);
     const headings = [...html.matchAll(/<h2[^>]*>(.*?)<\/h2>/g)].map((match) => match[1]);
     expect(headings).toEqual(["Ufficio Tecnico", "Marketing", "Da assegnare"]);
+    expect(html).toMatch(/>01<[\s\S]*Ufficio Tecnico[\s\S]*>02<[\s\S]*Marketing[\s\S]*>03<[\s\S]*Da assegnare/);
     expect(html).toContain("1 PC");
     expect(html).not.toContain(">Commerciale</h2>");
   });
@@ -61,11 +64,12 @@ describe("Card per reparto", () => {
     ["Intel Core i9-13900K", "i9"], ["Apple M4 Max", "M4"],
     ["Intel Xeon W-2102", "Xeon"], ["AMD Ryzen 5 7530U", "Ryzen"],
     ["Intel Core Ultra 7 155H", "Ultra"], ["Processore sconosciuto", "CPU"],
-  ])("evidenzia la famiglia CPU %s come %s mantenendo le specifiche complete", (processore, family) => {
+  ])("evidenzia il marchio CPU %s come %s mantenendo le specifiche complete", (processore, family) => {
     const pc = { ...pcsData[32], processore } as PcRecord;
     const html = renderToStaticMarkup(<ArchivioPc pcs={[pc]} />);
     const card = html.match(/<article[\s\S]*?<\/article>/)?.[0] ?? "";
-    expect(card).toContain(`>${family}</span>`);
+    expect(card).toContain("cpuBrand");
+    expect(card).toContain(`aria-label="${family === "CPU" ? "Processore" : family === "M4" ? "Apple M4" : family === "Ultra" ? "Intel Core Ultra" : family === "Xeon" ? "Intel Xeon" : family === "Ryzen" ? "AMD Ryzen" : `Intel Core ${family}`}"`);
     expect(card).toContain(processore);
     expect(card).toContain(">RAM</dt>");
     expect(card).toContain(pc.ram);
