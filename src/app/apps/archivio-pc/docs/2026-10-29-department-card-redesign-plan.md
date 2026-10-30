@@ -22,30 +22,30 @@
 
 **Files:** Modify `domain/archive.ts`; Modify `domain/archive.test.ts`.
 
-- [ ] Scrivere test fallenti per ordine gruppi, gruppo Da assegnare e omissione gruppi vuoti.
-- [ ] Eseguire il test e osservare RED.
-- [ ] Implementare `groupPcsByArea(pcs)` senza mutare l’array.
-- [ ] Eseguire i test e ottenere GREEN.
+- [x] Scrivere test fallenti per ordine gruppi, gruppo Da assegnare e omissione gruppi vuoti.
+- [x] Eseguire il test e osservare RED.
+- [x] Implementare `groupPcsByArea(pcs)` senza mutare l’array.
+- [x] Eseguire i test e ottenere GREEN.
 
 ### Task 2: Card hardware e layout responsive
 
 **Files:** Modify `archive-pc.tsx`; Modify `archive-pc.module.css`; Modify `archive-pc.test.tsx`.
 
-- [ ] Scrivere test SSR fallenti per titoli reparto, badge Potenza, CPU/RAM/GPU e tooltip.
-- [ ] Eseguire il test e osservare RED.
-- [ ] Renderizzare sezioni per reparto e card compatte con icone vettoriali hardware.
-- [ ] Nascondere dal corpo card profilo, provvisorietà e attendibilità.
-- [ ] Impostare immagini uniformi e griglia 4/2/1.
-- [ ] Eseguire i test e ottenere GREEN.
+- [x] Scrivere test SSR fallenti per titoli reparto, badge Potenza, CPU/RAM/GPU e tooltip.
+- [x] Eseguire il test e osservare RED.
+- [x] Renderizzare sezioni per reparto e card compatte con icone vettoriali hardware.
+- [x] Nascondere dal corpo card profilo, provvisorietà e attendibilità.
+- [x] Impostare immagini uniformi e griglia 4/2/1.
+- [x] Eseguire i test e ottenere GREEN.
 
 ### Task 3: Icona Archivio PC
 
 **Files:** Modify `src/app/_components/app-icon-model.ts`; Modify `src/app/_components/app-icon.tsx`; Modify `src/app/_components/app-icon.test.ts`.
 
-- [ ] Aggiungere prima il test fallente della mappatura `/apps/archivio-pc`.
-- [ ] Osservare RED.
-- [ ] Aggiungere chiave `computer`, viewBox e artwork monitor + torre.
-- [ ] Eseguire il test e ottenere GREEN.
+- [x] Aggiungere prima il test fallente della mappatura `/apps/archivio-pc`.
+- [x] Osservare RED.
+- [x] Aggiungere chiave `computer`, viewBox e artwork monitor + torre.
+- [x] Eseguire il test e ottenere GREEN.
 
 ### Task 4: Verifica e pubblicazione
 
