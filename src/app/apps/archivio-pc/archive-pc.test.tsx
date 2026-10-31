@@ -5,7 +5,7 @@ import type { ImageProps } from "next/image";
 import pcsData from "./data/pcs.json";
 import type { PcRecord } from "./domain/archive";
 import { assessPerformance } from "./domain/performance";
-import { ArchiveModeToggle, ArchivioPc, PerformanceDetail, PerformanceSummary, RamValue, splitRam } from "./archive-pc";
+import { ArchiveModeToggle, ArchivioPc, isUnverified, PerformanceDetail, PerformanceSummary, RamValue, splitRam } from "./archive-pc";
 
 const gaia = pcsData.find((pc) => pc.id === 35) as PcRecord;
 
@@ -50,6 +50,26 @@ describe("Valutazione prestazionale nell'interfaccia", () => {
 });
 
 describe("Card per reparto", () => {
+  it("segnala soltanto le specifiche esplicitamente da verificare", () => {
+    expect(isUnverified("GPU dedicata 16 GB (modello da verificare)")).toBe(true);
+    expect(isUnverified("DATI DA VERIFICARE")).toBe(true);
+    expect(isUnverified("NVIDIA RTX A500 Laptop, 4 GB")).toBe(false);
+
+    const uncertain = renderToStaticMarkup(<ArchivioPc pcs={[{ ...gaia, gpu: "GPU dedicata 16 GB (modello da verificare)" }]} />);
+    const confirmed = renderToStaticMarkup(<ArchivioPc pcs={[{ ...gaia, gpu: "NVIDIA RTX A500 Laptop, 4 GB" }]} />);
+    expect(uncertain).toContain('title="Informazione da verificare"');
+    expect(uncertain).toContain('aria-label="Informazione da verificare"');
+    expect(confirmed).not.toContain("Informazione da verificare");
+  });
+
+  it("mette il logo CPU nella colonna etichetta e allinea la descrizione alle altre specifiche", () => {
+    const html = renderToStaticMarkup(<ArchivioPc pcs={[gaia]} />);
+    const cpuRow = html.match(/<div class="[^"]*cpuSpec[^"]*">[\s\S]*?<\/div>/)?.[0] ?? "";
+
+    expect(cpuRow).toMatch(/<dt>[\s\S]*cpuBrand[\s\S]*<\/dt><dd><span>Intel Core i5-1335U<\/span><\/dd>/);
+    expect(cpuRow).not.toContain("hardwareIcon");
+  });
+
   it("sostituisce i filtri iniziali con il solo comando di priorità", () => {
     const html = renderToStaticMarkup(<ArchivioPc pcs={[gaia, pcsData[0], pcsData[3]] as PcRecord[]} />);
 

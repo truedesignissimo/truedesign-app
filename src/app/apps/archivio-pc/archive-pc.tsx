@@ -143,15 +143,35 @@ export function RamValue({ value, compact = false }: { value: string; compact?: 
   );
 }
 
+export function isUnverified(value: string) {
+  return /\bda verificare\b/i.test(value);
+}
+
+function VerificationWarning() {
+  return (
+    <span
+      className={styles.warningIcon}
+      aria-label="Informazione da verificare"
+      title="Informazione da verificare"
+      tabIndex={0}
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 3 22 21H2L12 3Z" />
+        <path d="M12 9v5m0 3v.1" />
+      </svg>
+    </span>
+  );
+}
+
 function HardwareSpecs({ pc }: { pc: PcRecord }) {
   return (
     <dl className={styles.quickSpecs}>
       {pc.processore && <div className={styles.cpuSpec}>
-        <dt><HardwareIcon kind="cpu" /><span className={styles.srOnly}>CPU</span></dt>
-        <dd><CpuBrand processor={pc.processore} /><span>{pc.processore}</span></dd>
+        <dt><CpuBrand processor={pc.processore} /><span className={styles.srOnly}>CPU</span></dt>
+        <dd><span>{pc.processore}</span>{isUnverified(pc.processore) && <VerificationWarning />}</dd>
       </div>}
-      {pc.ram && <div className={styles.ramSpec}><dt><HardwareIcon kind="ram" />RAM</dt><dd><RamValue value={pc.ram} compact /></dd></div>}
-      {pc.gpu && <div><dt><HardwareIcon kind="gpu" />GPU</dt><dd>{pc.gpu}</dd></div>}
+      {pc.ram && <div className={styles.ramSpec}><dt><HardwareIcon kind="ram" />RAM</dt><dd><RamValue value={pc.ram} compact />{isUnverified(pc.ram) && <VerificationWarning />}</dd></div>}
+      {pc.gpu && <div><dt><HardwareIcon kind="gpu" />GPU</dt><dd><span>{pc.gpu}</span>{isUnverified(pc.gpu) && <VerificationWarning />}</dd></div>}
       {pc.schermo && <div><dt><HardwareIcon kind="screen" />Schermo</dt><dd>{pc.schermo}</dd></div>}
     </dl>
   );
