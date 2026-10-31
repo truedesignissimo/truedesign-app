@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import pcsData from "../data/pcs.json";
 import type { PcRecord } from "./archive";
-import { assessPerformance, missingPerformanceData, PROFILE_WEIGHTS } from "./performance";
+import { assessPerformance, missingPerformanceData, PROFILE_WEIGHTS, rankReplacementPriority } from "./performance";
 
 const pcs = pcsData as PcRecord[];
 const pc = (overrides: Partial<PcRecord> = {}): PcRecord => ({
@@ -10,6 +10,23 @@ const pc = (overrides: Partial<PcRecord> = {}): PcRecord => ({
 });
 
 describe("Performance PC", () => {
+  it("seleziona i sei PC meno adatti al profilo, esclude i non valutabili e ordina le parità per assegnatario", () => {
+    const candidates = [
+      pc({ id: 101, assegnatario: "Quarantotto", ram: "48 GB" }),
+      pc({ id: 102, assegnatario: "Zeno", ram: "8 GB" }),
+      pc({ id: 103, assegnatario: "Bassa", ram: "4 GB" }),
+      pc({ id: 104, assegnatario: "Invalido", ram: "" }),
+      pc({ id: 105, assegnatario: "Trentadue", ram: "32 GB" }),
+      pc({ id: 106, assegnatario: "Alberto", ram: "8 GB" }),
+      pc({ id: 107, assegnatario: "Sedici", ram: "16 GB" }),
+      pc({ id: 108, assegnatario: "Dodici", ram: "12 GB" }),
+    ];
+
+    expect(rankReplacementPriority(candidates).map((item) => item.assegnatario)).toEqual([
+      "Bassa", "Alberto", "Zeno", "Dodici", "Sedici", "Trentadue",
+    ]);
+  });
+
   it("usa esattamente i pesi concordati e la media geometrica rinormalizzata", () => {
     expect(PROFILE_WEIGHTS).toEqual({
       Ufficio: { singleCore: .4, multiCore: .15, gpu: .05, ram: .25, storage: .15, graphicsMemory: 0 },

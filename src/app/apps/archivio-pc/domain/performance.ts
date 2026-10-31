@@ -159,3 +159,13 @@ export function assessPerformance(pc: PcRecord): PerformanceAssessment {
     components: hardware.components, scoresByProfile, recommendation, recommendationProvisional: confidence === "Bassa",
     osSupport, missingData: missingData(pc, hardware), storageWarning };
 }
+
+export function rankReplacementPriority(pcs: PcRecord[], limit = 6): PcRecord[] {
+  return pcs
+    .map((pc) => ({ pc, score: assessPerformance(pc).score }))
+    .filter((item): item is { pc: PcRecord; score: number } => item.score !== null)
+    .sort((left, right) => left.score - right.score
+      || left.pc.assegnatario.localeCompare(right.pc.assegnatario, "it", { sensitivity: "base" }))
+    .slice(0, limit)
+    .map(({ pc }) => pc);
+}

@@ -5,7 +5,7 @@ import type { ImageProps } from "next/image";
 import pcsData from "./data/pcs.json";
 import type { PcRecord } from "./domain/archive";
 import { assessPerformance } from "./domain/performance";
-import { ArchivioPc, PerformanceDetail, PerformanceSummary, RamValue, splitRam } from "./archive-pc";
+import { ArchiveModeToggle, ArchivioPc, PerformanceDetail, PerformanceSummary, RamValue, splitRam } from "./archive-pc";
 
 const gaia = pcsData.find((pc) => pc.id === 35) as PcRecord;
 
@@ -50,6 +50,16 @@ describe("Valutazione prestazionale nell'interfaccia", () => {
 });
 
 describe("Card per reparto", () => {
+  it("sostituisce i filtri iniziali con il solo comando di priorità", () => {
+    const html = renderToStaticMarkup(<ArchivioPc pcs={[gaia, pcsData[0], pcsData[3]] as PcRecord[]} />);
+
+    expect(html).toContain("Da sostituire prima");
+    expect(html).not.toContain('type="search"');
+    expect(html).not.toContain("<select");
+    expect(html).not.toContain("Cerca nell’archivio");
+    expect(renderToStaticMarkup(<ArchiveModeToggle priorityOnly onToggle={() => undefined} />)).toContain("Mostra tutti");
+  });
+
   it("mostra solo la capacità RAM nella card e mantiene la velocità nel dettaglio", () => {
     const compact = renderToStaticMarkup(<RamValue value="32 GB (2667 MT/s)" compact />);
     const detailed = renderToStaticMarkup(<RamValue value="32 GB (2667 MT/s)" />);

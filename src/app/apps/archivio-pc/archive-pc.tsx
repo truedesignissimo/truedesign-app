@@ -6,18 +6,13 @@ import logo from "./assets/logo_true.svg";
 import styles from "./archive-pc.module.css";
 import { CpuBrand } from "./cpu-brand";
 import {
-  filterPcs,
   groupPcsByArea,
   summarizePcs,
-  uniqueValues,
-  type PcFilters,
   type PcRecord,
-  type PcSort,
 } from "./domain/archive";
 import { pcImages } from "./image-map";
-import { assessPerformance, PROFILE_WEIGHTS, type PerformanceAssessment, type PerformanceComponents, type PerformanceProfile } from "./domain/performance";
+import { assessPerformance, PROFILE_WEIGHTS, rankReplacementPriority, type PerformanceAssessment, type PerformanceComponents, type PerformanceProfile } from "./domain/performance";
 
-const EMPTY_FILTERS: PcFilters = { query: "", area: "", type: "", profile: "", sort: "assignee" };
 const PROFILES = Object.keys(PROFILE_WEIGHTS) as PerformanceProfile[];
 const COMPONENT_LABELS: Array<[keyof PerformanceComponents, string]> = [
   ["singleCore", "CPU single-core"], ["multiCore", "CPU multi-core"], ["gpu", "GPU"],
@@ -98,21 +93,25 @@ export function PerformanceDetail({ assessment }: { assessment: PerformanceAsses
   );
 }
 
-function SearchIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="11" cy="11" r="6.5" />
-      <path d="m16 16 4 4" />
-    </svg>
-  );
-}
-
 function PrintIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2" />
       <path d="M7 14h10v7H7z" />
     </svg>
+  );
+}
+
+export function ArchiveModeToggle({ priorityOnly, onToggle }: { priorityOnly: boolean; onToggle: () => void }) {
+  return (
+    <button
+      type="button"
+      className={`${styles.priorityButton} ${priorityOnly ? styles.priorityButtonActive : ""}`}
+      aria-pressed={priorityOnly}
+      onClick={onToggle}
+    >
+      {priorityOnly ? "Mostra tutti" : "Da sostituire prima"}
+    </button>
   );
 }
 
@@ -181,15 +180,14 @@ function PcVisual({ pc, priority = false }: { pc: PcRecord; priority?: boolean }
 }
 
 export function ArchivioPc({ pcs }: { pcs: PcRecord[] }) {
-  const [filters, setFilters] = useState<PcFilters>(EMPTY_FILTERS);
+  const [priorityOnly, setPriorityOnly] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [activePc, setActivePc] = useState<PcRecord | null>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   const summary = useMemo(() => summarizePcs(pcs), [pcs]);
-  const areas = useMemo(() => uniqueValues(pcs, "area"), [pcs]);
-  const types = useMemo(() => uniqueValues(pcs, "tipologia"), [pcs]);
-  const visiblePcs = useMemo(() => filterPcs(pcs, filters), [pcs, filters]);
+  const priorityPcs = useMemo(() => rankReplacementPriority(pcs), [pcs]);
+  const visiblePcs = priorityOnly ? priorityPcs : pcs;
   const groups = useMemo(() => groupPcsByArea(visiblePcs), [visiblePcs]);
   const selectedPcs = useMemo(() => pcs.filter((pc) => selectedIds.has(pc.id)), [pcs, selectedIds]);
   const assessments = useMemo(() => new Map(pcs.map((pc) => [pc.id, assessPerformance(pc)])), [pcs]);
@@ -200,10 +198,6 @@ export function ArchivioPc({ pcs }: { pcs: PcRecord[] }) {
     if (activePc && !dialog.open) dialog.showModal();
     if (!activePc && dialog.open) dialog.close();
   }, [activePc]);
-
-  const updateFilter = <Key extends keyof PcFilters>(key: Key, value: PcFilters[Key]) => {
-    setFilters((current) => ({ ...current, [key]: value }));
-  };
 
   const toggleSelection = (id: number) => {
     setSelectedIds((current) => {
@@ -244,52 +238,11 @@ export function ArchivioPc({ pcs }: { pcs: PcRecord[] }) {
         <div><strong>{summary.windows11}</strong><span>Windows 11</span></div>
       </section>
 
-      <section className={styles.controls} aria-label="Ricerca e filtri">
-        <label className={styles.searchField}>
-          <span className={styles.srOnly}>Cerca nell’archivio</span>
-          <SearchIcon />
-          <input
-            type="search"
-            value={filters.query}
-            onChange={(event) => updateFilter("query", event.target.value)}
-            placeholder="Cerca persona, modello o specifica"
-          />
-        </label>
-        <label>
-          <span className={styles.srOnly}>Filtra per area</span>
-          <select value={filters.area} onChange={(event) => updateFilter("area", event.target.value)}>
-            <option value="">Tutte le aree</option>
-            {areas.map((area) => <option key={area}>{area}</option>)}
-          </select>
-        </label>
-        <label>
-          <span className={styles.srOnly}>Filtra per tipologia</span>
-          <select value={filters.type} onChange={(event) => updateFilter("type", event.target.value)}>
-            <option value="">Tutte le tipologie</option>
-            {types.map((type) => <option key={type}>{type}</option>)}
-          </select>
-        </label>
-        <label>
-          <span className={styles.srOnly}>Filtra per profilo</span>
-          <select value={filters.profile} onChange={(event) => updateFilter("profile", event.target.value as PcFilters["profile"])}>
-            <option value="">Tutti i profili</option>
-            {PROFILES.map((profile) => <option key={profile}>{profile}</option>)}
-          </select>
-        </label>
-        <label>
-          <span className={styles.srOnly}>Ordina archivio</span>
-          <select value={filters.sort} onChange={(event) => updateFilter("sort", event.target.value as PcSort)}>
-            <option value="assignee">Ordina per assegnatario</option>
-            <option value="area">Ordina per area</option>
-            <option value="model">Ordina per modello</option>
-            <option value="updated">Più recenti</option>
-            <option value="performance">Performance crescente</option>
-          </select>
-        </label>
-      </section>
-
       <div className={styles.resultsBar}>
-        <p aria-live="polite">{visiblePcs.length} {visiblePcs.length === 1 ? "risultato" : "risultati"}</p>
+        <div className={styles.viewControl}>
+          <ArchiveModeToggle priorityOnly={priorityOnly} onToggle={() => setPriorityOnly((current) => !current)} />
+          <p aria-live="polite">{priorityOnly ? `${visiblePcs.length} priorità su ${pcs.length} PC` : `${pcs.length} PC censiti`}</p>
+        </div>
         <button
           type="button"
           className={styles.printButton}
@@ -344,9 +297,8 @@ export function ArchivioPc({ pcs }: { pcs: PcRecord[] }) {
         </section>
       ) : (
         <section className={styles.emptyState}>
-          <p className={styles.eyebrow}>Nessuna corrispondenza</p>
-          <h2>Prova una ricerca più ampia.</h2>
-          <button type="button" onClick={() => setFilters(EMPTY_FILTERS)}>Azzera i filtri</button>
+          <p className={styles.eyebrow}>Nessun dato disponibile</p>
+          <h2>{priorityOnly ? "Completa i dati prestazionali per creare la priorità." : "L’archivio è vuoto."}</h2>
         </section>
       )}
 

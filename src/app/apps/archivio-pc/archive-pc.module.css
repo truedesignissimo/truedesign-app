@@ -114,59 +114,30 @@
 .stats strong { font-size: 30px; font-weight: 500; letter-spacing: -0.04em; }
 .stats span { align-self: end; color: #d8e0e8; font-size: 13px; }
 
-.controls {
-  display: grid;
-  grid-template-columns: minmax(220px, 1.5fr) repeat(4, minmax(140px, 0.7fr));
-  gap: 10px;
-  margin-top: 32px;
-  padding: 20px;
-  background: var(--fog);
-  border: 1px solid var(--graphite);
-}
-
-.controls label { display: block; }
-.controls input, .controls select {
-  width: 100%;
-  height: 52px;
-  border: 1px solid var(--graphite);
-  border-radius: 0;
-  color: var(--ink);
-  background: #fff;
-  font: inherit;
-  font-size: 14px;
-  outline: none;
-  transition: border-color 180ms ease, background 180ms ease;
-}
-
-.controls input { padding: 0 16px 0 48px; }
-.controls select { padding: 0 40px 0 16px; }
-.controls input:hover, .controls select:hover { background: #f7f9fb; }
-.controls input:focus-visible, .controls select:focus-visible { border-color: var(--cobalt); box-shadow: inset 0 -4px 0 var(--cobalt); }
-
-.searchField { position: relative; }
-.searchField svg { position: absolute; z-index: 1; top: 16px; left: 17px; width: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; }
-
-.resultsBar { display: flex; min-height: 60px; align-items: center; justify-content: space-between; gap: 16px; }
+.resultsBar { display: flex; min-height: 60px; align-items: center; justify-content: space-between; gap: 16px; padding-top: 32px; }
 .resultsBar p { margin: 0; color: var(--muted); font-size: 13px; }
+.viewControl { display: flex; align-items: center; gap: 16px; }
 
-.printButton, .emptyState button {
+.priorityButton, .printButton {
   min-height: 44px;
-  border: 0;
+  border: 1px solid var(--graphite);
   border-radius: 0;
   padding: 0 20px;
-  color: #f8f6f0;
-  background: var(--graphite);
   font: inherit;
   font-size: 13px;
   cursor: pointer;
-  transition: opacity 180ms ease, transform 180ms ease;
+  transition: color 180ms ease, background 180ms ease, opacity 180ms ease, transform 180ms ease;
 }
 
+.priorityButton { color: var(--graphite); background: #fff; }
+.priorityButtonActive { border-color: var(--cobalt); color: #fff; background: var(--cobalt); }
+.priorityButton:hover { color: #fff; background: var(--cobalt); }
+.printButton { border-color: var(--graphite); color: #f8f6f0; background: var(--graphite); }
 .printButton { display: inline-flex; align-items: center; gap: 9px; }
 .printButton svg { width: 17px; fill: none; stroke: currentColor; stroke-width: 1.6; }
-.printButton:hover:not(:disabled), .emptyState button:hover { transform: translateY(-1px); }
+.priorityButton:hover, .printButton:hover:not(:disabled) { transform: translateY(-1px); }
 .printButton:disabled { opacity: 0.34; cursor: not-allowed; }
-.printButton:focus-visible, .emptyState button:focus-visible, .selectButton:focus-visible, .cardOpen:focus-visible, .closeButton:focus-visible, .brand:focus-visible, .powerBadge:focus-visible { outline: 3px solid var(--cobalt); outline-offset: 3px; }
+.priorityButton:focus-visible, .printButton:focus-visible, .selectButton:focus-visible, .cardOpen:focus-visible, .closeButton:focus-visible, .brand:focus-visible, .powerBadge:focus-visible { outline: 3px solid var(--cobalt); outline-offset: 3px; }
 
 .departments { display: grid; gap: 80px; padding-top: 32px; }
 .department { min-width: 0; }
@@ -299,11 +270,6 @@
   .dialogPanel { grid-template-columns: 0.75fr 1.25fr; }
 }
 
-@media (min-width: 1051px) and (max-width: 1250px) {
-  .controls { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .searchField { grid-column: 1 / -1; }
-}
-
 @media (max-width: 720px) {
   .page { padding: 0 16px 64px; }
   .header { min-height: 72px; }
@@ -316,9 +282,9 @@
   .stats > div + div { padding-left: 16px; }
   .stats > div:nth-child(3) { padding-left: 0; border-left: 0; border-top: 1px solid var(--line); }
   .stats > div:nth-child(4) { border-top: 1px solid var(--line); }
-  .controls { grid-template-columns: 1fr; padding-top: 28px; }
-  .searchField { grid-column: auto; }
   .resultsBar { align-items: flex-start; flex-direction: column; padding: 12px 0 20px; }
+  .viewControl { width: 100%; align-items: flex-start; flex-direction: column; gap: 8px; }
+  .priorityButton { width: 100%; }
   .printButton { width: 100%; justify-content: center; }
   .grid { grid-template-columns: 1fr; }
   .card h3 { font-size: 26px; }
@@ -335,7 +301,7 @@
 
 @media print {
   .page { padding: 0; background: white; }
-  .header, .hero, .stats, .controls, .resultsBar, .departments, .emptyState, .dialog { display: none !important; }
+  .header, .hero, .stats, .resultsBar, .departments, .emptyState, .dialog { display: none !important; }
   .printSheet { display: block; color: #111; font-family: "Suisse Archive", Arial, sans-serif; }
   .printSheet header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-bottom: 14px; border-bottom: 1px solid #999; }
   .printSheet header img { width: 90px; height: auto; }
