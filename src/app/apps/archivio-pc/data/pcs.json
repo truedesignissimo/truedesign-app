@@ -789,7 +789,7 @@
   "aggiornata": "28/10/2026",
   "note": "Nome dispositivo: NbUfficioT2.",
   "area": "Ufficio Tecnico",
-  "foto": ""
+  "foto": "lenovo_p16s_gen3.png"
  },
  {
   "id": 34,
@@ -813,7 +813,7 @@
   "aggiornata": "29/10/2026",
   "note": "",
   "area": "",
-  "foto": ""
+  "foto": "hp_probook455.png"
  },
  {
   "id": 35,
@@ -837,6 +837,6 @@
   "aggiornata": "29/10/2026",
   "note": "Spazio di archiviazione quasi esaurito: 18 GB liberi su 238 GB.",
   "area": "",
-  "foto": ""
+  "foto": "hp_630g10.jpg"
  }
 ]

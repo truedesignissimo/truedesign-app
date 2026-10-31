@@ -5,6 +5,7 @@ import type { ImageProps } from "next/image";
 import pcsData from "./data/pcs.json";
 import type { PcRecord } from "./domain/archive";
 import { assessPerformance } from "./domain/performance";
+import { pcImages } from "./image-map";
 import { ArchiveModeToggle, ArchivioPc, isUnverified, PerformanceDetail, PerformanceSummary, RamValue, splitRam } from "./archive-pc";
 
 const gaia = pcsData.find((pc) => pc.id === 35) as PcRecord;
@@ -50,6 +51,11 @@ describe("Valutazione prestazionale nell'interfaccia", () => {
 });
 
 describe("Card per reparto", () => {
+  it("assegna a ogni PC una foto presente nel catalogo immagini", () => {
+    expect(pcsData.filter((pc) => !pc.foto).map((pc) => pc.assegnatario)).toEqual([]);
+    expect(pcsData.filter((pc) => pc.foto && !pcImages[pc.foto]).map((pc) => pc.foto)).toEqual([]);
+  });
+
   it("segnala soltanto le specifiche esplicitamente da verificare", () => {
     expect(isUnverified("GPU dedicata 16 GB (modello da verificare)")).toBe(true);
     expect(isUnverified("DATI DA VERIFICARE")).toBe(true);
