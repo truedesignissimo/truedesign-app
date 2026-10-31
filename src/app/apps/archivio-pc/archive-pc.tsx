@@ -127,6 +127,23 @@ function HardwareIcon({ kind }: { kind: "cpu" | "ram" | "gpu" | "screen" }) {
   );
 }
 
+export function splitRam(value: string) {
+  const match = value.trim().match(/^(\d+(?:[.,]\d+)?\s*GB)\s*(.*)$/i);
+  return match
+    ? { capacity: match[1], details: match[2] }
+    : { capacity: value.trim(), details: "" };
+}
+
+export function RamValue({ value, compact = false }: { value: string; compact?: boolean }) {
+  const ram = splitRam(value);
+  return (
+    <span className={styles.ramValue}>
+      <span>{ram.capacity}</span>
+      {!compact && ram.details && <small className={styles.ramSpeed}>{ram.details}</small>}
+    </span>
+  );
+}
+
 function HardwareSpecs({ pc }: { pc: PcRecord }) {
   return (
     <dl className={styles.quickSpecs}>
@@ -134,7 +151,7 @@ function HardwareSpecs({ pc }: { pc: PcRecord }) {
         <dt><HardwareIcon kind="cpu" /><span className={styles.srOnly}>CPU</span></dt>
         <dd><CpuBrand processor={pc.processore} /><span>{pc.processore}</span></dd>
       </div>}
-      {pc.ram && <div className={styles.ramSpec}><dt><HardwareIcon kind="ram" />RAM</dt><dd>{pc.ram}</dd></div>}
+      {pc.ram && <div className={styles.ramSpec}><dt><HardwareIcon kind="ram" />RAM</dt><dd><RamValue value={pc.ram} compact /></dd></div>}
       {pc.gpu && <div><dt><HardwareIcon kind="gpu" />GPU</dt><dd>{pc.gpu}</dd></div>}
       {pc.schermo && <div><dt><HardwareIcon kind="screen" />Schermo</dt><dd>{pc.schermo}</dd></div>}
     </dl>
@@ -355,7 +372,7 @@ export function ArchivioPc({ pcs }: { pcs: PcRecord[] }) {
                 {DETAIL_FIELDS.map(([key, label]) => {
                   const value = activePc[key];
                   if (!value || key === "area" || key === "marca" || key === "modello") return null;
-                  return <div key={key}><dt>{label}</dt><dd>{value}</dd></div>;
+                  return <div key={key}><dt>{label}</dt><dd>{key === "ram" ? <RamValue value={String(value)} /> : value}</dd></div>;
                 })}
               </dl>
             </div>

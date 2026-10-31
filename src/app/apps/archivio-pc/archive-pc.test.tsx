@@ -5,7 +5,7 @@ import type { ImageProps } from "next/image";
 import pcsData from "./data/pcs.json";
 import type { PcRecord } from "./domain/archive";
 import { assessPerformance } from "./domain/performance";
-import { ArchivioPc, PerformanceDetail, PerformanceSummary } from "./archive-pc";
+import { ArchivioPc, PerformanceDetail, PerformanceSummary, RamValue, splitRam } from "./archive-pc";
 
 const gaia = pcsData.find((pc) => pc.id === 35) as PcRecord;
 
@@ -50,6 +50,17 @@ describe("Valutazione prestazionale nell'interfaccia", () => {
 });
 
 describe("Card per reparto", () => {
+  it("mostra solo la capacità RAM nella card e mantiene la velocità nel dettaglio", () => {
+    const compact = renderToStaticMarkup(<RamValue value="32 GB (2667 MT/s)" compact />);
+    const detailed = renderToStaticMarkup(<RamValue value="32 GB (2667 MT/s)" />);
+
+    expect(compact).toContain("32 GB");
+    expect(compact).not.toContain("2667 MT/s");
+    expect(detailed).toContain("32 GB");
+    expect(detailed).toContain("2667 MT/s");
+    expect(detailed).toContain("ramSpeed");
+  });
+
   it("renderizza sezioni ordinate con conteggio dei soli PC ricevuti", () => {
     const html = renderToStaticMarkup(<ArchivioPc pcs={[gaia, pcsData[0], pcsData[3]] as PcRecord[]} />);
     const headings = [...html.matchAll(/<h2[^>]*>(.*?)<\/h2>/g)].map((match) => match[1]);
@@ -72,7 +83,8 @@ describe("Card per reparto", () => {
     expect(card).toContain(`aria-label="${family === "CPU" ? "Processore" : family === "M4" ? "Apple M4" : family === "Ultra" ? "Intel Core Ultra" : family === "Xeon" ? "Intel Xeon" : family === "Ryzen" ? "AMD Ryzen" : `Intel Core ${family}`}"`);
     expect(card).toContain(processore);
     expect(card).toContain(">RAM</dt>");
-    expect(card).toContain(pc.ram);
+    expect(card).toContain(splitRam(pc.ram).capacity);
+    expect(card).not.toContain(splitRam(pc.ram).details);
     expect(card).toContain(">GPU</dt>");
     expect(card).toContain(pc.gpu);
     expect(card).toContain(">Schermo</dt>");
