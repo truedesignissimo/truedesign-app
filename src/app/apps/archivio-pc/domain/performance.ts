@@ -26,7 +26,7 @@ export const PROFILE_WEIGHTS = {
 } as const satisfies Record<PerformanceProfile, Record<keyof PerformanceComponents, number>>;
 
 /**
- * Snapshot v1, rilevato il 29/10/2026. Riferimenti CPU PassMark PerformanceTest V10:
+ * Snapshot v1, rilevato il 29/10/2026 e integrato il 03/11/2026. Riferimenti CPU PassMark PerformanceTest V10:
  * https://www.cpubenchmark.net/cpu-list/ (CPU Mark)
  * https://www.cpubenchmark.net/singleThread.html (Single Thread Rating).
  * Sono riferimenti di modello, non misure effettuate su questi PC. I valori sono
@@ -47,6 +47,8 @@ const CPU_BENCHMARKS: Record<string, readonly [number, number]> = {
   "i5-12400": [3466, 18829], "i5-1135g7": [2592, 9285], "i7-1355u": [3360, 13817],
   "ultra 9 285": [4910, 57908], "ryzen 5 7530u": [2966, 14847],
   "apple m2": [3880, 15644], "apple m4": [4491, 23567],
+  "i5-1035g1": [2162, 7106], "i5-14500": [3924, 30461], "i7-13700": [4091, 35840],
+  "ultra 7 256v": [4022, 19458], "ultra 7 258v": [4009, 18886], "ultra 7 265": [4619, 48390],
 };
 
 /** G3D Mark, stessa data/versione del censimento, fonte primaria:

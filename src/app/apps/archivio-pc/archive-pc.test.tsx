@@ -76,6 +76,35 @@ describe("Valutazione prestazionale nell'interfaccia", () => {
 });
 
 describe("Card per reparto", () => {
+  it("mantiene un inventario univoco con le assegnazioni confermate", () => {
+    expect(new Set(pcsData.map((pc) => pc.id)).size).toBe(pcsData.length);
+    expect(pcsData).toHaveLength(48);
+
+    const expected = [
+      ["NbValentinaM", "Valentina Marchioro", "Commerciale", "Ufficio"],
+      ["NbNicole", "Nicole Salnitri", "Commerciale", "Ufficio"],
+      ["NbSolange", "Solange Pandolfini", "Commerciale", "Ufficio"],
+      ["NbLucaC", "Luca Cambi", "Commerciale", "Ufficio"],
+      ["NbMarcoB", "Marco Beltramini", "Commerciale", "Ufficio"],
+      ["NbPozzonovo", "Notebook Pozzonovo", "Produzione", "Ufficio"],
+      ["PcProduzione", "PC Produzione", "Produzione", "Ufficio"],
+      ["PcFalegnameria", "PC Falegnameria", "Produzione", "Ufficio"],
+      ["PcTommasoV", "Tommaso Vanin", "Produzione", "Render"],
+      ["PcStefanoB", "Stefano Bissacco", "Produzione", "Render"],
+    ];
+    for (const [device, assignee, area, profile] of expected) {
+      expect(pcsData).toContainEqual(expect.objectContaining({ nome_dispositivo: device, assegnatario: assignee, area, profilo: profile }));
+    }
+  });
+
+  it("applica le corrispondenze nominate senza duplicare i computer", () => {
+    expect(pcsData).toContainEqual(expect.objectContaining({ nome_dispositivo: "PcQualita", assegnatario: "Hillary Bellin", numero_serie: "8CC4120D22" }));
+    expect(pcsData).toContainEqual(expect.objectContaining({ nome_dispositivo: "PcMelaniaT", assegnatario: "Marco Russo", numero_serie: "SID3002177" }));
+    expect(pcsData).toContainEqual(expect.objectContaining({ nome_dispositivo: "MacBook-Air-2", assegnatario: "Mac Alessandro Maniero" }));
+    expect(pcsData).toContainEqual(expect.objectContaining({ nome_dispositivo: "NbUfficioT2", assegnatario: "Notebook Ufficio Tecnico", numero_serie: "PF5D4R3F" }));
+    expect(pcsData).toContainEqual(expect.objectContaining({ nome_dispositivo: "NbSofiaS", assegnatario: "Sofia S.", profilo: "Ufficio" }));
+  });
+
   it("assegna a ogni PC una foto presente nel catalogo immagini", () => {
     expect(pcsData.filter((pc) => !pc.foto).map((pc) => pc.assegnatario)).toEqual([]);
     expect(pcsData.filter((pc) => pc.foto && !pcImages[pc.foto]).map((pc) => pc.foto)).toEqual([]);

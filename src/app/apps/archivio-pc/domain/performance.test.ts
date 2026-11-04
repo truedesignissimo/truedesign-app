@@ -44,6 +44,20 @@ describe("Performance PC", () => {
   });
 
   it.each([
+    ["Intel Core i5-1035G1", 2162, 7106],
+    ["Intel Core i5-14500", 3924, 30461],
+    ["Intel Core i7-13700", 4091, 35840],
+    ["Intel Core Ultra 7 256V", 4022, 19458],
+    ["Intel Core Ultra 7 258V", 4009, 18886],
+    ["Intel Core Ultra 7 265", 4619, 48390],
+  ])("censisce il benchmark del nuovo processore %s", (processore, single, multi) => {
+    const result = assessPerformance(pc({ processore }));
+    expect(result.components.singleCore).toBeCloseTo(Math.min(100, Math.max(0, (single - 1500) / 3500 * 100)));
+    expect(result.components.multiCore).toBeCloseTo(Math.min(100, Math.max(0, (multi - 5000) / 45000 * 100)));
+    expect(result.missingData).not.toContain("Modello CPU e relativi benchmark");
+  });
+
+  it.each([
     ["4 GB", 10, "Insufficiente"], ["12 GB", 48, "Limitato"], ["16 GB", 60, "Adeguato"],
     ["32 GB", 80, "Forte"], ["48 GB", 90, "Eccellente"], ["128 GB", 100, "Eccellente"],
   ])("interpola RAM %s e classifica la fascia", (ram, score, band) => {

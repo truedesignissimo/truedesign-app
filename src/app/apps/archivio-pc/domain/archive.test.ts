@@ -12,7 +12,7 @@ describe("Archivio PC", () => {
     expect(groups.map((group) => group.area)).toEqual([
       "Ufficio Tecnico", "Commerciale", "Marketing", "Logistica", "Amministrazione", "Produzione", "Da assegnare",
     ]);
-    expect(groups.at(-1)?.pcs.map((pc) => pc.id)).toEqual([34, 35]);
+    expect(groups.at(-1)?.pcs.map((pc) => pc.id)).toEqual([34, 35, 46, 47, 48]);
     expect(groups.flatMap((group) => group.pcs)).toHaveLength(pcs.length);
     expect(input).toEqual(pcs);
   });
@@ -43,25 +43,25 @@ describe("Archivio PC", () => {
     expect(result.indexOf(pcs[0])).toBeLessThan(result.indexOf(tied));
     expect(input[0]).toBe(unscored);
   });
-  it("contiene 35 record e non duplica il notebook del cantiere", () => {
-    expect(pcs).toHaveLength(35);
+  it("contiene 48 record e non duplica il notebook del cantiere", () => {
+    expect(pcs).toHaveLength(48);
     expect(pcs.filter((pc) => pc.processore.includes("i7-1255U"))).toHaveLength(1);
     expect(pcs.find((pc) => pc.id === 16)?.assegnatario).toBe("Notebook Cantiere");
     expect(pcs.find((pc) => pc.id === 33)).toMatchObject({
-      assegnatario: "NbUfficioT2",
+      assegnatario: "Notebook Ufficio Tecnico",
       modello: "ThinkPad P16s Gen 3",
-      numero_serie: "21KS0004IX",
+      numero_serie: "PF5D4R3F",
       area: "Ufficio Tecnico",
     });
   });
 
-  it("censisce i due ex notebook senza inventare area, seriale o dati hardware", () => {
-    expect(pcs.find((pc) => pc.id === 34)).toMatchObject({ assegnatario: "Ex Notebook Cristina", nome_dispositivo: "NbCristinaC", profilo: "Ufficio", area: "", numero_serie: "", processore: "AMD Ryzen 5 7530U", ram: "16 GB", archiviazione: "477 GB con 157 GB usati", data_installazione_os: "05/12/2025" });
+  it("aggiorna il notebook assegnato a Sofia e conserva l’ex notebook Gaia", () => {
+    expect(pcs.find((pc) => pc.id === 34)).toMatchObject({ assegnatario: "Sofia S.", nome_dispositivo: "NbSofiaS", profilo: "Ufficio", area: "", numero_serie: "5CD5134675", processore: "AMD Ryzen 5 7530U", ram: "16 GB", archiviazione: "477 GB con 157 GB usati", data_installazione_os: "05/12/2025" });
     expect(pcs.find((pc) => pc.id === 35)).toMatchObject({ assegnatario: "Ex Notebook Gaia", nome_dispositivo: "NbGaiaB", profilo: "Ufficio", area: "", numero_serie: "5CD337LZ66", processore: "Intel Core i5-1335U", ram: "8 GB", archiviazione: "238 GB con 220 GB usati", data_installazione_os: "18/02/2025" });
     expect(pcs.every((pc) => ["Ufficio", "Tecnico", "Grafica", "Render"].includes(pc.profilo))).toBe(true);
     expect(pcs.every((pc) => typeof pc.nome_dispositivo === "string")).toBe(true);
     expect(pcs.filter((pc) => pc.profilo === "Grafica").map((pc) => pc.id)).toEqual([1, 3]);
-    expect(pcs.filter((pc) => pc.profilo === "Render").map((pc) => pc.id)).toEqual([4, 6, 7, 11, 14, 32]);
+    expect(pcs.filter((pc) => pc.profilo === "Render").map((pc) => pc.id)).toEqual([4, 6, 7, 11, 14, 32, 44, 45]);
     expect(pcs.find((pc) => pc.id === 16)?.profilo).toBe("Ufficio");
     expect(pcs.find((pc) => pc.id === 33)?.profilo).toBe("Tecnico");
   });
@@ -72,7 +72,7 @@ describe("Archivio PC", () => {
 
   it("cerca senza distinguere maiuscole e accenti in tutti i campi principali", () => {
     const result = filterPcs(pcs, {
-      query: "Uffício Técnico 21ks0004ix",
+      query: "Uffício Técnico pf5d4r3f",
       profile: "",
       area: "",
       type: "",
@@ -102,8 +102,8 @@ describe("Archivio PC", () => {
     const result = filterPcs(pcs, { query: "", area: "", type: "", profile: "", sort: "updated" });
     const summary = summarizePcs(pcs);
 
-    expect(result[0].aggiornata).toBe("29/10/2026");
-    expect(summary.total).toBe(35);
+    expect(result[0].aggiornata).toBe("03/11/2026");
+    expect(summary.total).toBe(48);
     expect(summary.notebooks).toBe(pcs.filter((pc) => pc.tipologia === "Notebook").length);
     expect(summary.areas).toBe(new Set(pcs.map((pc) => pc.area).filter(Boolean)).size);
     expect(summary.windows11).toBe(pcs.filter((pc) => pc.sistema_operativo.includes("Windows 11")).length);
