@@ -6,7 +6,7 @@ import pcsData from "./data/pcs.json";
 import type { PcRecord } from "./domain/archive";
 import { assessPerformance } from "./domain/performance";
 import { pcImages } from "./image-map";
-import { ArchiveModeToggle, ArchivioPc, isUnverified, PerformanceDetail, PerformanceSummary, RamValue, splitRam } from "./archive-pc";
+import { ArchiveModeToggle, ArchivioPc, isUnverified, PcDetail, PerformanceDetail, PerformanceSummary, RamValue, splitRam } from "./archive-pc";
 
 const gaia = pcsData.find((pc) => pc.id === 35) as PcRecord;
 
@@ -29,16 +29,41 @@ describe("Valutazione prestazionale nell'interfaccia", () => {
     expect(text).not.toMatch(/Profilo|Ufficio|Attendibilità|provvisorio/);
   });
 
-  it("mostra componenti, quattro profili, raccomandazione, warning e dati mancanti senza ripetere l'attendibilità", () => {
+  it("mostra soltanto il profilo assegnato, raccomandazione, warning e dati mancanti senza ripetere l'attendibilità", () => {
     const assessment = assessPerformance(gaia);
     const html = renderToStaticMarkup(<PerformanceDetail assessment={assessment} />);
-    for (const value of ["CPU single-core", "CPU multi-core", "GPU", "RAM", "Archiviazione", "Memoria grafica", "Ufficio", "Tecnico", "Grafica", "Render", assessment.recommendation, assessment.storageWarning!, ...assessment.missingData]) {
+    for (const value of [assessment.profile, assessment.recommendation, assessment.storageWarning!, ...assessment.missingData]) {
       expect(html).toContain(value);
     }
+    for (const profile of ["Ufficio", "Tecnico", "Grafica", "Render"].filter((profile) => profile !== assessment.profile)) {
+      expect(html).not.toContain(`>${profile}<`);
+    }
+    expect(html).not.toContain("Idoneità nei quattro profili");
+    expect(html).not.toContain("CPU single-core");
     expect(html).not.toContain("Attendibilità");
     expect(html).not.toContain("voto provvisorio");
-    expect(html).toContain("Non disponibile");
     expect(html).toContain("Supportato");
+  });
+
+  it("colloca tutti i punteggi dei componenti in fondo alla scheda", () => {
+    const html = renderToStaticMarkup(<PcDetail pc={gaia} assessment={assessPerformance(gaia)} onClose={() => undefined} />);
+    const detailStart = html.indexOf("Valutazione prestazionale");
+    const inventoryStart = html.indexOf("Nome dispositivo", detailStart);
+    const scoresStart = html.indexOf("Punteggi dei componenti", detailStart);
+
+    expect(detailStart).toBeGreaterThan(-1);
+    expect(inventoryStart).toBeGreaterThan(detailStart);
+    expect(scoresStart).toBeGreaterThan(inventoryStart);
+    for (const label of ["CPU single-core", "CPU multi-core", "GPU", "RAM", "Archiviazione", "Memoria grafica / unificata"]) {
+      expect(html.slice(scoresStart)).toContain(label);
+    }
+  });
+
+  it("offre nella scheda singola un download PDF accessibile tramite sola icona", () => {
+    const html = renderToStaticMarkup(<PcDetail pc={gaia} assessment={assessPerformance(gaia)} onClose={() => undefined} />);
+    expect(html).toContain('aria-label="Scarica scheda PDF"');
+    expect(html).toContain('title="Scarica scheda PDF"');
+    expect(html).not.toContain(">Scarica scheda PDF<");
   });
 
   it("distingue un voto non valutabile da un voto zero", () => {

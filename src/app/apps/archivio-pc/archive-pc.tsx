@@ -11,9 +11,8 @@ import {
   type PcRecord,
 } from "./domain/archive";
 import { pcImages } from "./image-map";
-import { assessPerformance, PROFILE_WEIGHTS, rankReplacementPriority, type PerformanceAssessment, type PerformanceComponents, type PerformanceProfile } from "./domain/performance";
+import { assessPerformance, rankReplacementPriority, type PerformanceAssessment, type PerformanceComponents } from "./domain/performance";
 
-const PROFILES = Object.keys(PROFILE_WEIGHTS) as PerformanceProfile[];
 const COMPONENT_LABELS: Array<[keyof PerformanceComponents, string]> = [
   ["singleCore", "CPU single-core"], ["multiCore", "CPU multi-core"], ["gpu", "GPU"],
   ["ram", "RAM"], ["storage", "Archiviazione"], ["graphicsMemory", "Memoria grafica / unificata"],
@@ -66,7 +65,20 @@ export function PerformanceDetail({ assessment }: { assessment: PerformanceAsses
         <p>Sistema operativo: {assessment.osSupport}</p>
       </div>
       {assessment.storageWarning && <p className={styles.storageWarning}>{assessment.storageWarning}</p>}
-      <h4>Componenti · punteggi su 100</h4>
+      <p className={styles.performanceNote}>I dati non disponibili sono esclusi dal voto; possono modificare la valutazione una volta completati.</p>
+      <h4>Dati da completare</h4>
+      {assessment.missingData.length > 0
+        ? <ul className={styles.missingData}>{assessment.missingData.map((item) => <li key={item}>{item}</li>)}</ul>
+        : <p className={styles.performanceNote}>Dati prestazionali completi.</p>}
+    </section>
+  );
+}
+
+export function ComponentScores({ assessment }: { assessment: PerformanceAssessment }) {
+  return (
+    <section className={styles.componentScoreSection} aria-labelledby="component-scores-title">
+      <h3 id="component-scores-title">Punteggi dei componenti</h3>
+      <p>Valori normalizzati su 100, usati per il profilo {assessment.profile}.</p>
       <dl className={styles.componentScores}>
         {COMPONENT_LABELS.map(([key, label]) => (
           <div key={key}>
@@ -75,20 +87,6 @@ export function PerformanceDetail({ assessment }: { assessment: PerformanceAsses
           </div>
         ))}
       </dl>
-      <h4>Idoneità nei quattro profili</h4>
-      <dl className={styles.profileScores}>
-        {PROFILES.map((profile) => (
-          <div key={profile} className={profile === assessment.profile ? styles.assignedProfile : undefined}>
-            <dt>{profile}{profile === assessment.profile && <span>Assegnato</span>}</dt>
-            <dd>{assessment.scoresByProfile[profile] ?? "—"}<small>/100</small></dd>
-          </div>
-        ))}
-      </dl>
-      <p className={styles.performanceNote}>I dati non disponibili sono esclusi dal voto; possono modificare la valutazione una volta completati.</p>
-      <h4>Dati da completare</h4>
-      {assessment.missingData.length > 0
-        ? <ul className={styles.missingData}>{assessment.missingData.map((item) => <li key={item}>{item}</li>)}</ul>
-        : <p className={styles.performanceNote}>Dati prestazionali completi.</p>}
     </section>
   );
 }
@@ -100,6 +98,78 @@ function PrintIcon() {
       <path d="M7 14h10v7H7z" />
     </svg>
   );
+}
+
+function DownloadIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 3v12m0 0 5-5m-5 5-5-5M4 19h16" />
+    </svg>
+  );
+}
+
+async function downloadPcPdf(pc: PcRecord, assessment: PerformanceAssessment) {
+  const { jsPDF } = await import("jspdf");
+  const pdf = new jsPDF({ unit: "mm", format: "a4" });
+  const margin = 18;
+  const width = 210 - margin * 2;
+  let y = 20;
+  const ensureSpace = (height = 10) => {
+    if (y + height <= 278) return;
+    pdf.addPage();
+    y = 20;
+  };
+  const field = (label: string, value: string) => {
+    const lines = pdf.splitTextToSize(value, width - 48);
+    const height = Math.max(7, lines.length * 5);
+    ensureSpace(height);
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(9);
+    pdf.setTextColor(96, 104, 114);
+    pdf.text(label, margin, y);
+    pdf.setTextColor(30, 34, 40);
+    pdf.text(lines, margin + 48, y);
+    y += height;
+  };
+
+  pdf.setTextColor(23, 104, 196);
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(10);
+  pdf.text("TRUE DESIGN · ARCHIVIO PC", margin, y);
+  y += 11;
+  pdf.setTextColor(30, 34, 40);
+  pdf.setFontSize(24);
+  pdf.text(pc.assegnatario, margin, y);
+  y += 8;
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(11);
+  pdf.setTextColor(96, 104, 114);
+  pdf.text(`${pc.area || "Area da assegnare"} · ${pc.marca} ${pc.modello}`, margin, y);
+  y += 14;
+  pdf.setDrawColor(36, 40, 47);
+  pdf.line(margin, y, 210 - margin, y);
+  y += 9;
+  field(`Idoneità ${assessment.profile}`, `${assessment.score ?? "—"}/100 · ${assessment.band}`);
+  field("Indicazione", assessment.recommendation);
+  y += 4;
+  for (const [key, label] of DETAIL_FIELDS) {
+    const value = pc[key];
+    if (value && !["area", "marca", "modello"].includes(key)) field(label, String(value));
+  }
+  y += 5;
+  ensureSpace(18);
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(13);
+  pdf.setTextColor(30, 34, 40);
+  pdf.text("Punteggi dei componenti", margin, y);
+  y += 9;
+  for (const [key, label] of COMPONENT_LABELS) {
+    const score = assessment.components[key];
+    field(label, score === null ? "Non disponibile" : `${Math.round(score)}/100`);
+  }
+
+  const filename = pc.assegnatario.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").toLowerCase();
+  pdf.save(`scheda-pc-${filename || pc.id}.pdf`);
 }
 
 export function ArchiveModeToggle({ priorityOnly, onToggle }: { priorityOnly: boolean; onToggle: () => void }) {
@@ -199,6 +269,40 @@ function PcVisual({ pc, priority = false }: { pc: PcRecord; priority?: boolean }
   );
 }
 
+export function PcDetail({ pc, assessment, onClose }: { pc: PcRecord; assessment: PerformanceAssessment; onClose: () => void }) {
+  return (
+    <div className={styles.dialogPanel}>
+      <div className={styles.dialogActions}>
+        <button
+          type="button"
+          className={styles.pdfButton}
+          onClick={() => void downloadPcPdf(pc, assessment)}
+          aria-label="Scarica scheda PDF"
+          title="Scarica scheda PDF"
+        >
+          <DownloadIcon />
+        </button>
+        <button type="button" className={styles.closeButton} onClick={onClose} aria-label="Chiudi scheda">×</button>
+      </div>
+      <div className={styles.dialogVisual}><PcVisual pc={pc} /></div>
+      <div className={styles.dialogContent}>
+        <p className={styles.eyebrow}>{pc.area || "Area da assegnare"}</p>
+        <h2 id="pc-detail-title">{pc.assegnatario}</h2>
+        <p className={styles.dialogModel}>{pc.marca} · {pc.modello}</p>
+        <PerformanceDetail assessment={assessment} />
+        <dl className={styles.detailList}>
+          {DETAIL_FIELDS.map(([key, label]) => {
+            const value = pc[key];
+            if (!value || key === "area" || key === "marca" || key === "modello") return null;
+            return <div key={key}><dt>{label}</dt><dd>{key === "ram" ? <RamValue value={String(value)} /> : value}</dd></div>;
+          })}
+        </dl>
+        <ComponentScores assessment={assessment} />
+      </div>
+    </div>
+  );
+}
+
 export function ArchivioPc({ pcs }: { pcs: PcRecord[] }) {
   const [priorityOnly, setPriorityOnly] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
@@ -217,6 +321,18 @@ export function ArchivioPc({ pcs }: { pcs: PcRecord[] }) {
     if (!dialog) return;
     if (activePc && !dialog.open) dialog.showModal();
     if (!activePc && dialog.open) dialog.close();
+  }, [activePc]);
+
+  useEffect(() => {
+    if (!activePc) return;
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverscroll = document.documentElement.style.overscrollBehavior;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overscrollBehavior = "none";
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overscrollBehavior = previousHtmlOverscroll;
+    };
   }, [activePc]);
 
   const toggleSelection = (id: number) => {
@@ -331,25 +447,7 @@ export function ArchivioPc({ pcs }: { pcs: PcRecord[] }) {
           if (event.target === event.currentTarget) setActivePc(null);
         }}
       >
-        {activePc && (
-          <div className={styles.dialogPanel}>
-            <button type="button" className={styles.closeButton} onClick={() => setActivePc(null)} aria-label="Chiudi scheda">×</button>
-            <div className={styles.dialogVisual}><PcVisual pc={activePc} /></div>
-            <div className={styles.dialogContent}>
-              <p className={styles.eyebrow}>{activePc.area || "Area da assegnare"}</p>
-              <h2 id="pc-detail-title">{activePc.assegnatario}</h2>
-              <p className={styles.dialogModel}>{activePc.marca} · {activePc.modello}</p>
-              <PerformanceDetail assessment={assessments.get(activePc.id)!} />
-              <dl className={styles.detailList}>
-                {DETAIL_FIELDS.map(([key, label]) => {
-                  const value = activePc[key];
-                  if (!value || key === "area" || key === "marca" || key === "modello") return null;
-                  return <div key={key}><dt>{label}</dt><dd>{key === "ram" ? <RamValue value={String(value)} /> : value}</dd></div>;
-                })}
-              </dl>
-            </div>
-          </div>
-        )}
+        {activePc && <PcDetail pc={activePc} assessment={assessments.get(activePc.id)!} onClose={() => setActivePc(null)} />}
       </dialog>
 
       <section className={styles.printSheet} aria-hidden="true">

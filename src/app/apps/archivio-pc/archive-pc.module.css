@@ -219,7 +219,7 @@
 .performanceHeading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .performanceHeading > span { color: var(--accent); font-size: 13px; font-weight: 500; }
 .performanceHeading strong { font-size: 32px; font-weight: 500; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
-.performanceHeading small, .profileScores small { margin-left: 3px; color: var(--muted); font-size: 12px; font-weight: 400; letter-spacing: 0; }
+.performanceHeading small { margin-left: 3px; color: var(--muted); font-size: 12px; font-weight: 400; letter-spacing: 0; }
 .performanceMeta { display: grid; gap: 5px; margin-top: 12px; color: #595c53; font-size: 12px; line-height: 1.45; }
 .performanceMeta > span:first-child { font-weight: 500; }
 .performanceDetail { margin: 0 0 36px; }
@@ -235,27 +235,30 @@
 .componentScores > div { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; border-top: 1px solid var(--line); padding: 10px 0; font-size: 12px; line-height: 1.5; }
 .componentScores dt { color: #595c53; }
 .componentScores dd { flex-shrink: 0; margin: 0; font-weight: 500; font-variant-numeric: tabular-nums; text-align: right; }
-.profileScores { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; }
-.profileScores > div { border: 1px solid var(--line); border-radius: 0; padding: 16px; }
-.profileScores .assignedProfile { border-color: var(--accent); background: var(--surface); }
-.profileScores dt { display: grid; min-height: 37px; gap: 4px; font-size: 13px; }
-.profileScores dt span { color: var(--accent); font-size: 10px; }
-.profileScores dd { margin: 12px 0 0; font-size: 25px; line-height: 1; font-variant-numeric: tabular-nums; }
+.componentScoreSection { margin-top: 44px; padding-top: 24px; border-top: 2px solid var(--graphite); }
+.componentScoreSection h3 { margin: 0; font-size: 20px; font-weight: 500; letter-spacing: -0.025em; }
+.componentScoreSection > p { margin: 8px 0 18px; color: var(--muted); font-size: 12px; line-height: 1.5; }
 .missingData { margin: 0; padding-left: 18px; color: #595c53; font-size: 12px; line-height: 1.6; }
 .missingData li + li { margin-top: 6px; }
 
 .emptyState { display: grid; min-height: 360px; place-content: center; justify-items: center; border-top: 1px solid var(--line); text-align: center; }
 .emptyState h2 { margin: 0 0 28px; font-size: 32px; font-weight: 500; letter-spacing: -0.035em; }
 
-.dialog { width: min(1000px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: hidden; border: 2px solid var(--graphite); border-radius: 0; padding: 0; color: var(--ink); background: var(--paper); box-shadow: 12px 12px 0 var(--cobalt); }
+.dialog { width: min(900px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; border: 1px solid var(--graphite); border-radius: 0; padding: 0; color: var(--ink); background: var(--paper); box-shadow: 6px 6px 0 rgba(23, 104, 196, 0.8); }
 .dialog::backdrop { background: rgba(25, 26, 24, 0.62); }
-.dialogPanel { position: relative; display: grid; grid-template-columns: minmax(300px, 0.8fr) minmax(360px, 1.2fr); max-height: calc(100vh - 32px); }
-.dialogVisual { display: grid; min-height: 620px; place-items: center; padding: 56px; background: var(--graphite); }
+.dialogPanel { position: relative; display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: min(720px, calc(100dvh - 32px)); }
+.dialogActions { position: sticky; z-index: 3; top: 14px; grid-column: 1 / -1; grid-row: 1; display: flex; height: 0; justify-content: flex-end; gap: 8px; padding-right: 14px; pointer-events: none; }
+.dialogActions button { pointer-events: auto; }
+.dialogVisual { grid-column: 1; grid-row: 1; align-self: start; display: grid; width: 184px; height: 184px; margin: 72px 24px 0; place-items: center; border: 1px solid rgba(36, 40, 47, 0.16); padding: 20px; background: #fff; }
 .dialogVisual > img, .dialogVisual > div { width: 100%; height: 100%; object-fit: contain; }
-.dialogContent { overflow-y: auto; padding: clamp(40px, 5vw, 70px); }
+.dialogContent { grid-column: 2; grid-row: 1; min-width: 0; padding: 72px clamp(32px, 5vw, 64px) 64px 40px; }
 .dialogContent h2 { margin: 0; font-size: clamp(38px, 5vw, 64px); font-weight: 500; letter-spacing: -0.05em; line-height: 0.96; }
 .dialogModel { margin: 14px 0 36px; color: var(--muted); }
-.closeButton { position: absolute; z-index: 2; top: 16px; right: 16px; width: 44px; height: 44px; border: 1px solid var(--graphite); border-radius: 0; color: #fff; background: var(--cobalt); font: inherit; font-size: 26px; line-height: 1; cursor: pointer; }
+.closeButton, .pdfButton { display: grid; width: 44px; height: 44px; place-items: center; border: 1px solid var(--graphite); border-radius: 0; color: var(--graphite); background: #fff; font: inherit; line-height: 1; cursor: pointer; }
+.closeButton { font-size: 26px; }
+.pdfButton svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.closeButton:hover, .pdfButton:hover { color: #fff; background: var(--cobalt); }
+.closeButton:focus-visible, .pdfButton:focus-visible { outline: 3px solid var(--cobalt); outline-offset: 2px; }
 .detailList { margin: 0; }
 .detailList div { display: grid; grid-template-columns: minmax(130px, 0.7fr) 1.3fr; gap: 20px; padding: 13px 0; border-top: 1px solid var(--line); font-size: 13px; line-height: 1.45; }
 .detailList dt { color: var(--muted); }
@@ -268,7 +271,6 @@
   .controls { grid-template-columns: 1fr 1fr; }
   .searchField { grid-column: 1 / -1; }
   .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .dialogPanel { grid-template-columns: 0.75fr 1.25fr; }
 }
 
 @media (max-width: 720px) {
@@ -289,10 +291,11 @@
   .printButton { width: 100%; justify-content: center; }
   .grid { grid-template-columns: 1fr; }
   .card h3 { font-size: 26px; }
-  .dialog { max-height: calc(100vh - 16px); }
-  .dialogPanel { display: block; max-height: calc(100vh - 16px); overflow-y: auto; }
-  .dialogVisual { min-height: 280px; height: 34vh; padding: 36px; }
-  .dialogContent { overflow: visible; padding: 36px 24px 48px; }
+  .dialog { max-height: calc(100dvh - 16px); }
+  .dialogPanel { display: block; min-height: 0; }
+  .dialogActions { position: sticky; display: flex; height: 0; padding-right: 8px; }
+  .dialogVisual { width: 168px; height: 168px; margin: 64px 24px 20px; padding: 18px; }
+  .dialogContent { padding: 12px 24px 48px; }
   .detailList div { grid-template-columns: 1fr; gap: 4px; }
 }
 
