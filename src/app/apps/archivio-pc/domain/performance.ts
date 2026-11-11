@@ -1,6 +1,6 @@
 import type { PcRecord } from "./archive";
 
-export type PerformanceProfile = "Ufficio" | "Tecnico" | "Grafica" | "Render";
+export type PerformanceProfile = "Ufficio" | "Tecnico" | "Grafica" | "3D avanzato";
 export type PerformanceComponents = Record<"singleCore" | "multiCore" | "gpu" | "ram" | "storage" | "graphicsMemory", number | null>;
 export type PerformanceAssessment = {
   profile: PerformanceProfile;
@@ -22,7 +22,7 @@ export const PROFILE_WEIGHTS = {
   Ufficio: { singleCore: .4, multiCore: .15, gpu: .05, ram: .25, storage: .15, graphicsMemory: 0 },
   Tecnico: { singleCore: .35, multiCore: .25, gpu: .15, ram: .2, storage: .05, graphicsMemory: 0 },
   Grafica: { singleCore: .2, multiCore: .15, gpu: .25, ram: .25, storage: .05, graphicsMemory: .1 },
-  Render: { singleCore: .1, multiCore: .3, gpu: .3, ram: .15, storage: .05, graphicsMemory: .1 },
+  "3D avanzato": { singleCore: .1, multiCore: .3, gpu: .3, ram: .15, storage: .05, graphicsMemory: .1 },
 } as const satisfies Record<PerformanceProfile, Record<keyof PerformanceComponents, number>>;
 
 /**

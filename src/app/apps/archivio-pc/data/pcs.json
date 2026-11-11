@@ -73,7 +73,7 @@
  },
  {
   "id": 4,
-  "profilo": "Render",
+  "profilo": "3D avanzato",
   "nome_dispositivo": "PcLucaB",
   "assegnatario": "Luca Bonfanti",
   "tipologia": "Desktop",
@@ -121,7 +121,7 @@
  },
  {
   "id": 6,
-  "profilo": "Render",
+  "profilo": "3D avanzato",
   "nome_dispositivo": "PcLucaF",
   "assegnatario": "Luca Favato",
   "tipologia": "Desktop",
@@ -145,7 +145,7 @@
  },
  {
   "id": 7,
-  "profilo": "Render",
+  "profilo": "3D avanzato",
   "nome_dispositivo": "PcWalterM",
   "assegnatario": "Walter Masetto",
   "tipologia": "Workstation",
@@ -217,7 +217,7 @@
  },
  {
   "id": 10,
-  "profilo": "Tecnico",
+  "profilo": "Ufficio",
   "nome_dispositivo": "NbMarta",
   "assegnatario": "Marta Chiapperin",
   "tipologia": "Notebook",
@@ -241,7 +241,7 @@
  },
  {
   "id": 11,
-  "profilo": "Render",
+  "profilo": "3D avanzato",
   "nome_dispositivo": "PcAlessandraMe",
   "assegnatario": "Alessandra Merrina",
   "tipologia": "Desktop",
@@ -313,7 +313,7 @@
  },
  {
   "id": 14,
-  "profilo": "Render",
+  "profilo": "3D avanzato",
   "nome_dispositivo": "PcMartinaC",
   "assegnatario": "Martina Carraro",
   "tipologia": "Workstation",
@@ -745,7 +745,7 @@
  },
  {
   "id": 32,
-  "profilo": "Render",
+  "profilo": "3D avanzato",
   "nome_dispositivo": "PcBeatriceB",
   "assegnatario": "Beatrice B.",
   "tipologia": "Workstation",
@@ -812,7 +812,7 @@
   "data_acquisto": "",
   "aggiornata": "03/11/2026",
   "note": "Precedentemente censito come Ex Notebook Cristina; assegnazione nominativa da completare.",
-  "area": "",
+  "area": "Ufficio Tecnico",
   "foto": "hp_probook455.png"
  },
  {
@@ -1033,7 +1033,7 @@
  },
  {
   "id": 44,
-  "profilo": "Render",
+  "profilo": "3D avanzato",
   "nome_dispositivo": "PcTommasoV",
   "assegnatario": "Tommaso Vanin",
   "tipologia": "Workstation",
@@ -1057,7 +1057,7 @@
  },
  {
   "id": 45,
-  "profilo": "Render",
+  "profilo": "3D avanzato",
   "nome_dispositivo": "PcStefanoB",
   "assegnatario": "Stefano Bissacco",
   "tipologia": "Workstation",
@@ -1148,7 +1148,7 @@
   "data_acquisto": "",
   "aggiornata": "03/11/2026",
   "note": "Modello GPU e tecnologia di archiviazione da censire.",
-  "area": "",
+  "area": "Logistica",
   "foto": "sic_xs.jpg"
  }
 ]

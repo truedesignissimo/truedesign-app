@@ -32,7 +32,7 @@ describe("Performance PC", () => {
       Ufficio: { singleCore: .4, multiCore: .15, gpu: .05, ram: .25, storage: .15, graphicsMemory: 0 },
       Tecnico: { singleCore: .35, multiCore: .25, gpu: .15, ram: .2, storage: .05, graphicsMemory: 0 },
       Grafica: { singleCore: .2, multiCore: .15, gpu: .25, ram: .25, storage: .05, graphicsMemory: .1 },
-      Render: { singleCore: .1, multiCore: .3, gpu: .3, ram: .15, storage: .05, graphicsMemory: .1 },
+      "3D avanzato": { singleCore: .1, multiCore: .3, gpu: .3, ram: .15, storage: .05, graphicsMemory: .1 },
     });
     const result = assessPerformance(pc({ processore: "AMD Ryzen 5 7530U", ram: "16 GB" }));
     const expected = Math.pow(((2966 - 1500) / 3500) * 100, .4 / .8)
@@ -75,11 +75,11 @@ describe("Performance PC", () => {
     expect(assessPerformance(pc(hardware))).toMatchObject({ confidence: "Alta", provisional: false });
     expect(assessPerformance(pc({ ...hardware, gpu: "", archiviazione: "" }))).toMatchObject({ confidence: "Media", provisional: true });
     expect(assessPerformance(pc({ processore: hardware.processore }))).toMatchObject({ confidence: "Bassa", provisional: true, recommendationProvisional: true });
-    expect(assessPerformance(pc({ ...hardware, profilo: "Render", gpu: "NVIDIA GeForce RTX 4060 Ti" }))).toMatchObject({ confidence: "Alta", knownWeight: .9 });
+    expect(assessPerformance(pc({ ...hardware, profilo: "3D avanzato", gpu: "NVIDIA GeForce RTX 4060 Ti" }))).toMatchObject({ confidence: "Alta", knownWeight: .9 });
   });
 
   it("propone la ricollocazione quando il PC è adeguato solo per Ufficio", () => {
-    const result = assessPerformance(pc({ profilo: "Render", processore: "Intel Core i7-13700H", ram: "32 GB", gpu: "NVIDIA T400, 2 GB", archiviazione: "SSD 1000 GB, 100 GB usati" }));
+    const result = assessPerformance(pc({ profilo: "3D avanzato", processore: "Intel Core i7-13700H", ram: "32 GB", gpu: "NVIDIA T400, 2 GB", archiviazione: "SSD 1000 GB, 100 GB usati" }));
     expect(result.score).toBeLessThan(55);
     expect(result.scoresByProfile.Ufficio).toBeGreaterThanOrEqual(55);
     expect(result.recommendation).toBe("Ricolloca in Ufficio");
@@ -103,7 +103,7 @@ describe("Performance PC", () => {
   });
 
   it("riconosce la GPU dal modello e mai dai soli GB, interpolando la VRAM", () => {
-    const result = assessPerformance(pc({ profilo: "Render", gpu: "GPU dedicata 6 GB (modello da verificare)" }));
+    const result = assessPerformance(pc({ profilo: "3D avanzato", gpu: "GPU dedicata 6 GB (modello da verificare)" }));
     expect(result.components.gpu).toBeNull();
     expect(result.components.graphicsMemory).toBe(65);
     expect(result.missingData).toContain("Modello GPU e relativo benchmark");
@@ -129,7 +129,7 @@ describe("Performance PC", () => {
     expect(missingPerformanceData(pc())).toContain("Capacità RAM");
     expect(missingPerformanceData(pc())).toContain("Tecnologia di archiviazione (HDD, SSD o NVMe)");
     expect(missingPerformanceData(pc())).not.toContain("Capacità memoria grafica");
-    expect(missingPerformanceData(pc({ profilo: "Render" }))).toContain("Capacità memoria grafica");
+    expect(missingPerformanceData(pc({ profilo: "3D avanzato" }))).toContain("Capacità memoria grafica");
   });
 
   it("è puro, deterministico e limita tutti i punteggi tra zero e cento", () => {

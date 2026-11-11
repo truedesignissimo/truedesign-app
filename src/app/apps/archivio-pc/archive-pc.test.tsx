@@ -35,7 +35,7 @@ describe("Valutazione prestazionale nell'interfaccia", () => {
     for (const value of [assessment.profile, assessment.recommendation, assessment.storageWarning!, ...assessment.missingData]) {
       expect(html).toContain(value);
     }
-    for (const profile of ["Ufficio", "Tecnico", "Grafica", "Render"].filter((profile) => profile !== assessment.profile)) {
+    for (const profile of ["Ufficio", "Tecnico", "Grafica", "3D avanzato"].filter((profile) => profile !== assessment.profile)) {
       expect(html).not.toContain(`>${profile}<`);
     }
     expect(html).not.toContain("Idoneità nei quattro profili");
@@ -89,8 +89,8 @@ describe("Card per reparto", () => {
       ["NbPozzonovo", "Notebook Pozzonovo", "Produzione", "Ufficio"],
       ["PcProduzione", "PC Produzione", "Produzione", "Ufficio"],
       ["PcFalegnameria", "PC Falegnameria", "Produzione", "Ufficio"],
-      ["PcTommasoV", "Tommaso Vanin", "Produzione", "Render"],
-      ["PcStefanoB", "Stefano Bissacco", "Produzione", "Render"],
+      ["PcTommasoV", "Tommaso Vanin", "Produzione", "3D avanzato"],
+      ["PcStefanoB", "Stefano Bissacco", "Produzione", "3D avanzato"],
     ];
     for (const [device, assignee, area, profile] of expected) {
       expect(pcsData).toContainEqual(expect.objectContaining({ nome_dispositivo: device, assegnatario: assignee, area, profilo: profile }));
@@ -102,7 +102,8 @@ describe("Card per reparto", () => {
     expect(pcsData).toContainEqual(expect.objectContaining({ nome_dispositivo: "PcMelaniaT", assegnatario: "Marco Russo", numero_serie: "SID3002177" }));
     expect(pcsData).toContainEqual(expect.objectContaining({ nome_dispositivo: "MacBook-Air-2", assegnatario: "Mac Alessandro Maniero" }));
     expect(pcsData).toContainEqual(expect.objectContaining({ nome_dispositivo: "NbUfficioT2", assegnatario: "Notebook Ufficio Tecnico", numero_serie: "PF5D4R3F" }));
-    expect(pcsData).toContainEqual(expect.objectContaining({ nome_dispositivo: "NbSofiaS", assegnatario: "Sofia S.", profilo: "Ufficio" }));
+    expect(pcsData).toContainEqual(expect.objectContaining({ nome_dispositivo: "NbSofiaS", assegnatario: "Sofia S.", area: "Ufficio Tecnico", profilo: "Ufficio" }));
+    expect(pcsData).toContainEqual(expect.objectContaining({ nome_dispositivo: "PcAnna", assegnatario: "Anna Masola", area: "Logistica", profilo: "Ufficio" }));
   });
 
   it("assegna a ogni PC una foto presente nel catalogo immagini", () => {
