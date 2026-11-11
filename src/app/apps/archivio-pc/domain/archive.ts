@@ -121,7 +121,12 @@ export function groupPcsByArea(pcs: readonly PcRecord[]) {
     .toSorted((a, b) => a.localeCompare(b, "it"));
   return [...areaOrder, ...extraAreas, "Da assegnare"]
     .filter((area) => groups.has(area))
-    .map((area) => ({ area, pcs: groups.get(area)! }));
+    .map((area) => ({
+      area,
+      pcs: groups.get(area)!.toSorted((a, b) =>
+        a.assegnatario.localeCompare(b.assegnatario, "it", { sensitivity: "base" }) || a.id - b.id,
+      ),
+    }));
 }
 
 export function summarizePcs(pcs: PcRecord[]) {

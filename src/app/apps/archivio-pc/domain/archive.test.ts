@@ -12,16 +12,22 @@ describe("Archivio PC", () => {
     expect(groups.map((group) => group.area)).toEqual([
       "Ufficio Tecnico", "Commerciale", "Marketing", "Logistica", "Amministrazione", "Produzione", "Da assegnare",
     ]);
-    expect(groups.at(-1)?.pcs.map((pc) => pc.id)).toEqual([34, 35, 46, 47, 48]);
+    expect(groups.at(-1)?.pcs.map((pc) => pc.assegnatario)).toEqual([
+      "Anna Masola", "Carloalberto Gasparello", "Ex Notebook Gaia", "Lorenzo Maniero", "Sofia S.",
+    ]);
     expect(groups.flatMap((group) => group.pcs)).toHaveLength(pcs.length);
     expect(input).toEqual(pcs);
   });
 
-  it("omette i gruppi vuoti e conserva l’ordine dei risultati nel reparto", () => {
+  it("omette i gruppi vuoti e ordina alfabeticamente i PC nel reparto", () => {
     const filtered = [pcs[6], pcs[3], { ...pcs[0], area: "  " }];
     const groups = groupPcsByArea(filtered);
     expect(groups.map((group) => group.area)).toEqual(["Ufficio Tecnico", "Da assegnare"]);
-    expect(groups[0].pcs.map((pc) => pc.id)).toEqual([7, 4]);
+    expect(groups[0].pcs.map((pc) => pc.assegnatario)).toEqual(
+      [...groups[0].pcs.map((pc) => pc.assegnatario)].sort((a, b) =>
+        a.localeCompare(b, "it", { sensitivity: "base" }),
+      ),
+    );
     expect(groupPcsByArea([])).toEqual([]);
   });
 
@@ -52,6 +58,12 @@ describe("Archivio PC", () => {
       modello: "ThinkPad P16s Gen 3",
       numero_serie: "PF5D4R3F",
       area: "Ufficio Tecnico",
+    });
+  });
+
+  it("assegna Marta Chiapperin al reparto Commerciale", () => {
+    expect(pcs.find((pc) => pc.assegnatario === "Marta Chiapperin")).toMatchObject({
+      area: "Commerciale",
     });
   });
 
