@@ -73,7 +73,7 @@
  },
  {
   "id": 4,
-  "profilo": "3D avanzato",
+  "profilo": "Tecnico",
   "nome_dispositivo": "PcLucaB",
   "assegnatario": "Luca Bonfanti",
   "tipologia": "Desktop",
@@ -121,7 +121,7 @@
  },
  {
   "id": 6,
-  "profilo": "3D avanzato",
+  "profilo": "Tecnico",
   "nome_dispositivo": "PcLucaF",
   "assegnatario": "Luca Favato",
   "tipologia": "Desktop",
@@ -145,7 +145,7 @@
  },
  {
   "id": 7,
-  "profilo": "3D avanzato",
+  "profilo": "Tecnico",
   "nome_dispositivo": "PcWalterM",
   "assegnatario": "Walter Masetto",
   "tipologia": "Workstation",
@@ -236,7 +236,7 @@
   "data_acquisto": "",
   "aggiornata": "03/11/2026",
   "note": "",
-  "area": "Commerciale",
+  "area": "Ufficio Tecnico",
   "foto": "hp_630g10.jpg"
  },
  {
@@ -313,7 +313,7 @@
  },
  {
   "id": 14,
-  "profilo": "3D avanzato",
+  "profilo": "Tecnico",
   "nome_dispositivo": "PcMartinaC",
   "assegnatario": "Martina Carraro",
   "tipologia": "Workstation",
@@ -361,7 +361,7 @@
  },
  {
   "id": 16,
-  "profilo": "Ufficio",
+  "profilo": "Tecnico",
   "nome_dispositivo": "NbCantiereTRUE",
   "assegnatario": "Notebook Cantiere",
   "tipologia": "Notebook",
@@ -668,7 +668,7 @@
   "data_acquisto": "",
   "aggiornata": "28/10/2026",
   "note": "",
-  "area": "Logistica",
+  "area": "",
   "foto": "hp_250.jpg"
  },
  {
@@ -699,7 +699,7 @@
   "id": 30,
   "profilo": "Ufficio",
   "nome_dispositivo": "MacBook-Air-2",
-  "assegnatario": "Mac Alessandro Maniero",
+  "assegnatario": "Alessandro Maniero — Mac",
   "tipologia": "Notebook",
   "marca": "Apple",
   "modello": "MacBook Air 13\" (M4, 2025)",
@@ -723,7 +723,7 @@
   "id": 31,
   "profilo": "Ufficio",
   "nome_dispositivo": "NbAlessandroM",
-  "assegnatario": "PC Alessandro Maniero",
+  "assegnatario": "Alessandro Maniero — PC",
   "tipologia": "Notebook",
   "marca": "HP",
   "modello": "HP ProBook 450 15.6 inch G10 Notebook PC",
@@ -747,7 +747,7 @@
   "id": 32,
   "profilo": "3D avanzato",
   "nome_dispositivo": "PcBeatriceB",
-  "assegnatario": "Beatrice B.",
+  "assegnatario": "Beatrice Barbieri",
   "tipologia": "Workstation",
   "marca": "HP",
   "modello": "HP Z2 Tower G1i",
@@ -795,7 +795,7 @@
   "id": 34,
   "profilo": "Ufficio",
   "nome_dispositivo": "NbSofiaS",
-  "assegnatario": "Sofia S.",
+  "assegnatario": "Sofia Sturaro",
   "tipologia": "Notebook",
   "marca": "HP",
   "modello": "HP ProBook 455 15.6 G10",
@@ -860,7 +860,7 @@
   "data_acquisto": "",
   "aggiornata": "03/11/2026",
   "note": "Modello GPU e tecnologia di archiviazione da censire.",
-  "area": "Commerciale",
+  "area": "Logistica",
   "foto": "hp_250.jpg"
  },
  {
@@ -987,7 +987,7 @@
   "id": 42,
   "profilo": "Ufficio",
   "nome_dispositivo": "PcProduzione",
-  "assegnatario": "PC Produzione",
+  "assegnatario": "Produzione",
   "tipologia": "Mini PC",
   "marca": "HP",
   "modello": "HP Pro Mini 260 G9 Desktop PC",
@@ -1011,7 +1011,7 @@
   "id": 43,
   "profilo": "Ufficio",
   "nome_dispositivo": "PcFalegnameria",
-  "assegnatario": "PC Falegnameria",
+  "assegnatario": "Falegnameria",
   "tipologia": "Desktop",
   "marca": "HP",
   "modello": "HP Pro SFF 400 G9 Desktop PC",
@@ -1033,7 +1033,7 @@
  },
  {
   "id": 44,
-  "profilo": "3D avanzato",
+  "profilo": "Ufficio",
   "nome_dispositivo": "PcTommasoV",
   "assegnatario": "Tommaso Vanin",
   "tipologia": "Workstation",
@@ -1057,7 +1057,7 @@
  },
  {
   "id": 45,
-  "profilo": "3D avanzato",
+  "profilo": "Ufficio",
   "nome_dispositivo": "PcStefanoB",
   "assegnatario": "Stefano Bissacco",
   "tipologia": "Workstation",
@@ -1100,7 +1100,7 @@
   "data_acquisto": "",
   "aggiornata": "03/11/2026",
   "note": "Disco e seriale da censire.",
-  "area": "",
+  "area": "Commerciale",
   "foto": "mba_m4.jpg"
  },
  {
@@ -1124,7 +1124,7 @@
   "data_acquisto": "",
   "aggiornata": "03/11/2026",
   "note": "Disco e seriale da censire.",
-  "area": "",
+  "area": "Commerciale",
   "foto": "mba_m4.jpg"
  },
  {

@@ -44,6 +44,7 @@ export function PerformanceSummary({ assessment }: { assessment: PerformanceAsse
   return (
     <span className={styles.powerBadge} tabIndex={0} title={tooltip} aria-label={`Potenza ${assessment.score ?? "non disponibile"} su 100 · ${tooltip}`}>
       Potenza <strong>{assessment.score ?? "—"}</strong>
+      <span className={styles.profileLabel}>Profilo {assessment.profile}</span>
     </span>
   );
 }

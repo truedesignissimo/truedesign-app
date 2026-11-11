@@ -1,4 +1,5 @@
 import * as React from "react";
+import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import type { ImageProps } from "next/image";
@@ -16,7 +17,7 @@ vi.mock("next/image", () => ({
 }));
 
 describe("Valutazione prestazionale nell'interfaccia", () => {
-  it("mostra solo Potenza e voto, con fascia, attendibilità e provvisorietà nel tooltip accessibile", () => {
+  it("mostra Potenza, voto e profilo assegnato, lasciando attendibilità e provvisorietà nel tooltip accessibile", () => {
     const assessment = assessPerformance(gaia);
     const html = renderToStaticMarkup(<PerformanceSummary assessment={assessment} />);
     expect(html).toContain(`Potenza <strong>${assessment.score}</strong>`);
@@ -24,9 +25,9 @@ describe("Valutazione prestazionale nell'interfaccia", () => {
     expect(html).toContain("title=\"");
     expect(html).toContain("aria-label=\"");
     const text = html.replace(/<[^>]*>/g, "");
-    expect(text).toBe(`Potenza ${assessment.score}`);
+    expect(text).toBe(`Potenza ${assessment.score}Profilo ${assessment.profile}`);
     for (const value of [assessment.band, "Attendibilità", assessment.confidence.toLowerCase(), "voto provvisorio"]) expect(html).toContain(value);
-    expect(text).not.toMatch(/Profilo|Ufficio|Attendibilità|provvisorio/);
+    expect(text).not.toMatch(/Attendibilità|provvisorio/);
   });
 
   it("mostra soltanto il profilo assegnato, raccomandazione, warning e dati mancanti senza ripetere l'attendibilità", () => {
@@ -69,28 +70,33 @@ describe("Valutazione prestazionale nell'interfaccia", () => {
   it("distingue un voto non valutabile da un voto zero", () => {
     const assessment = assessPerformance({ ...gaia, processore: "", gpu: "", ram: "", archiviazione: "" });
     const html = renderToStaticMarkup(<PerformanceSummary assessment={assessment} />);
-    expect(html.replace(/<[^>]*>/g, "")).toBe("Potenza —");
+    expect(html.replace(/<[^>]*>/g, "")).toBe("Potenza —Profilo Ufficio");
     expect(html).toContain("Non valutabile");
     expect(html).not.toContain(">0<");
   });
 });
 
 describe("Card per reparto", () => {
+  it("impedisce alla label Schermo di spezzarsi su due righe", () => {
+    const css = readFileSync(new URL("./archive-pc.module.css", import.meta.url), "utf8");
+    expect(css).toMatch(/\.quickSpecs dt\s*\{[\s\S]*?white-space:\s*nowrap/);
+  });
+
   it("mantiene un inventario univoco con le assegnazioni confermate", () => {
     expect(new Set(pcsData.map((pc) => pc.id)).size).toBe(pcsData.length);
     expect(pcsData).toHaveLength(48);
 
     const expected = [
-      ["NbValentinaM", "Valentina Marchioro", "Commerciale", "Ufficio"],
+      ["NbValentinaM", "Valentina Marchioro", "Logistica", "Ufficio"],
       ["NbNicole", "Nicole Salnitri", "Commerciale", "Ufficio"],
       ["NbSolange", "Solange Pandolfini", "Commerciale", "Ufficio"],
       ["NbLucaC", "Luca Cambi", "Commerciale", "Ufficio"],
       ["NbMarcoB", "Marco Beltramini", "Commerciale", "Ufficio"],
       ["NbPozzonovo", "Notebook Pozzonovo", "Produzione", "Ufficio"],
-      ["PcProduzione", "PC Produzione", "Produzione", "Ufficio"],
-      ["PcFalegnameria", "PC Falegnameria", "Produzione", "Ufficio"],
-      ["PcTommasoV", "Tommaso Vanin", "Produzione", "3D avanzato"],
-      ["PcStefanoB", "Stefano Bissacco", "Produzione", "3D avanzato"],
+      ["PcProduzione", "Produzione", "Produzione", "Ufficio"],
+      ["PcFalegnameria", "Falegnameria", "Produzione", "Ufficio"],
+      ["PcTommasoV", "Tommaso Vanin", "Produzione", "Ufficio"],
+      ["PcStefanoB", "Stefano Bissacco", "Produzione", "Ufficio"],
     ];
     for (const [device, assignee, area, profile] of expected) {
       expect(pcsData).toContainEqual(expect.objectContaining({ nome_dispositivo: device, assegnatario: assignee, area, profilo: profile }));
@@ -100,9 +106,10 @@ describe("Card per reparto", () => {
   it("applica le corrispondenze nominate senza duplicare i computer", () => {
     expect(pcsData).toContainEqual(expect.objectContaining({ nome_dispositivo: "PcQualita", assegnatario: "Hillary Bellin", numero_serie: "8CC4120D22" }));
     expect(pcsData).toContainEqual(expect.objectContaining({ nome_dispositivo: "PcMelaniaT", assegnatario: "Marco Russo", numero_serie: "SID3002177" }));
-    expect(pcsData).toContainEqual(expect.objectContaining({ nome_dispositivo: "MacBook-Air-2", assegnatario: "Mac Alessandro Maniero" }));
+    expect(pcsData).toContainEqual(expect.objectContaining({ nome_dispositivo: "MacBook-Air-2", assegnatario: "Alessandro Maniero — Mac", profilo: "Ufficio" }));
+    expect(pcsData).toContainEqual(expect.objectContaining({ id: 31, assegnatario: "Alessandro Maniero — PC", profilo: "Ufficio" }));
     expect(pcsData).toContainEqual(expect.objectContaining({ nome_dispositivo: "NbUfficioT2", assegnatario: "Notebook Ufficio Tecnico", numero_serie: "PF5D4R3F" }));
-    expect(pcsData).toContainEqual(expect.objectContaining({ nome_dispositivo: "NbSofiaS", assegnatario: "Sofia S.", area: "Ufficio Tecnico", profilo: "Ufficio" }));
+    expect(pcsData).toContainEqual(expect.objectContaining({ nome_dispositivo: "NbSofiaS", assegnatario: "Sofia Sturaro", area: "Ufficio Tecnico", profilo: "Ufficio" }));
     expect(pcsData).toContainEqual(expect.objectContaining({ nome_dispositivo: "PcAnna", assegnatario: "Anna Masola", area: "Logistica", profilo: "Ufficio" }));
   });
 
@@ -180,7 +187,8 @@ describe("Card per reparto", () => {
     expect(card).toContain(pc.gpu);
     expect(card).toContain(">Schermo</dt>");
     expect(card).toContain(pc.schermo.replaceAll('"', "&quot;"));
-    expect(card.replace(/<[^>]*>/g, "")).not.toMatch(/Profilo|Attendibilità|provvisorio/);
+    expect(card.replace(/<[^>]*>/g, "")).toContain(`Profilo ${pc.profilo}`);
+    expect(card.replace(/<[^>]*>/g, "")).not.toMatch(/Attendibilità|provvisorio/);
   });
 
   it("non aggiunge schermo o specifiche hardware mancanti", () => {

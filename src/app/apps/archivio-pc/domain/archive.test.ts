@@ -12,9 +12,7 @@ describe("Archivio PC", () => {
     expect(groups.map((group) => group.area)).toEqual([
       "Ufficio Tecnico", "Commerciale", "Marketing", "Logistica", "Amministrazione", "Produzione", "Da assegnare",
     ]);
-    expect(groups.at(-1)?.pcs.map((pc) => pc.assegnatario)).toEqual([
-      "Carloalberto Gasparello", "Ex Notebook Gaia", "Lorenzo Maniero",
-    ]);
+    expect(groups.at(-1)?.pcs.map((pc) => pc.assegnatario)).toEqual(["Ex Notebook Gaia", "Notebook EX Alberto"]);
     expect(groups.flatMap((group) => group.pcs)).toHaveLength(pcs.length);
     expect(input).toEqual(pcs);
   });
@@ -61,24 +59,36 @@ describe("Archivio PC", () => {
     });
   });
 
-  it("assegna Marta Chiapperin al reparto Commerciale", () => {
+  it("assegna Marta Chiapperin all’Ufficio Tecnico con profilo Ufficio", () => {
     expect(pcs.find((pc) => pc.assegnatario === "Marta Chiapperin")).toMatchObject({
-      area: "Commerciale",
+      area: "Ufficio Tecnico",
+      profilo: "Ufficio",
     });
   });
 
   it("aggiorna il notebook assegnato a Sofia e conserva l’ex notebook Gaia", () => {
-    expect(pcs.find((pc) => pc.id === 34)).toMatchObject({ assegnatario: "Sofia S.", nome_dispositivo: "NbSofiaS", profilo: "Ufficio", area: "Ufficio Tecnico", numero_serie: "5CD5134675", processore: "AMD Ryzen 5 7530U", ram: "16 GB", archiviazione: "477 GB con 157 GB usati", data_installazione_os: "05/12/2025" });
+    expect(pcs.find((pc) => pc.id === 34)).toMatchObject({ assegnatario: "Sofia Sturaro", nome_dispositivo: "NbSofiaS", profilo: "Ufficio", area: "Ufficio Tecnico", numero_serie: "5CD5134675", processore: "AMD Ryzen 5 7530U", ram: "16 GB", archiviazione: "477 GB con 157 GB usati", data_installazione_os: "05/12/2025" });
     expect(pcs.find((pc) => pc.id === 35)).toMatchObject({ assegnatario: "Ex Notebook Gaia", nome_dispositivo: "NbGaiaB", profilo: "Ufficio", area: "", numero_serie: "5CD337LZ66", processore: "Intel Core i5-1335U", ram: "8 GB", archiviazione: "238 GB con 220 GB usati", data_installazione_os: "18/02/2025" });
     expect(pcs.every((pc) => ["Ufficio", "Tecnico", "Grafica", "3D avanzato"].includes(pc.profilo))).toBe(true);
     expect(pcs.every((pc) => typeof pc.nome_dispositivo === "string")).toBe(true);
     expect(pcs.filter((pc) => pc.profilo === "Grafica").map((pc) => pc.id)).toEqual([1, 3]);
-    expect(pcs.filter((pc) => pc.profilo === "3D avanzato").map((pc) => pc.id)).toEqual([4, 6, 7, 11, 14, 32, 44, 45]);
-    expect(pcs.find((pc) => pc.id === 16)?.profilo).toBe("Ufficio");
+    expect(pcs.filter((pc) => pc.profilo === "3D avanzato").map((pc) => pc.id)).toEqual([11, 32]);
+    expect(pcs.find((pc) => pc.id === 16)?.profilo).toBe("Tecnico");
     expect(pcs.find((pc) => pc.id === 33)?.profilo).toBe("Tecnico");
     expect(pcs.find((pc) => pc.id === 10)?.profilo).toBe("Ufficio");
     expect(pcs.find((pc) => pc.id === 48)).toMatchObject({ assegnatario: "Anna Masola", area: "Logistica", profilo: "Ufficio" });
     expect(pcs.filter((pc) => pc.area === "Commerciale").every((pc) => pc.profilo === "Ufficio")).toBe(true);
+    expect(pcs.filter((pc) => pc.area === "Amministrazione").every((pc) => pc.profilo === "Ufficio")).toBe(true);
+    expect(pcs.filter((pc) => pc.area === "Produzione").every((pc) => pc.profilo === "Ufficio")).toBe(true);
+    expect(pcs.find((pc) => pc.id === 2)?.profilo).toBe("Ufficio");
+    expect(pcs.find((pc) => pc.id === 13)?.profilo).toBe("Tecnico");
+    expect(pcs.find((pc) => pc.id === 11)?.profilo).toBe("3D avanzato");
+    expect(pcs.find((pc) => pc.id === 32)).toMatchObject({ assegnatario: "Beatrice Barbieri", profilo: "3D avanzato" });
+    expect(pcs.find((pc) => pc.id === 28)).toMatchObject({ assegnatario: "Notebook EX Alberto", area: "", profilo: "Ufficio" });
+    expect(pcs.find((pc) => pc.id === 36)).toMatchObject({ assegnatario: "Valentina Marchioro", area: "Logistica", profilo: "Ufficio" });
+    expect(pcs.find((pc) => pc.id === 46)).toMatchObject({ assegnatario: "Carloalberto Gasparello", area: "Commerciale", profilo: "Ufficio" });
+    expect(pcs.find((pc) => pc.id === 47)).toMatchObject({ assegnatario: "Lorenzo Maniero", area: "Commerciale", profilo: "Ufficio" });
+    expect(pcs.filter((pc) => pc.area === "Ufficio Tecnico" && ![10, 11, 32, 34].includes(pc.id)).every((pc) => pc.profilo === "Tecnico")).toBe(true);
   });
 
   it("cerca anche il nome dispositivo confermato", () => {
