@@ -4,12 +4,13 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import type { ImageProps } from "next/image";
 import pcsData from "./data/pcs.json";
+import { enrichHardwareInventory } from "./data/hardware-inventory";
 import type { PcRecord } from "./domain/archive";
 import { assessPerformance } from "./domain/performance";
 import { pcImages } from "./image-map";
 import { ArchiveModeToggle, ArchivioPc, isUnverified, PcDetail, PerformanceDetail, PerformanceSummary, RamValue, splitRam } from "./archive-pc";
 
-const gaia = pcsData.find((pc) => pc.id === 35) as PcRecord;
+const gaia = enrichHardwareInventory(pcsData as PcRecord[]).find((pc) => pc.id === 35)!;
 
 // Vite imports bitmap/SVG assets as URLs, without Next's static image dimensions.
 vi.mock("next/image", () => ({
@@ -30,10 +31,10 @@ describe("Valutazione prestazionale nell'interfaccia", () => {
     expect(text).not.toMatch(/Attendibilità|provvisorio/);
   });
 
-  it("mostra soltanto il profilo assegnato, raccomandazione, warning e dati mancanti senza ripetere l'attendibilità", () => {
+  it("mostra soltanto il profilo assegnato, raccomandazione e dati mancanti senza ripetere l'attendibilità", () => {
     const assessment = assessPerformance(gaia);
     const html = renderToStaticMarkup(<PerformanceDetail assessment={assessment} />);
-    for (const value of [assessment.profile, assessment.recommendation, assessment.storageWarning!, ...assessment.missingData]) {
+    for (const value of [assessment.profile, assessment.recommendation, ...assessment.missingData]) {
       expect(html).toContain(value);
     }
     for (const profile of ["Ufficio", "Tecnico", "Grafica", "3D avanzato"].filter((profile) => profile !== assessment.profile)) {
@@ -60,6 +61,14 @@ describe("Valutazione prestazionale nell'interfaccia", () => {
     }
   });
 
+  it("mostra core fisici e processori logici nella scheda dettagliata", () => {
+    const html = renderToStaticMarkup(<PcDetail pc={gaia} assessment={assessPerformance(gaia)} onClose={() => undefined} />);
+    expect(html).toContain("Core processore");
+    expect(html).toContain("Processori logici");
+    expect(html).toContain(">10<");
+    expect(html).toContain(">12<");
+  });
+
   it("offre nella scheda singola un download PDF accessibile tramite sola icona", () => {
     const html = renderToStaticMarkup(<PcDetail pc={gaia} assessment={assessPerformance(gaia)} onClose={() => undefined} />);
     expect(html).toContain('aria-label="Scarica scheda PDF"');
@@ -84,7 +93,7 @@ describe("Card per reparto", () => {
 
   it("mantiene un inventario univoco con le assegnazioni confermate", () => {
     expect(new Set(pcsData.map((pc) => pc.id)).size).toBe(pcsData.length);
-    expect(pcsData).toHaveLength(48);
+    expect(pcsData).toHaveLength(51);
 
     const expected = [
       ["NbValentinaM", "Valentina Marchioro", "Logistica", "Ufficio"],
@@ -195,5 +204,20 @@ describe("Card per reparto", () => {
     const html = renderToStaticMarkup(<ArchivioPc pcs={[{ ...gaia, processore: "", ram: "", gpu: "", schermo: "" }]} />);
     const card = html.match(/<article[\s\S]*?<\/article>/)?.[0] ?? "";
     expect(card).not.toMatch(/>CPU<|>RAM<|>GPU<|>Schermo</);
+  });
+
+  it("mostra prezzo e data di acquisto in piccolo sulla card e i dati completi nel dettaglio", () => {
+    const pc = pcsData.find((item) => item.id === 50)! as PcRecord;
+    const archiveHtml = renderToStaticMarkup(<ArchivioPc pcs={[pc]} />);
+    const card = archiveHtml.match(/<article[\s\S]*?<\/article>/)?.[0] ?? "";
+    const detailHtml = renderToStaticMarkup(<PcDetail pc={pc} assessment={assessPerformance(pc)} onClose={() => undefined} />);
+    const css = readFileSync(new URL("./archive-pc.module.css", import.meta.url), "utf8");
+
+    expect(card).toContain("2.950,00 €");
+    expect(card).toContain("18/11/2026");
+    expect(card).toContain("Informatica2008");
+    expect(detailHtml).toContain("Prezzo acquisto");
+    expect(detailHtml).toContain("Venditore");
+    expect(css).toMatch(/\.purchaseMeta\s*\{[\s\S]*?font-size:\s*10px/);
   });
 });

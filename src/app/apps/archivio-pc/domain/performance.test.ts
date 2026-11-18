@@ -110,24 +110,23 @@ describe("Performance PC", () => {
     expect(assessPerformance(pc({ gpu: "NVIDIA GeForce RTX 4060 Ti, 8 GB" })).components.gpu).toBeGreaterThan(80);
   });
 
-  it("penalizza soltanto le soglie note di spazio libero e conserva la tecnologia sconosciuta", () => {
+  it("valuta il disco soltanto dalla tecnologia, senza considerare lo spazio usato", () => {
     expect(assessPerformance(pc({ archiviazione: "SSD 100 GB, 80 GB usati" })).components.storage).toBe(75);
-    expect(assessPerformance(pc({ archiviazione: "SSD 100 GB, 81 GB usati" })).components.storage).toBe(50);
-    expect(assessPerformance(pc({ archiviazione: "SSD 100 GB, 90 GB usati" })).components.storage).toBe(50);
-    expect(assessPerformance(pc({ archiviazione: "SSD 238 GB, 220 GB usati" })).components.storage).toBe(25);
+    expect(assessPerformance(pc({ archiviazione: "SSD 100 GB, 81 GB usati" })).components.storage).toBe(75);
+    expect(assessPerformance(pc({ archiviazione: "SSD 100 GB, 90 GB usati" })).components.storage).toBe(75);
+    expect(assessPerformance(pc({ archiviazione: "SSD 238 GB, 220 GB usati" })).components.storage).toBe(75);
     expect(assessPerformance(pc({ archiviazione: "NVMe 100 GB, 10 GB usati" })).components.storage).toBe(90);
-    expect(assessPerformance(pc({ archiviazione: "HDD 100 GB, 95 GB usati" })).components.storage).toBe(0);
+    expect(assessPerformance(pc({ archiviazione: "HDD 100 GB, 95 GB usati" })).components.storage).toBe(25);
     expect(assessPerformance(pc({ archiviazione: "238 GB con 220 GB usati" })).components.storage).toBeNull();
     expect(assessPerformance(pc({ archiviazione: "SSD 238 GB" })).components.storage).toBe(75);
-    expect(missingPerformanceData(pc({ archiviazione: "SSD 238 GB" }))).toContain("Spazio libero di archiviazione");
+    expect(missingPerformanceData(pc({ archiviazione: "SSD 238 GB" }))).not.toContain("Spazio libero di archiviazione");
   });
 
-  it("censisce i dati mancanti pertinenti al profilo e la criticità confermata di Gaia", () => {
-    const gaia = pcs.find((item) => item.id === 35)!;
-    expect(assessPerformance(gaia).storageWarning).toContain("meno del 10%");
+  it("censisce soltanto i dati mancanti pertinenti al profilo", () => {
     expect(missingPerformanceData(pc())).toContain("Modello CPU e relativi benchmark");
     expect(missingPerformanceData(pc())).toContain("Capacità RAM");
     expect(missingPerformanceData(pc())).toContain("Tecnologia di archiviazione (HDD, SSD o NVMe)");
+    expect(missingPerformanceData(pc())).not.toContain("Spazio libero di archiviazione");
     expect(missingPerformanceData(pc())).not.toContain("Capacità memoria grafica");
     expect(missingPerformanceData(pc({ profilo: "3D avanzato" }))).toContain("Capacità memoria grafica");
   });

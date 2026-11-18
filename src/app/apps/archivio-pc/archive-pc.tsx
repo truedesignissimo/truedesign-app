@@ -27,6 +27,8 @@ const DETAIL_FIELDS: Array<[keyof PcRecord, string]> = [
   ["anno", "Anno"],
   ["numero_serie", "Numero di serie"],
   ["processore", "Processore"],
+  ["core_processore", "Core processore"],
+  ["processori_logici", "Processori logici"],
   ["ram", "Memoria"],
   ["gpu", "Scheda grafica"],
   ["schermo", "Schermo"],
@@ -34,7 +36,10 @@ const DETAIL_FIELDS: Array<[keyof PcRecord, string]> = [
   ["sistema_operativo", "Sistema operativo"],
   ["versione_os", "Versione OS"],
   ["data_installazione_os", "Installazione OS"],
+  ["prezzo_acquisto", "Prezzo acquisto"],
   ["data_acquisto", "Data acquisto"],
+  ["venditore", "Venditore"],
+  ["articolo_acquisto", "Articolo acquistato"],
   ["aggiornata", "Ultimo aggiornamento"],
   ["note", "Note"],
 ];
@@ -65,7 +70,6 @@ export function PerformanceDetail({ assessment }: { assessment: PerformanceAsses
         <strong>{assessment.recommendation}</strong>
         <p>Sistema operativo: {assessment.osSupport}</p>
       </div>
-      {assessment.storageWarning && <p className={styles.storageWarning}>{assessment.storageWarning}</p>}
       <p className={styles.performanceNote}>I dati non disponibili sono esclusi dal voto; possono modificare la valutazione una volta completati.</p>
       <h4>Dati da completare</h4>
       {assessment.missingData.length > 0
@@ -248,6 +252,18 @@ function HardwareSpecs({ pc }: { pc: PcRecord }) {
   );
 }
 
+function PurchaseMeta({ pc }: { pc: PcRecord }) {
+  if (!pc.prezzo_acquisto && !pc.data_acquisto && !pc.venditore) return null;
+  return (
+    <div className={styles.purchaseMeta} title={pc.articolo_acquisto || undefined}>
+      <span>Acquisto</span>
+      {pc.prezzo_acquisto && <strong>{pc.prezzo_acquisto}</strong>}
+      {pc.data_acquisto && <time>{pc.data_acquisto}</time>}
+      {pc.venditore && <small>{pc.venditore}</small>}
+    </div>
+  );
+}
+
 function PcVisual({ pc, priority = false }: { pc: PcRecord; priority?: boolean }) {
   const image = pcImages[pc.foto];
   if (!image) {
@@ -421,6 +437,7 @@ export function ArchivioPc({ pcs }: { pcs: PcRecord[] }) {
                           <span className={styles.deviceType}>{pc.tipologia}</span>
                           <h3>{pc.assegnatario}</h3>
                           <p className={styles.model}>{pc.marca} · {pc.modello}</p>
+                          <PurchaseMeta pc={pc} />
                           <HardwareSpecs pc={pc} />
                           <span className={styles.detailsLink}>Consulta scheda <span aria-hidden="true">↗</span></span>
                         </div>

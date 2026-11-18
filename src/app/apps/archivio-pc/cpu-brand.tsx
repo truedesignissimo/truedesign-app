@@ -1,9 +1,14 @@
 import Image, { type StaticImageData } from "next/image";
 import appleLogo from "./assets/cpu/apple.png";
-import i5Logo from "./assets/cpu/i5.png";
-import i7Logo from "./assets/cpu/i7.png";
-import i9Logo from "./assets/cpu/i9.png";
-import xeonLogo from "./assets/cpu/xeon.png";
+import amdRyzenLogo from "./assets/cpu/amd-ryzen.svg";
+import i3Logo from "./assets/cpu/intel-core-i3.svg";
+import i5Logo from "./assets/cpu/intel-core-i5.svg";
+import i7Logo from "./assets/cpu/intel-core-i7.svg";
+import i9Logo from "./assets/cpu/intel-core-i9.svg";
+import ultra5Logo from "./assets/cpu/intel-core-ultra-5.svg";
+import ultra7Logo from "./assets/cpu/intel-core-ultra-7.svg";
+import ultra9Logo from "./assets/cpu/intel-core-ultra-9.svg";
+import xeonLogo from "./assets/cpu/intel-xeon.svg";
 import styles from "./archive-pc.module.css";
 
 export type CpuBrandKind =
@@ -27,12 +32,29 @@ export type CpuBrandInfo = {
 };
 
 const IMAGE_LOGOS: Partial<Record<CpuBrandKind, StaticImageData>> = {
+  "intel-i3": i3Logo,
   "intel-i5": i5Logo,
   "intel-i7": i7Logo,
   "intel-i9": i9Logo,
   "intel-xeon": xeonLogo,
+  "amd-ryzen": amdRyzenLogo,
   apple: appleLogo,
 };
+
+const ULTRA_LOGOS: Record<string, StaticImageData> = {
+  "5": ultra5Logo,
+  "7": ultra7Logo,
+  "9": ultra9Logo,
+};
+
+function getCpuLogo(processor: string, kind: CpuBrandKind) {
+  if (kind === "intel-ultra") {
+    const tier = processor.match(/Core Ultra\s+([579])/i)?.[1] ?? "7";
+    return ULTRA_LOGOS[tier];
+  }
+
+  return IMAGE_LOGOS[kind];
+}
 
 export function classifyCpu(processor: string): CpuBrandInfo {
   if (/Core Ultra/i.test(processor)) {
@@ -65,7 +87,7 @@ export function classifyCpu(processor: string): CpuBrandInfo {
 
 export function CpuBrand({ processor }: { processor: string }) {
   const brand = classifyCpu(processor);
-  const logo = IMAGE_LOGOS[brand.kind];
+  const logo = getCpuLogo(processor, brand.kind);
 
   return (
     <span
@@ -74,7 +96,7 @@ export function CpuBrand({ processor }: { processor: string }) {
       aria-label={brand.label}
     >
       {logo ? (
-        <Image src={logo} alt="" className={`${styles.cpuLogo} ${brand.kind === "intel-xeon" ? styles.cpuLogoWide : ""}`} />
+        <Image src={logo} alt="" className={`${styles.cpuLogo} ${brand.kind === "amd-ryzen" ? styles.cpuLogoWide : ""}`} />
       ) : brand.kind === "intel-ultra" ? (
         <span className={styles.cpuWordmark}><small>CORE</small><strong>ULTRA</strong></span>
       ) : brand.kind === "amd-ryzen" ? (

@@ -15,7 +15,6 @@ export type PerformanceAssessment = {
   recommendationProvisional: boolean;
   osSupport: "Supportato" | "Fuori supporto" | "Da verificare";
   missingData: string[];
-  storageWarning: string | null;
 };
 
 export const PROFILE_WEIGHTS = {
@@ -90,20 +89,14 @@ function readHardware(pc: PcRecord) {
   const gpu = GPU_BENCHMARKS.find(([model]) => model.test(pc.gpu))?.[1];
   const ram = interpolate(capacity(pc.ram), RAM_CURVE);
   const baseStorage = /\bnvme\b/i.test(pc.archiviazione) ? 90 : /\bssd\b/i.test(pc.archiviazione) ? 75 : /\bhdd\b/i.test(pc.archiviazione) ? 25 : null;
-  const total = capacity(pc.archiviazione);
-  const used = pc.archiviazione.match(/(\d+(?:[.,]\d+)?)\s*GB\s*usat[io]/i);
-  const free = pc.archiviazione.match(/(\d+(?:[.,]\d+)?)\s*GB\s*liber[io]/i);
-  const available = free ? Number(free[1].replace(",", ".")) : used && total ? total - Number(used[1].replace(",", ".")) : null;
-  const freeRatio = total && available !== null && available >= 0 && available <= total ? available / total : null;
-  const storagePenalty = freeRatio !== null && freeRatio < .1 ? 50 : freeRatio !== null && freeRatio < .2 ? 25 : 0;
   const components: PerformanceComponents = {
     singleCore: cpu ? clamp((cpu[0] - 1500) / 3500 * 100) : null,
     multiCore: cpu ? clamp((cpu[1] - 5000) / 45000 * 100) : null,
     gpu: gpu === undefined ? null : clamp(Math.log(gpu / 500) / Math.log(25000 / 500) * 100),
-    ram, storage: baseStorage === null ? null : clamp(baseStorage - storagePenalty),
+    ram, storage: baseStorage,
     graphicsMemory: apple ? ram : interpolate(capacity(pc.gpu), VRAM_CURVE),
   };
-  return { components, apple, freeRatio, baseStorage };
+  return { components, apple, baseStorage };
 }
 
 function missingData(pc: PcRecord, hardware: ReturnType<typeof readHardware>) {
@@ -112,7 +105,6 @@ function missingData(pc: PcRecord, hardware: ReturnType<typeof readHardware>) {
   if (hardware.components.gpu === null) missing.push(hardware.apple ? `Benchmark GPU comparabile per ${pc.processore}` : "Modello GPU e relativo benchmark");
   if (hardware.components.ram === null) missing.push("Capacità RAM");
   if (hardware.baseStorage === null) missing.push("Tecnologia di archiviazione (HDD, SSD o NVMe)");
-  if (hardware.freeRatio === null) missing.push("Spazio libero di archiviazione");
   if (PROFILE_WEIGHTS[pc.profilo].graphicsMemory > 0 && hardware.components.graphicsMemory === null) missing.push(hardware.apple ? "Capacità memoria unificata" : "Capacità memoria grafica");
   if (!pc.sistema_operativo || !pc.versione_os) missing.push("Sistema operativo e versione");
   return missing;
@@ -155,11 +147,9 @@ export function assessPerformance(pc: PcRecord): PerformanceAssessment {
     : score < 55 && pc.profilo !== "Ufficio" && (scoresByProfile.Ufficio ?? 0) >= 55 ? "Ricolloca in Ufficio"
     : score < 40 ? "Pensiona prima" : score < 55 ? "Programma sostituzione"
     : osSupport === "Supportato" ? "Mantieni" : "Verifica sistema operativo";
-  const storageWarning = hardware.freeRatio !== null && hardware.freeRatio < .1 ? "Archiviazione quasi esaurita: meno del 10% libero"
-    : hardware.freeRatio !== null && hardware.freeRatio < .2 ? "Archiviazione: meno del 20% libero" : null;
   return { profile: pc.profilo, score, band, confidence, provisional: confidence !== "Alta", knownWeight,
     components: hardware.components, scoresByProfile, recommendation, recommendationProvisional: confidence === "Bassa",
-    osSupport, missingData: missingData(pc, hardware), storageWarning };
+    osSupport, missingData: missingData(pc, hardware) };
 }
 
 export function rankReplacementPriority(pcs: PcRecord[], limit = 6): PcRecord[] {

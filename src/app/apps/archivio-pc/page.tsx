@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import pcsData from "./data/pcs.json";
+import { enrichHardwareInventory } from "./data/hardware-inventory";
 import { ArchivioPc } from "./archive-pc";
 import type { PcRecord } from "./domain/archive";
 
@@ -10,5 +11,5 @@ export const metadata: Metadata = {
 };
 
 export default function ArchivioPcPage() {
-  return <ArchivioPc pcs={pcsData as PcRecord[]} />;
+  return <ArchivioPc pcs={enrichHardwareInventory(pcsData as PcRecord[])} />;
 }

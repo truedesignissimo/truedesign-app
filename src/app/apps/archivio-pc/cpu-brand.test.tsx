@@ -28,11 +28,22 @@ describe("Marchi dei processori", () => {
     expect(classifyCpu(processor)).toMatchObject({ kind, label });
   });
 
-  it("renderizza il logo Intel accessibile come immagine", () => {
-    const html = renderToStaticMarkup(<CpuBrand processor="Intel Core i7-13700H" />);
-    expect(html).toContain('aria-label="Intel Core i7"');
+  it.each([
+    ["Intel Core i3-13100", "Intel Core i3"],
+    ["Intel Core i5-1335U", "Intel Core i5"],
+    ["Intel Core i7-13700H", "Intel Core i7"],
+    ["Intel Core i9-13900K", "Intel Core i9"],
+    ["Intel Core Ultra 5 125U", "Intel Core Ultra"],
+    ["Intel Core Ultra 7 155H", "Intel Core Ultra"],
+    ["Intel Core Ultra 9 285", "Intel Core Ultra"],
+    ["Intel Xeon W-2102", "Intel Xeon"],
+    ["AMD Ryzen 5 7530U", "AMD Ryzen"],
+  ])("renderizza per %s un asset grafico autentico", (processor, label) => {
+    const html = renderToStaticMarkup(<CpuBrand processor={processor} />);
+    expect(html).toContain(`aria-label="${label}"`);
     expect(html).toContain('role="img"');
     expect(html).toContain("cpuLogo");
+    expect(html).not.toContain("cpuWordmark");
   });
 
   it("affianca al marchio Apple la famiglia del chip", () => {

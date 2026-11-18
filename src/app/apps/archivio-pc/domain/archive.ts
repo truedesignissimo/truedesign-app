@@ -12,6 +12,8 @@ export type PcRecord = {
   anno: string;
   numero_serie: string;
   processore: string;
+  core_processore?: string;
+  processori_logici?: string;
   ram: string;
   gpu: string;
   schermo: string;
@@ -20,6 +22,9 @@ export type PcRecord = {
   versione_os: string;
   data_installazione_os: string;
   data_acquisto: string;
+  prezzo_acquisto?: string;
+  venditore?: string;
+  articolo_acquisto?: string;
   aggiornata: string;
   note: string;
   area: string;
@@ -53,11 +58,16 @@ const searchableText = (pc: PcRecord) =>
       pc.modello,
       pc.numero_serie,
       pc.processore,
+      pc.core_processore,
+      pc.processori_logici,
       pc.ram,
       pc.gpu,
       pc.archiviazione,
       pc.sistema_operativo,
       pc.versione_os,
+      pc.prezzo_acquisto,
+      pc.venditore,
+      pc.articolo_acquisto,
       pc.note,
       pc.area,
     ].join(" "),
