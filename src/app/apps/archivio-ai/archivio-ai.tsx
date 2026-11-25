@@ -397,7 +397,7 @@ export function ArchivioAi({ ruolo, originaliDallApp, repository: fornito }: Pro
             type="search"
             value={testo}
             onChange={(evento) => setTesto(evento.target.value)}
-            placeholder="Cerca collezione, prodotto, colore…"
+            placeholder="Cerca collezione, tipologia, colore…"
             aria-label="Cerca nell'archivio"
             autoComplete="off"
             spellCheck={false}
@@ -553,7 +553,7 @@ export function ArchivioAi({ ruolo, originaliDallApp, repository: fornito }: Pro
           onSuccessiva={() => vaiA(1)}
           onChiudi={chiudi}
           onStato={(nuovo, fatto) => revisiona(aperta, () => repository.cambiaStato(aperta.id, nuovo), fatto)}
-          onCorreggi={(prodotto) => revisiona(aperta, () => repository.correggiProdotto(aperta.id, prodotto), "Prodotto corretto e foto approvata")}
+          onCorreggi={(collezione) => revisiona(aperta, () => repository.correggiCollezione(aperta.id, collezione), "Collezione corretta e foto approvata")}
           onRipristina={() => revisiona(aperta, () => repository.ripristinaAi(aperta), "Valori dell'AI ripristinati")}
           onScaricaLeggera={() => scaricaUnaLeggera(aperta)}
         />

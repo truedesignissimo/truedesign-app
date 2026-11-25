@@ -227,18 +227,21 @@ export function creaArchivioRepository(supabase: SupabaseClient, ruolo: Ruolo = 
       return aggiorna(id, { stato_revisione: stato }, "Aggiornamento dello stato");
     },
 
-    /** Correzione a mano: il prodotto scelto diventa il principale, confermato al 100%, e la foto è approvata. */
-    correggiProdotto(id: number, prodotto: ProdottoAddestrato): Promise<ImmagineArchivio> {
-      if (ruolo !== "admin") return soloLettura("Correzione del prodotto");
+    /**
+     * Correzione a mano: si indica la collezione (il modello non distingue con sicurezza il prodotto
+     * specifico). Diventa la principale, confermata al 100%, e la foto è approvata.
+     */
+    correggiCollezione(id: number, collezione: string): Promise<ImmagineArchivio> {
+      if (ruolo !== "admin") return soloLettura("Correzione della collezione");
       return aggiorna(
         id,
         {
-          prodotto_principale: prodotto.prodotto,
-          collezione_principale: prodotto.collezione,
+          prodotto_principale: collezione,
+          collezione_principale: collezione,
           accuratezza_principale: 1,
           stato_revisione: "approvata",
         },
-        "Correzione del prodotto"
+        "Correzione della collezione"
       );
     },
 

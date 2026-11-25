@@ -42,17 +42,15 @@ export function nomeProdotto(riconoscimento: Riconoscimento): string {
   return prodotto;
 }
 
-/** Seconda riga sotto la foto nella griglia: il prodotto, oppure che cosa si vede. */
-export function dettaglioCarta(immagine: Pick<ImmagineArchivio, "principale" | "secondario" | "tipologie" | "nomeShooting">): string {
-  const top = riconoscimentoTop(immagine);
-  const prodotto = nomeProdotto(top);
-  if (prodotto && prodotto.toLowerCase() !== (top.collezione ?? "").toLowerCase()) return prodotto;
+/** Seconda riga sotto la foto nella griglia: che cosa si vede (la collezione sta già nel titolo). */
+export function dettaglioCarta(immagine: Pick<ImmagineArchivio, "tipologie" | "nomeShooting">): string {
   if (immagine.tipologie.length) return immagine.tipologie.slice(0, 3).join(", ");
   return immagine.nomeShooting;
 }
 
+/** Vero se un amministratore ha indicato una collezione diversa da quella proposta dall'AI. */
 export function correttaAMano(immagine: Pick<ImmagineArchivio, "principale" | "principaleAi">): boolean {
-  return (immagine.principale.prodotto ?? "") !== (immagine.principaleAi.prodotto ?? "");
+  return (immagine.principale.collezione ?? "") !== (immagine.principaleAi.collezione ?? "");
 }
 
 export function etichettaStato(immagine: Pick<ImmagineArchivio, "stato" | "sopraSoglia">): string {

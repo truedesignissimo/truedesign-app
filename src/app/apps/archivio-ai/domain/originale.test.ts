@@ -121,14 +121,16 @@ describe("formato", () => {
 
 describe("nomi per gli utenti", () => {
   it("toglie la collezione davanti al nome del prodotto", async () => {
-    const { nomeProdotto, dettaglioCarta } = await import("./formato");
+    const { nomeProdotto, dettaglioCarta, correttaAMano } = await import("./formato");
     expect(nomeProdotto({ prodotto: "Abisko-Divano", collezione: "Abisko", accuratezza: null })).toBe("Divano");
     expect(nomeProdotto({ prodotto: "Not-Not Small e mini 40-50", collezione: "Not", accuratezza: null })).toBe("Not Small e mini 40-50");
     expect(nomeProdotto({ prodotto: "Wing", collezione: "Wing", accuratezza: null })).toBe("Wing");
 
-    const vuoto = { prodotto: null, collezione: null, accuratezza: null };
-    expect(dettaglioCarta({ principale: { prodotto: "Abisko-Divano", collezione: "Abisko", accuratezza: null }, secondario: vuoto, tipologie: ["divano"], nomeShooting: "Linate" })).toBe("Divano");
-    expect(dettaglioCarta({ principale: { prodotto: "Wing", collezione: "Wing", accuratezza: null }, secondario: vuoto, tipologie: ["tavolo", "sedia"], nomeShooting: "Linate" })).toBe("tavolo, sedia");
-    expect(dettaglioCarta({ principale: vuoto, secondario: vuoto, tipologie: [], nomeShooting: "Linate" })).toBe("Linate");
+    expect(dettaglioCarta({ tipologie: ["tavolo", "sedia"], nomeShooting: "Linate" })).toBe("tavolo, sedia");
+    expect(dettaglioCarta({ tipologie: [], nomeShooting: "Linate" })).toBe("Linate");
+
+    const ai = { prodotto: "Abisko-Divano", collezione: "Abisko", accuratezza: 0.6 };
+    expect(correttaAMano({ principale: { prodotto: "Abisko-Pouf", collezione: "Abisko", accuratezza: 1 }, principaleAi: ai })).toBe(false);
+    expect(correttaAMano({ principale: { prodotto: "Wing", collezione: "Wing", accuratezza: 1 }, principaleAi: ai })).toBe(true);
   });
 });

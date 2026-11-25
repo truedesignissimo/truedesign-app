@@ -8,7 +8,6 @@ import {
   dataBreve,
   dimensioni,
   etichettaStato,
-  nomeProdotto,
   percentuale,
   peso,
   riconoscimentoTop,
@@ -45,7 +44,7 @@ interface Props {
   onSuccessiva(): void;
   onChiudi(): void;
   onStato(nuovo: StatoRevisione, fatto: string): Promise<void>;
-  onCorreggi(prodotto: ProdottoAddestrato): Promise<void>;
+  onCorreggi(collezione: string): Promise<void>;
   onRipristina(): Promise<void>;
   onScaricaLeggera(): Promise<void>;
 }
@@ -77,8 +76,6 @@ const spiegazioneStato = (immagine: ImmagineArchivio) => {
     : `Fuori dall'archivio: il riconoscimento è sotto il ${SOGLIA_TESTO}.`;
 };
 
-const chiaveProdotto = (prodotto: { prodotto: string; collezione: string }) => `${prodotto.collezione}|||${prodotto.prodotto}`;
-
 const uguali = (a: Riconoscimento, b: Riconoscimento) =>
   (a.prodotto ?? "") === (b.prodotto ?? "") && (a.accuratezza ?? null) === (b.accuratezza ?? null);
 
@@ -86,7 +83,8 @@ const messaggioErrore = (errore: unknown) =>
   errore instanceof Error && errore.message ? errore.message : "Operazione non riuscita.";
 
 function RigaRiconoscimento({ titolo, valore, ai }: { titolo: string; valore: Riconoscimento; ai?: Riconoscimento }) {
-  if (!valore.prodotto && !valore.collezione) return null;
+  const nome = valore.collezione ?? valore.prodotto;
+  if (!nome) return null;
   const frazione = Math.min(1, Math.max(0, valore.accuratezza ?? 0));
   return (
     <div className={styles.riconoscimento}>
@@ -94,45 +92,17 @@ function RigaRiconoscimento({ titolo, valore, ai }: { titolo: string; valore: Ri
         <span className={styles.riconoscimentoTitolo}>{titolo}</span>
         <span className={styles.riconoscimentoValore}>{percentuale(valore.accuratezza)}</span>
       </div>
-      <p className={styles.riconoscimentoNome}>{valore.prodotto ?? valore.collezione}</p>
-      {valore.collezione && valore.collezione !== valore.prodotto ? (
-        <p className={styles.riconoscimentoCollezione}>Collezione {valore.collezione}</p>
-      ) : null}
+      <p className={styles.riconoscimentoNome}>{nome}</p>
       <span className={styles.misura} aria-hidden="true">
         <span className={styles.misuraValore} style={{ width: `${frazione * 100}%` }} data-sopra={frazione >= SOGLIA ? "si" : "no"} />
         <span className={styles.misuraSoglia} style={{ left: `${SOGLIA * 100}%` }} />
       </span>
       {ai ? (
         <p className={styles.riconoscimentoAi}>
-          Corretto a mano. L&rsquo;AI aveva indicato {ai.prodotto ?? "nessun prodotto"} ({percentuale(ai.accuratezza)}).
+          Corretta a mano. L&rsquo;AI aveva indicato {ai.collezione ?? "nessuna collezione"} ({percentuale(ai.accuratezza)}).
         </p>
       ) : null}
     </div>
-  );
-}
-
-/** I prodotti come li legge un utente normale: solo i nomi, senza percentuali. */
-function ProdottiNellaFoto({ immagine }: { immagine: ImmagineArchivio }) {
-  const top = riconoscimentoTop(immagine);
-  const altro = top === immagine.principale ? immagine.secondario : immagine.principale;
-  // Il secondo prodotto compare solo se anche lui è riconosciuto con sicurezza.
-  const voci = [top, altro]
-    .filter((voce) => voce.prodotto && (voce === top || (voce.accuratezza ?? 0) >= SOGLIA))
-    .map((voce) => {
-      const nome = nomeProdotto(voce);
-      const collezione = voce.collezione ?? "";
-      if (!nome || nome.toLowerCase() === collezione.toLowerCase()) return collezione || nome;
-      return nome.toLowerCase().startsWith(collezione.toLowerCase()) ? nome : `${collezione} ${nome}`.trim();
-    });
-  const unici = [...new Set(voci)];
-  if (!unici.length) return null;
-  return (
-    <section className={styles.blocco} aria-label="Prodotti nella foto">
-      <h3 className={styles.bloccoTitolo}>{unici.length === 1 ? "Prodotto" : "Prodotti"}</h3>
-      <ul className={styles.prodotti}>
-        {unici.map((voce) => <li key={voce}>{voce}</li>)}
-      </ul>
-    </section>
   );
 }
 
@@ -231,13 +201,10 @@ export function SchedaImmagine({
     return () => document.removeEventListener("keydown", tasto);
   }, []);
 
-  const gruppi = useMemo(() => {
-    const perCollezione = new Map<string, ProdottoAddestrato[]>();
-    for (const prodotto of prodotti) {
-      perCollezione.set(prodotto.collezione, [...(perCollezione.get(prodotto.collezione) ?? []), prodotto]);
-    }
-    return [...perCollezione.entries()].sort((a, b) => a[0].localeCompare(b[0], "it", { sensitivity: "base" }));
-  }, [prodotti]);
+  const collezioni = useMemo(
+    () => [...new Set(prodotti.map((prodotto) => prodotto.collezione))].sort((a, b) => a.localeCompare(b, "it", { sensitivity: "base" })),
+    [prodotti]
+  );
 
   const esegui = async (nome: string, azione: () => Promise<unknown>) => {
     setOccupato(nome);
@@ -270,8 +237,7 @@ export function SchedaImmagine({
     }
   };
 
-  const prodottoScelto = prodotti.find((prodotto) => chiaveProdotto(prodotto) === sceltaProdotto) ?? null;
-  const sceltaDiversa = Boolean(prodottoScelto) && prodottoScelto?.prodotto !== immagine.principale.prodotto;
+  const sceltaDiversa = Boolean(sceltaProdotto) && sceltaProdotto !== immagine.principale.collezione;
   const corretta = correttaAMano(immagine);
   const diversaDaAi = !uguali(immagine.principale, immagine.principaleAi) || !uguali(immagine.secondario, immagine.secondarioAi);
   const titolo = immagine.collezioneTop ?? riconoscimentoTop(immagine).collezione ?? "Senza collezione";
@@ -318,12 +284,14 @@ export function SchedaImmagine({
     <>
       {!immagine.pertinente ? <p className={styles.nota}>L&rsquo;AI l&rsquo;ha segnata come foto non di arredo.</p> : null}
 
-      <section className={styles.blocco} aria-label="Prodotti riconosciuti">
+      <section className={styles.blocco} aria-label="Collezioni riconosciute">
         <h3 className={styles.bloccoTitolo}>Riconoscimento</h3>
-        <RigaRiconoscimento titolo="Prodotto principale" valore={immagine.principale} ai={corretta ? immagine.principaleAi : undefined} />
-        <RigaRiconoscimento titolo="Prodotto secondario" valore={immagine.secondario} />
-        {!immagine.principale.prodotto && !immagine.secondario.prodotto ? (
-          <p className={styles.nota}>Nessun prodotto riconosciuto.</p>
+        <RigaRiconoscimento titolo="Collezione principale" valore={immagine.principale} ai={corretta ? immagine.principaleAi : undefined} />
+        {immagine.secondario.collezione && immagine.secondario.collezione !== immagine.principale.collezione ? (
+          <RigaRiconoscimento titolo="Collezione secondaria" valore={immagine.secondario} />
+        ) : null}
+        {!immagine.principale.collezione && !immagine.secondario.collezione ? (
+          <p className={styles.nota}>Nessuna collezione riconosciuta.</p>
         ) : null}
         {immagine.inAddestramento ? <p className={styles.nota}>Questa foto è anche tra quelle di addestramento.</p> : null}
       </section>
@@ -352,23 +320,17 @@ export function SchedaImmagine({
         {prodotti.length ? (
           <div className={styles.correzione}>
             <label className={styles.campo}>
-              <span className={styles.campoEtichetta}>Il prodotto è un altro?</span>
+              <span className={styles.campoEtichetta}>La collezione è un&rsquo;altra?</span>
               <select className={styles.selezione} value={sceltaProdotto} onChange={(evento) => setSceltaProdotto(evento.target.value)} disabled={Boolean(occupato)}>
-                <option value="">Scegli il prodotto giusto</option>
-                {gruppi.map(([collezione, voci]) => (
-                  <optgroup key={collezione} label={collezione}>
-                    {voci.map((prodotto) => (
-                      <option key={chiaveProdotto(prodotto)} value={chiaveProdotto(prodotto)}>{prodotto.prodotto}</option>
-                    ))}
-                  </optgroup>
-                ))}
+                <option value="">Scegli la collezione giusta</option>
+                {collezioni.map((collezione) => <option key={collezione} value={collezione}>{collezione}</option>)}
               </select>
             </label>
             <button
               type="button"
               className={styles.bottone}
               disabled={!sceltaDiversa || Boolean(occupato)}
-              onClick={() => prodottoScelto && esegui("correggi", () => onCorreggi(prodottoScelto).then(() => setSceltaProdotto("")))}
+              onClick={() => sceltaProdotto && esegui("correggi", () => onCorreggi(sceltaProdotto).then(() => setSceltaProdotto("")))}
             >
               {occupato === "correggi" ? "Salvo…" : "Correggi e approva"}
             </button>
@@ -384,9 +346,7 @@ export function SchedaImmagine({
         {errore ? <p className={styles.errore} role="alert">{errore}</p> : null}
       </section>
     </>
-  ) : (
-    <ProdottiNellaFoto immagine={immagine} />
-  );
+  ) : null;
 
   return (
     <div className={styles.velo} onMouseDown={(evento) => { if (evento.target === evento.currentTarget) onChiudi(); }}>

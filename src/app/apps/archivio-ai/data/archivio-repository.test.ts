@@ -183,7 +183,7 @@ describe("repository dell'archivio", () => {
 
   it("la correzione scrive solo le colonne permesse e approva la foto", async () => {
     const { supabase, chiamate } = clientFinto({ data: riga, error: null });
-    const immagine = await creaArchivioRepository(supabase).correggiProdotto(12, { prodotto: "Wing", collezione: "Wing" });
+    const immagine = await creaArchivioRepository(supabase).correggiCollezione(12, "Wing");
 
     expect(immagine.id).toBe(12);
     expect(chiamate).toContainEqual(["from", "archivio_immagini"]);
@@ -260,7 +260,7 @@ describe("repository per un utente normale", () => {
     const repository = creaArchivioRepository(supabase, "utente");
 
     await expect(repository.cambiaStato(12, "approvata")).rejects.toThrow("riservato agli amministratori");
-    await expect(repository.correggiProdotto(12, { prodotto: "Wing", collezione: "Wing" })).rejects.toThrow("riservato agli amministratori");
+    await expect(repository.correggiCollezione(12, "Wing")).rejects.toThrow("riservato agli amministratori");
     await expect(repository.ripristinaAi(immagineDaRiga(riga))).rejects.toThrow("riservato agli amministratori");
     await expect(repository.prodotti()).resolves.toEqual([]);
     expect(chiamate).toEqual([]);
