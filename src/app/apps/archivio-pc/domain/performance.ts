@@ -56,7 +56,8 @@ const CPU_BENCHMARKS: Record<string, readonly [number, number]> = {
  * riferimento univoco comparabile: non si convertono Metal/Geekbench in G3D.
  */
 const GPU_BENCHMARKS: readonly (readonly [RegExp, number])[] = [
-  [/\brtx 5060\b(?!\s*(ti|laptop))/i, 20594], [/\brtx 4060 ti\b/i, 22594],
+  [/\brtx 5070\b(?!\s*(ti|laptop))/i, 28656], [/\brtx 5060\b(?!\s*(ti|laptop))/i, 20594],
+  [/\brtx 4060 ti\b/i, 22594],
   [/\bt1000\s*,?\s*8\s*gb\b/i, 7684], [/\bt1000\b/i, 7633],
   [/\bt400\s*,?\s*4\s*gb\b/i, 3812], [/\bt400\b/i, 3602],
   [/\brtx a500 laptop\b/i, 6555], [/\brtx 500 ada generation laptop\b/i, 11196],

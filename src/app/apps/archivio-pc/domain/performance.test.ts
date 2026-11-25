@@ -110,6 +110,16 @@ describe("Performance PC", () => {
     expect(assessPerformance(pc({ gpu: "NVIDIA GeForce RTX 4060 Ti, 8 GB" })).components.gpu).toBeGreaterThan(80);
   });
 
+  it("ricalcola il voto della workstation di Beatrice con la RTX 5070", () => {
+    const beatrice = pcs.find((item) => item.id === 32)!;
+    expect(assessPerformance(beatrice)).toMatchObject({
+      score: 95,
+      confidence: "Alta",
+      provisional: false,
+    });
+    expect(missingPerformanceData(beatrice)).not.toContain("Modello GPU e relativo benchmark");
+  });
+
   it("valuta il disco soltanto dalla tecnologia, senza considerare lo spazio usato", () => {
     expect(assessPerformance(pc({ archiviazione: "SSD 100 GB, 80 GB usati" })).components.storage).toBe(75);
     expect(assessPerformance(pc({ archiviazione: "SSD 100 GB, 81 GB usati" })).components.storage).toBe(75);
