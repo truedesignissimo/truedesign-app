@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import pcsData from "./data/pcs.json";
-import { enrichHardwareInventory } from "./data/hardware-inventory";
+import { getPcAdministrator, loadPcAssets } from "./data/pc-assets";
 import { ArchivioPc } from "./archive-pc";
-import type { PcRecord } from "./domain/archive";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Archivio PC · True Design",
@@ -10,6 +10,19 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function ArchivioPcPage() {
-  return <ArchivioPc pcs={enrichHardwareInventory(pcsData as PcRecord[])} />;
+export default async function ArchivioPcPage() {
+  try {
+    const canEdit = Boolean(await getPcAdministrator());
+    const { pcs, versions } = await loadPcAssets(canEdit);
+    return <ArchivioPc pcs={pcs} versions={versions} />;
+  } catch (error) {
+    console.error("[archivio-pc] lettura", error);
+    return (
+      <main>
+        <h1>Archivio PC</h1>
+        <p>L’archivio è temporaneamente indisponibile.</p>
+        <a href="/apps/archivio-pc">Riprova</a>
+      </main>
+    );
+  }
 }

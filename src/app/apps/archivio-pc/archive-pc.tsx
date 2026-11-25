@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { PcEditor } from "./pc-editor";
 import logo from "./assets/logo_true.svg";
 import styles from "./archive-pc.module.css";
 import { CpuBrand } from "./cpu-brand";
@@ -286,10 +287,19 @@ function PcVisual({ pc, priority = false }: { pc: PcRecord; priority?: boolean }
   );
 }
 
-export function PcDetail({ pc, assessment, onClose }: { pc: PcRecord; assessment: PerformanceAssessment; onClose: () => void }) {
+export function PcDetail({ pc, assessment, onClose, onEdit }: {
+  pc: PcRecord; assessment: PerformanceAssessment; onClose: () => void; onEdit?: () => void;
+}) {
   return (
     <div className={styles.dialogPanel}>
       <div className={styles.dialogActions}>
+        {onEdit && (
+          <button type="button" className={styles.pdfButton} onClick={onEdit} aria-label="Modifica PC" title="Modifica PC">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+              <path d="m14 6 4 4M4 20l4.5-1 11-11a2.8 2.8 0 0 0-4-4l-11 11L4 20Z" />
+            </svg>
+          </button>
+        )}
         <button
           type="button"
           className={styles.pdfButton}
@@ -320,11 +330,20 @@ export function PcDetail({ pc, assessment, onClose }: { pc: PcRecord; assessment
   );
 }
 
-export function ArchivioPc({ pcs }: { pcs: PcRecord[] }) {
+export function ArchivioPc({ pcs, versions }: { pcs: PcRecord[]; versions?: Record<number, string> }) {
   const [priorityOnly, setPriorityOnly] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [activePc, setActivePc] = useState<PcRecord | null>(null);
+  const [editor, setEditor] = useState<{ pc: PcRecord | null; version?: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [saved, setSaved] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const dialogOpen = Boolean(editor || activePc);
+
+  function exitDialog() {
+    setEditor(null);
+    setActivePc(null);
+  }
 
   const summary = useMemo(() => summarizePcs(pcs), [pcs]);
   const priorityPcs = useMemo(() => rankReplacementPriority(pcs), [pcs]);
@@ -336,12 +355,16 @@ export function ArchivioPc({ pcs }: { pcs: PcRecord[] }) {
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
-    if (activePc && !dialog.open) dialog.showModal();
-    if (!activePc && dialog.open) dialog.close();
-  }, [activePc]);
+    if (dialogOpen && !dialog.open) dialog.showModal();
+    if (!dialogOpen && dialog.open) dialog.close();
+  }, [dialogOpen]);
 
   useEffect(() => {
-    if (!activePc) return;
+    if (dialogRef.current) dialogRef.current.scrollTop = 0;
+  }, [editor, activePc]);
+
+  useEffect(() => {
+    if (!dialogOpen) return;
     const previousBodyOverflow = document.body.style.overflow;
     const previousHtmlOverscroll = document.documentElement.style.overscrollBehavior;
     document.body.style.overflow = "hidden";
@@ -350,7 +373,7 @@ export function ArchivioPc({ pcs }: { pcs: PcRecord[] }) {
       document.body.style.overflow = previousBodyOverflow;
       document.documentElement.style.overscrollBehavior = previousHtmlOverscroll;
     };
-  }, [activePc]);
+  }, [dialogOpen]);
 
   const toggleSelection = (id: number) => {
     setSelectedIds((current) => {
@@ -367,8 +390,14 @@ export function ArchivioPc({ pcs }: { pcs: PcRecord[] }) {
         <a href="https://www.truedesign.it" className={styles.brand} aria-label="True Design">
           <Image src={logo} alt="True Design" priority />
         </a>
-        <span className={styles.readOnly}>Consultazione · sola lettura</span>
+        {versions ? (
+          <button type="button" className={styles.printButton} onClick={() => {
+            setSaved(false);
+            setEditor({ pc: null });
+          }}>Aggiungi PC</button>
+        ) : <span className={styles.readOnly}>Consultazione · sola lettura</span>}
       </header>
+      {saved && <p role="status" className={styles.editorNotice}>Archivio aggiornato.</p>}
 
       <section className={styles.hero} aria-labelledby="archive-title">
         <div>
@@ -460,12 +489,37 @@ export function ArchivioPc({ pcs }: { pcs: PcRecord[] }) {
         ref={dialogRef}
         className={styles.dialog}
         aria-labelledby="pc-detail-title"
-        onClose={() => setActivePc(null)}
+        onClose={() => { if (!dialogRef.current?.open) exitDialog(); }}
+        onCancel={(event) => {
+          event.preventDefault();
+          if (!busy) exitDialog();
+        }}
         onClick={(event) => {
-          if (event.target === event.currentTarget) setActivePc(null);
+          if (!busy && event.target === event.currentTarget) exitDialog();
         }}
       >
-        {activePc && <PcDetail pc={activePc} assessment={assessments.get(activePc.id)!} onClose={() => setActivePc(null)} />}
+        {editor ? (
+          <PcEditor pc={editor.pc} version={editor.version}
+            areas={[...new Set(pcs.map((pc) => pc.area).filter(Boolean)), "Da assegnare"]}
+            types={[...new Set(pcs.map((pc) => pc.tipologia).filter(Boolean))]}
+            onBusy={setBusy}
+            onExit={(didSave) => {
+              if (didSave) {
+                setSaved(true);
+                exitDialog();
+              } else {
+                setEditor(null);
+              }
+            }}
+          />
+        ) : activePc && assessments.has(activePc.id) && (
+          <PcDetail pc={activePc} assessment={assessments.get(activePc.id)!} onClose={exitDialog}
+            onEdit={versions?.[activePc.id] ? () => {
+              setSaved(false);
+              setEditor({ pc: activePc, version: versions[activePc.id] });
+            } : undefined}
+          />
+        )}
       </dialog>
 
       <section className={styles.printSheet} aria-hidden="true">

@@ -12,6 +12,18 @@ import { ArchiveModeToggle, ArchivioPc, isUnverified, PcDetail, PerformanceDetai
 
 const gaia = enrichHardwareInventory(pcsData as PcRecord[]).find((pc) => pc.id === 35)!;
 
+vi.mock("./actions", () => ({
+  archivePcAsset: vi.fn(), createPcAsset: vi.fn(), updatePcAsset: vi.fn(),
+}));
+
+it("mostra i comandi amministrativi solo nella vista con permessi", () => {
+  expect(renderToStaticMarkup(<ArchivioPc pcs={[gaia]} />)).not.toContain("Aggiungi PC");
+  expect(renderToStaticMarkup(<ArchivioPc pcs={[gaia]} versions={{}} />)).toContain("Aggiungi PC");
+  const detail = { pc: gaia, assessment: assessPerformance(gaia), onClose: () => {} };
+  expect(renderToStaticMarkup(<PcDetail {...detail} />)).not.toContain("Modifica PC");
+  expect(renderToStaticMarkup(<PcDetail {...detail} onEdit={() => {}} />)).toContain("Modifica PC");
+});
+
 // Vite imports bitmap/SVG assets as URLs, without Next's static image dimensions.
 vi.mock("next/image", () => ({
   default: ({ src, alt, className }: ImageProps) => <img src={typeof src === "string" ? src : "src" in src ? src.src : src.default.src} alt={alt} className={className} />,

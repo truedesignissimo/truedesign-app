@@ -55,6 +55,40 @@
 .brand { display: inline-flex; width: 96px; min-height: 44px; align-items: center; }
 .brand img { width: 100%; height: auto; }
 .readOnly { color: var(--muted); font-size: 13px; letter-spacing: 0.015em; }
+.editorNotice { padding-inline: 24px; font-size: 14px; }
+.editor { padding: clamp(16px, 4vw, 32px); }
+.editor h2 { margin: 0 0 24px; }
+.editorGroup {
+  border: 0;
+  border-top: 1px solid var(--muted);
+  padding: 12px 0 0;
+  margin: 0 0 24px;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  gap: 16px;
+}
+.editorGroup legend { padding-right: 12px; font-weight: 600; }
+.editorGroup label { display: grid; align-content: start; gap: 4px; font-size: 14px; min-width: 0; }
+.editorGroup :is(input, select, textarea), .editorButtons button {
+  min-height: 44px;
+  max-width: 100%;
+  border: 1px solid var(--muted);
+  background: var(--paper);
+  color: var(--ink);
+  padding: 8px 12px;
+  font: inherit;
+}
+.editorGroup textarea { resize: vertical; }
+.editorFooter { position: sticky; bottom: 0; background: var(--paper); padding-block: 12px; }
+.editorButtons { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.editorButtons p { flex-basis: 100%; }
+.editorButtons button { cursor: pointer; }
+.editorButtons button:last-child { background: var(--graphite); color: white; }
+.editorButtons button:disabled { opacity: .55; cursor: wait; }
+.editorButtons button:hover:not(:disabled) { text-decoration: underline; }
+.editor :is(button, input, select, textarea):focus-visible { outline: 2px solid var(--graphite); outline-offset: 2px; }
+@media print { .editorNotice { display: none; } }
 
 .hero {
   display: grid;
