@@ -4,6 +4,7 @@ export type AppIconKey =
   | "calculator"
   | "conversation"
   | "computer"
+  | "image"
   | "checklist";
 
 const ICON_BY_URL: Record<string, AppIconKey> = {
@@ -13,6 +14,7 @@ const ICON_BY_URL: Record<string, AppIconKey> = {
   "/apps/prenotazione-sale-riunioni": "conversation",
   "/apps/true-sondaggio-iconici": "checklist",
   "/apps/archivio-pc": "computer",
+  "/apps/archivio-ai": "image",
 };
 
 export function getAppIconKey(url: string | null) {

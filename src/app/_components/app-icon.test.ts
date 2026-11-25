@@ -9,6 +9,7 @@ describe("app icon mapping", () => {
     ["/apps/prenotazione-sale-riunioni", "conversation"],
     ["/apps/true-sondaggio-iconici", "checklist"],
     ["/apps/archivio-pc", "computer"],
+    ["/apps/archivio-ai", "image"],
   ] as const)("maps %s to %s", (url, icon) => {
     expect(getAppIconKey(url)).toBe(icon);
   });

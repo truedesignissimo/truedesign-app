@@ -7,6 +7,7 @@ const VIEWBOX_BY_ICON: Record<AppIconKey, string> = {
   conversation: "340.16 0 170.08 170.08",
   checklist: "510.24 0 170.08 170.08",
   computer: "0 0 170.08 170.08",
+  image: "0 0 170.08 170.08",
 };
 
 function IconArtwork({ icon }: { icon: AppIconKey }) {
@@ -18,6 +19,16 @@ function IconArtwork({ icon }: { icon: AppIconKey }) {
         <rect x="114" y="34" width="26" height="85" rx="4" />
         <path d="M122 47h10m-10 11h10" />
         <circle cx="127" cy="106" r="3" />
+      </g>
+    );
+  }
+
+  if (icon === "image") {
+    return (
+      <g fill="none" stroke="currentColor" strokeWidth="4.1" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="32" y="42" width="106" height="82" rx="6" />
+        <circle cx="62" cy="68" r="8" />
+        <path d="M32 108l28-26 20 18 22-24 36 36" />
       </g>
     );
   }
