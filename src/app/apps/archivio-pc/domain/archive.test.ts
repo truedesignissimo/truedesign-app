@@ -87,7 +87,12 @@ describe("Archivio PC", () => {
     expect(pcs.find((pc) => pc.id === 2)?.profilo).toBe("Ufficio");
     expect(pcs.find((pc) => pc.id === 13)?.profilo).toBe("Tecnico");
     expect(pcs.find((pc) => pc.id === 11)?.profilo).toBe("3D avanzato");
-    expect(pcs.find((pc) => pc.id === 32)).toMatchObject({ assegnatario: "Beatrice Barbieri", profilo: "3D avanzato" });
+    expect(pcs.find((pc) => pc.id === 32)).toMatchObject({
+      assegnatario: "Beatrice Barbieri",
+      profilo: "3D avanzato",
+      gpu: "NVIDIA GeForce RTX 5070, 12 GB",
+      aggiornata: "25/11/2026",
+    });
     expect(pcs.find((pc) => pc.id === 13)).toMatchObject({
       assegnatario: "Ex Laptop Alessandra Benetti",
       area: "",
@@ -172,7 +177,7 @@ describe("Archivio PC", () => {
     const result = filterPcs(pcs, { query: "", area: "", type: "", profile: "", sort: "updated" });
     const summary = summarizePcs(pcs);
 
-    expect(result[0].aggiornata).toBe("18/11/2026");
+    expect(result[0].aggiornata).toBe("25/11/2026");
     expect(summary.total).toBe(51);
     expect(summary.notebooks).toBe(pcs.filter((pc) => pc.tipologia === "Notebook").length);
     expect(summary.areas).toBe(new Set(pcs.map((pc) => pc.area).filter(Boolean)).size);

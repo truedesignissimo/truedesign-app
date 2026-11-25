@@ -770,7 +770,7 @@
   "numero_serie": "CZC5467HVC",
   "processore": "Intel Core Ultra 9 285, 2,50 GHz",
   "ram": "32 GB (5600 MT/s)",
-  "gpu": "GPU dedicata 12 GB (modello da verificare)",
+  "gpu": "NVIDIA GeForce RTX 5070, 12 GB",
   "schermo": "",
   "archiviazione": "954 GB",
   "sistema_operativo": "Windows 11 Pro",
@@ -780,7 +780,7 @@
   "prezzo_acquisto": "2.633,39 € + circa 800 € scheda grafica",
   "venditore": "",
   "articolo_acquisto": "HP Z2 Tower G1i con scheda grafica dedicata",
-  "aggiornata": "03/11/2026",
+  "aggiornata": "25/11/2026",
   "note": "",
   "area": "Ufficio Tecnico",
   "foto": "hp_z2.jpg"
